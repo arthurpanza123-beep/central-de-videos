@@ -118,21 +118,22 @@
       const displayDay = `${prefix}${weekdayObj.name}`;
 
       let countdownText = "";
-      let badgeColor = "text-zinc-400";
+      let badgeColor = "bg-zinc-900 text-zinc-300 border-zinc-800";
 
       if (daysUntil === 0) {
         countdownText = "Posta Hoje! 🔥";
-        badgeColor = "text-red-400 font-black";
+        badgeColor = "bg-red-950/90 text-red-400 border-red-700 animate-pulse";
       } else if (daysUntil === 1) {
         countdownText = "Amanhã ⚡";
-        badgeColor = "text-amber-400 font-extrabold";
+        badgeColor = "bg-amber-950/90 text-amber-300 border-amber-700";
       } else {
         countdownText = `Faltam ${daysUntil} dias`;
-        badgeColor = "text-zinc-400 font-medium";
+        badgeColor = "bg-zinc-900 text-zinc-300 border-zinc-800";
       }
 
       return {
         displayDay,
+        weekdayName: weekdayObj.name,
         formattedDate,
         countdownText,
         daysUntil,
@@ -521,10 +522,38 @@
                       className="bg-[#080808] rounded-2xl p-4 sm:p-5 lg:p-6 border border-[#1a1a1a] shadow-2xl space-y-4"
                     >
                       {/* CARD TOOLBAR */}
-                      <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#141414] flex-wrap">
-                        {/* Left: Weekday Selector (Seg a Dom) + Date Info */}
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <div className="flex items-center gap-0.5 bg-[#030303] p-1 rounded-lg border border-[#1a1a1a]">
+                      <div className="flex items-center justify-between gap-4 pb-4 border-b border-[#161616] flex-wrap">
+                        {/* Left: Bloco do Dia Destacado, Maior e Seletor */}
+                        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                          {/* BADGE GIGANTE DO DIA */}
+                          <div className="flex items-center gap-3 bg-gradient-to-r from-[#1c0404] via-[#100303] to-[#0a0a0a] border-2 border-[#ff0000] px-4 py-2.5 rounded-xl shadow-lg shadow-red-950/40">
+                            <div className="w-10 h-10 rounded-lg bg-[#ff0000] flex items-center justify-center text-white text-xl font-black shadow-md shadow-red-600/50 select-none">
+                              📅
+                            </div>
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight">
+                                  {dayInfo.displayDay}
+                                </span>
+                                <span className="text-xs sm:text-sm font-black text-zinc-200 bg-[#222222] border border-[#3a3a3a] px-2.5 py-0.5 rounded-md">
+                                  {dayInfo.formattedDate}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`text-[11px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${dayInfo.badgeColor}`}>
+                                  {dayInfo.countdownText}
+                                </span>
+                                {video.isNextWeek && (
+                                  <span className="text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded-md">
+                                    Próxima Semana
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Seletor de Dias (Seg a Dom) - Botões Maiores e Bem Visíveis */}
+                          <div className="flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222]">
                             {WEEKDAYS.map((w) => {
                               const isSelected = video.weekday === w.day;
                               return (
@@ -532,38 +561,28 @@
                                   key={w.day}
                                   type="button"
                                   onClick={() => handleWeekdayClick(video.id, w.day)}
-                                  className={`px-2.5 py-1 rounded-md text-xs font-black transition active:scale-95 flex items-center gap-1 ${
+                                  className={`px-3 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-black transition-all active:scale-95 flex items-center gap-1.5 ${
                                     isSelected
-                                      ? "bg-[#ff0000] text-white shadow-sm"
-                                      : "text-zinc-500 hover:text-zinc-200 hover:bg-[#121212]"
+                                      ? "bg-[#ff0000] text-white shadow-lg shadow-red-600/40 ring-2 ring-red-400 scale-105 z-10"
+                                      : "text-zinc-400 hover:text-white hover:bg-[#181818]"
                                   }`}
                                   title={
                                     isSelected
                                       ? video.isNextWeek
-                                        ? "Próxima semana selecionada"
-                                        : "Esta semana selecionada"
-                                      : `Postar na ${w.name}`
+                                        ? "Esta semana selecionada (clique para alternar)"
+                                        : "Próxima semana selecionada (clique para alternar)"
+                                      : `Mudar para ${w.name}`
                                   }
                                 >
                                   <span>{w.label}</span>
                                   {isSelected && video.isNextWeek && (
-                                    <span className="text-[8px] bg-white/30 text-white px-1 rounded-full font-black">
+                                    <span className="text-[9px] bg-black/50 text-white px-1.5 py-0.2 rounded-full font-black">
                                       +1
                                     </span>
                                   )}
                                 </button>
                               );
                             })}
-                          </div>
-
-                          <div className="flex items-center gap-2 text-xs font-bold text-zinc-400">
-                            <span className="text-zinc-200 font-extrabold">
-                              {dayInfo.displayDay} ({dayInfo.formattedDate})
-                            </span>
-                            <span className="text-zinc-700">•</span>
-                            <span className={dayInfo.badgeColor}>
-                              {dayInfo.countdownText}
-                            </span>
                           </div>
                         </div>
 
