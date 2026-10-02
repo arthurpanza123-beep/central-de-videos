@@ -90,6 +90,7 @@
       { label: "Qui", day: 4, name: "Quinta" },
       { label: "Sex", day: 5, name: "Sexta" },
       { label: "Sáb", day: 6, name: "Sábado" },
+      { label: "Dom", day: 0, name: "Domingo" },
     ];
 
     function calculatePostDayInfo(targetWeekday, isNextWeek) {
@@ -358,8 +359,19 @@
         reader.readAsText(file);
       }
 
-      const activeVideos = videos.filter((v) => !v.posted);
-      const postedVideos = videos.filter((v) => v.posted);
+      // Ordenação: vídeos postados antes ficam em cima (menor prazo/dias restantes no topo!)
+      const activeVideos = [...videos]
+        .filter((v) => !v.posted)
+        .sort((a, b) => {
+          const daysA = calculatePostDayInfo(a.weekday, a.isNextWeek).daysUntil;
+          const daysB = calculatePostDayInfo(b.weekday, b.isNextWeek).daysUntil;
+          return daysA - daysB;
+        });
+
+      const postedVideos = [...videos]
+        .filter((v) => v.posted)
+        .sort((a, b) => (b.postedAt || 0) - (a.postedAt || 0));
+
       const displayedVideos = activeTab === "producao" ? activeVideos : postedVideos;
 
       return (
@@ -715,10 +727,12 @@
 
                               {/* 16:9 Cinema Thumbnail Frame */}
                               <div
-                                className={`relative rounded-lg overflow-hidden cursor-pointer group aspect-video bg-[#000000] border transition duration-200 flex items-center justify-center ${
-                                  is100Percent
-                                    ? "border-emerald-600 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
-                                    : "border-[#1c1c1c] hover:border-red-600/70"
+                                className={`relative rounded-lg overflow-hidden cursor-pointer group aspect-video transition duration-200 flex items-center justify-center ${
+                                  thumb
+                                    ? is100Percent
+                                      ? "bg-black border border-emerald-600 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                                      : "bg-black border border-[#1c1c1c] hover:border-red-600/70"
+                                    : "bg-white border-2 border-white shadow-md hover:opacity-95"
                                 }`}
                                 onClick={() =>
                                   document.getElementById(`yt-v13-${video.id}-${idx}`)?.click()
@@ -731,10 +745,13 @@
                                     className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
                                   />
                                 ) : (
-                                  <div className="flex flex-col items-center justify-center p-3 text-zinc-600 group-hover:text-red-400 transition">
-                                    <span className="text-xl mb-1 opacity-50">📁</span>
-                                    <span className="text-xs font-black tracking-tight">
-                                      Subir Thumbnail (16:9)
+                                  <div className="w-full h-full bg-white flex flex-col items-center justify-center p-3 text-zinc-950 transition">
+                                    <span className="text-2xl mb-1 text-zinc-800 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition">📁</span>
+                                    <span className="text-xs font-black tracking-tight text-zinc-900 uppercase">
+                                      Subir Thumbnail
+                                    </span>
+                                    <span className="text-[10px] text-zinc-500 font-bold">
+                                      16:9
                                     </span>
                                   </div>
                                 )}
