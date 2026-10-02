@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Central de Produção</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { background-color: #f0f4fc; color: #0f172a; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    
+    .thumb-split-box {
+      position: relative;
+      border-radius: 14px;
+      padding: 3.5px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.05);
+    }
+    .thumb-split-inner {
+      border-radius: 11px;
+      overflow: hidden;
+      background: #f8faff;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const STORAGE_KEY = "producao_videos_sonora_v11";
+
+    const WEEKDAYS = [
+      { label: "Seg", day: 1, name: "Segunda" },
+      { label: "Ter", day: 2, name: "Terça" },
+      { label: "Qua", day: 3, name: "Quarta" },
+      { label: "Qui", day: 4, name: "Quinta" },
+      { label: "Sex", day: 5, name: "Sexta" },
+      { label: "Sáb", day: 6, name: "Sábado" },
+    ];
+
+    function calculatePostDayInfo(targetWeekday, isNextWeek) {
+      const now = new Date();
+      const currentWeekday = now.getDay();
+
+      let daysUntil = targetWeekday - currentWeekday;
+      if (daysUntil < 0) {
+        daysUntil += 7;
+      }
+      if (isNextWeek) {
+        daysUntil += 7;
+      }
+
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() + daysUntil);
+
+      const formattedDate = targetDate.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+      });
+
+      const weekdayObj = WEEKDAYS.find((w) => w.day === targetWeekday) || WEEKDAYS[0];
+      const prefix = isNextWeek ? "Próx. " : "";
+      const displayDay = `${prefix}${weekdayObj.name}`;
+
+      let countdownText = "";
+      let badgeColor = "bg-blue-50 text-[#2563eb] border-blue-200/80";
+
+      if (daysUntil === 0) {
+        countdownText = "Posta Hoje! 🔥";
+        badgeColor = "bg-rose-50 text-[#f43f5e] border-rose-200";
+      } else if (daysUntil === 1) {
+        countdownText = "Amanhã ⚡";
+        badgeColor = "bg-blue-50 text-[#2563eb] border-blue-200/80";
+      } else {
+        countdownText = `Faltam ${daysUntil} dias`;
+        badgeColor = "bg-blue-50 text-[#2563eb] border-blue-200/80";
+      }
+
+      return {
+        displayDay,
+        formattedDate,
+        countdownText,
+        daysUntil,
+        badgeColor,
+      };
+    }
+
+    function getSplitBorderGradient(nando, duda, sonora) {
+      const cNando = nando ? "#10b981" : "#f43f5e";
+      const cDuda = duda ? "#10b981" : "#f43f5e";
+      const cSonora = sonora ? "#10b981" : "#f43f5e";
+
+      return {
+        background: `linear-gradient(90deg, ${cNando} 0% 33.33%, ${cDuda} 33.33% 66.66%, ${cSonora} 66.66% 100%)`,
+      };
+    }
+
+    function getInitialVideos() {
+      return [
+        {
+          id: "v-1",
+          weekday: 1,
+          isNextWeek: false,
+          posted: false,
+          nandoSim: true,
+          dudaSim: false,
+          sonoraSim: false,
+          thumbs: [
+            "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&auto=format&fit=crop&q=80",
+            "",
+            "",
+          ],
+          titles: [
+            "O DIA QUE O REAL MADRID QUEBROU O MERCADO DA BOLA",
+            "COMO O REAL MADRID MONTOU A MAIOR MÁQUINA DO FUTEBOL",
+            "O SEGREDO DOS MILHÕES QUE MUDARAM O FUTEBOL",
+          ],
+        },
+      ];
+    }
+
+    function compressImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const maxW = 960;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxW) {
+              height = Math.round((height * maxW) / width);
+              width = maxW;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL("image/jpeg", 0.82);
+            resolve(compressed);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function App() {
+      const [videos, setVideos] = useState([]);
+      const [activeTab, setActiveTab] = useState("producao");
+      const [loaded, setLoaded] = useState(false);
+
+      useEffect(() => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setVideos(parsed);
+              setLoaded(true);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error("Erro ao carregar dados", e);
+        }
+        setVideos(getInitialVideos());
+        setLoaded(true);
+      }, []);
+
+      useEffect(() => {
+        if (!loaded) return;
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
+        } catch (e) {
+          console.error("Erro ao salvar no storage", e);
+        }
+      }, [videos, loaded]);
+
+      function addNewVideo() {
+        const newV = {
+          id: "v-" + Date.now(),
+          weekday: 1,
+          isNextWeek: false,
+          posted: false,
+          nandoSim: false,
+          dudaSim: false,
+          sonoraSim: false,
+          thumbs: ["", "", ""],
+          titles: ["", "", ""],
+        };
+        setVideos((prev) => [newV, ...prev]);
+        setActiveTab("producao");
+      }
+
+      function handleWeekdayClick(id, clickedDay) {
+        setVideos((prev) =>
+          prev.map((v) => {
+            if (v.id !== id) return v;
+            if (v.weekday === clickedDay) {
+              return { ...v, isNextWeek: !v.isNextWeek };
+            } else {
+              return { ...v, weekday: clickedDay, isNextWeek: false };
+            }
+          })
+        );
+      }
+
+      function toggleProcess(id, key) {
+        setVideos((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, [key]: !v[key] } : v))
+        );
+      }
+
+      async function updateThumb(id, index, file) {
+        try {
+          const compressed = await compressImage(file);
+          setVideos((prev) =>
+            prev.map((v) => {
+              if (v.id !== id) return v;
+              const newThumbs = [...v.thumbs];
+              newThumbs[index] = compressed;
+              return { ...v, thumbs: newThumbs };
+            })
+          );
+        } catch (e) {
+          console.error("Erro ao processar imagem", e);
+        }
+      }
+
+      function removeThumb(id, index) {
+        setVideos((prev) =>
+          prev.map((v) => {
+            if (v.id !== id) return v;
+            const newThumbs = [...v.thumbs];
+            newThumbs[index] = "";
+            return { ...v, thumbs: newThumbs };
+          })
+        );
+      }
+
+      function updateTitle(id, index, text) {
+        setVideos((prev) =>
+          prev.map((v) => {
+            if (v.id !== id) return v;
+            const newTitles = [...v.titles];
+            newTitles[index] = text;
+            return { ...v, titles: newTitles };
+          })
+        );
+      }
+
+      function markAsPosted(id) {
+        setVideos((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, posted: true, postedAt: Date.now() } : v))
+        );
+      }
+
+      function restoreToProduction(id) {
+        setVideos((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, posted: false } : v))
+        );
+      }
+
+      function exportBackup() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(videos, null, 2));
+        const a = document.createElement("a");
+        a.setAttribute("href", dataStr);
+        a.setAttribute("download", `backup_videos_${new Date().toISOString().slice(0, 10)}.json`);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+
+      function importBackup(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = JSON.parse(event.target.result);
+            if (Array.isArray(parsed)) {
+              setVideos(parsed);
+              alert("Backup restaurado com sucesso! " + parsed.length + " projetos carregados.");
+            } else {
+              alert("Arquivo de backup inválido.");
+            }
+          } catch (err) {
+            alert("Erro ao ler o arquivo de backup.");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function deleteVideo(id) {
+        if (window.confirm("Deseja realmente excluir este vídeo?")) {
+          setVideos((prev) => prev.filter((v) => v.id !== id));
+        }
+      }
+
+      const activeVideos = videos.filter((v) => !v.posted);
+      const postedVideos = videos.filter((v) => v.posted);
+      const displayedVideos = activeTab === "producao" ? activeVideos : postedVideos;
+
+      return (
+        <div className="min-h-screen bg-[#f0f4fc] text-[#0f172a] flex flex-col md:flex-row">
+          {/* Lapidated Sidebar */}
+          <aside className="w-full md:w-56 bg-white border-r border-[#e2e8f5] p-4 flex flex-col justify-between shrink-0 shadow-[2px_0_16px_rgba(37,99,235,0.03)]">
+            <div>
+              <div className="flex items-center gap-2.5 px-2 py-2 mb-4">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1d4ed8] via-[#2563eb] to-[#38bdf8] flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-500/25">
+                  V
+                </div>
+                <h1 className="font-extrabold text-base tracking-tight text-[#0f172a]">
+                  Central
+                </h1>
+              </div>
+
+              <nav className="space-y-1">
+                <button
+                  onClick={() => setActiveTab("producao")}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition ${
+                    activeTab === "producao"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-500/25"
+                      : "text-[#64748b] hover:bg-blue-50/70 hover:text-[#2563eb]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>🎬</span>
+                    <span>Em Produção</span>
+                  </div>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold ${
+                      activeTab === "producao"
+                        ? "bg-white/20 text-white"
+                        : "bg-blue-50 text-[#2563eb]"
+                    }`}
+                  >
+                    {activeVideos.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("postados")}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition ${
+                    activeTab === "postados"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-500/25"
+                      : "text-[#64748b] hover:bg-blue-50/70 hover:text-[#2563eb]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>✓</span>
+                    <span>Postados</span>
+                  </div>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold ${
+                      activeTab === "postados"
+                        ? "bg-white/20 text-white"
+                        : "bg-blue-50 text-[#2563eb]"
+                    }`}
+                  >
+                    {postedVideos.length}
+                  </span>
+                </button>
+              </nav>
+            </div>
+
+            <div className="pt-3 border-t border-[#f1f5f9] mt-4 space-y-2">
+              <button
+                onClick={addNewVideo}
+                className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#1d4ed8] via-[#2563eb] to-[#3b82f6] hover:from-[#1e40af] hover:to-[#2563eb] text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-md shadow-blue-500/25 transition active:scale-95"
+              >
+                <span>＋</span>
+                <span>Novo Vídeo</span>
+              </button>
+
+              <div className="flex items-center gap-1.5 pt-1">
+                <button
+                  type="button"
+                  onClick={exportBackup}
+                  className="flex-1 text-[11px] font-bold text-[#64748b] hover:text-[#2563eb] bg-[#f8faff] hover:bg-blue-50/70 border border-[#e2e8f5] py-1.5 px-1 rounded-lg transition text-center"
+                  title="Baixar arquivo de backup com todos os vídeos e fotos"
+                >
+                  💾 Salvar
+                </button>
+                <label
+                  className="flex-1 text-[11px] font-bold text-[#64748b] hover:text-[#2563eb] bg-[#f8faff] hover:bg-blue-50/70 border border-[#e2e8f5] py-1.5 px-1 rounded-lg transition text-center cursor-pointer"
+                  title="Restaurar arquivo de backup salvo anteriormente"
+                >
+                  📥 Carregar
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={importBackup}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content Area */}
+          <main className="flex-1 flex flex-col min-w-0 p-4 sm:p-6 space-y-4 overflow-y-auto">
+            {/* Clean Top Bar */}
+            <div className="flex items-center justify-between bg-white rounded-2xl px-5 py-3 border border-[#e2e8f5] shadow-2xs">
+              <h2 className="text-base font-extrabold text-[#0f172a] tracking-tight">
+                {activeTab === "producao" ? "Em Produção" : "Postados"}
+              </h2>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[#2563eb] bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200/60">
+                  {displayedVideos.length} {displayedVideos.length === 1 ? "vídeo" : "vídeos"}
+                </span>
+                <button
+                  onClick={addNewVideo}
+                  className="md:hidden flex items-center gap-1 bg-[#2563eb] text-white text-xs font-bold px-2.5 py-1 rounded-lg"
+                >
+                  <span>＋</span>
+                  <span>Novo</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Video Cards Grid */}
+            {displayedVideos.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl border border-[#e2e8f5] p-6 shadow-2xs">
+                <p className="text-[#64748b] text-sm mb-3 font-medium">
+                  {activeTab === "producao"
+                    ? "Nenhum vídeo em produção."
+                    : "Nenhum vídeo marcado como postado."}
+                </p>
+                {activeTab === "producao" && (
+                  <button
+                    onClick={addNewVideo}
+                    className="bg-[#2563eb] text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md"
+                  >
+                    ＋ Adicionar Vídeo
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {displayedVideos.map((video) => {
+                  const dayInfo = calculatePostDayInfo(video.weekday, video.isNextWeek);
+                  const borderStyle = getSplitBorderGradient(
+                    video.nandoSim,
+                    video.dudaSim,
+                    video.sonoraSim
+                  );
+
+                  return (
+                    <section
+                      key={video.id}
+                      className="bg-white rounded-2xl p-5 border border-[#e2e8f5] shadow-[0_3px_18px_rgba(37,99,235,0.03)] hover:border-blue-200 transition space-y-4"
+                    >
+                      {/* Top Bar of Video Card */}
+                      <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#f1f5f9] flex-wrap">
+                        {/* Left: Weekday + Countdown + Nando/Duda/Sonora Once Here */}
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                          {/* Weekdays */}
+                          <div className="flex items-center gap-1 bg-[#f0f4fc] p-1 rounded-xl border border-blue-200/60 shadow-2xs">
+                            {WEEKDAYS.map((w) => {
+                              const isSelected = video.weekday === w.day;
+                              return (
+                                <button
+                                  key={w.day}
+                                  type="button"
+                                  onClick={() => handleWeekdayClick(video.id, w.day)}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition active:scale-95 flex items-center gap-1 ${
+                                    isSelected
+                                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-500/25"
+                                      : "text-[#64748b] hover:text-[#0f172a] hover:bg-white"
+                                  }`}
+                                >
+                                  <span>{w.label}</span>
+                                  {isSelected && video.isNextWeek && (
+                                    <span className="text-[9px] bg-white/25 px-1 rounded-full font-black">
+                                      +1
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Countdown */}
+                          <div
+                            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold border shadow-2xs ${dayInfo.badgeColor}`}
+                          >
+                            <span>🕒</span>
+                            <span>
+                              {dayInfo.displayDay} ({dayInfo.formattedDate})
+                            </span>
+                            <span>•</span>
+                            <span>{dayInfo.countdownText}</span>
+                          </div>
+
+                          {/* NANDO / DUDA / SONORA: Clean, compact, ONCE on the left! */}
+                          <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+                            {/* Nando */}
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] font-extrabold text-[#64748b]">
+                                Nando:
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => toggleProcess(video.id, "nandoSim")}
+                                className={`px-2 py-0.5 rounded-lg text-[10px] font-black transition active:scale-95 shadow-2xs ${
+                                  video.nandoSim
+                                    ? "bg-[#10b981] text-white"
+                                    : "bg-[#f43f5e] text-white"
+                                }`}
+                              >
+                                {video.nandoSim ? "Sim ✓" : "Não ✕"}
+                              </button>
+                            </div>
+
+                            {/* Duda */}
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] font-extrabold text-[#64748b]">
+                                Duda:
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => toggleProcess(video.id, "dudaSim")}
+                                className={`px-2 py-0.5 rounded-lg text-[10px] font-black transition active:scale-95 shadow-2xs ${
+                                  video.dudaSim
+                                    ? "bg-[#10b981] text-white"
+                                    : "bg-[#f43f5e] text-white"
+                                }`}
+                              >
+                                {video.dudaSim ? "Sim ✓" : "Não ✕"}
+                              </button>
+                            </div>
+
+                            {/* Sonora */}
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] font-extrabold text-[#64748b]">
+                                Sonora:
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => toggleProcess(video.id, "sonoraSim")}
+                                className={`px-2 py-0.5 rounded-lg text-[10px] font-black transition active:scale-95 shadow-2xs ${
+                                  video.sonoraSim
+                                    ? "bg-[#10b981] text-white"
+                                    : "bg-[#f43f5e] text-white"
+                                }`}
+                              >
+                                {video.sonoraSim ? "Sim ✓" : "Não ✕"}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right: Postado Button & Delete */}
+                        <div className="flex items-center gap-2">
+                          {!video.posted ? (
+                            <button
+                              onClick={() => markAsPosted(video.id)}
+                              className="bg-[#10b981]/15 hover:bg-[#10b981] text-[#10b981] hover:text-white border border-[#10b981]/30 text-xs font-bold px-3 py-1 rounded-xl transition active:scale-95 flex items-center gap-1 shadow-2xs"
+                            >
+                              <span>✓</span>
+                              <span>Vídeo Postado</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => restoreToProduction(video.id)}
+                              className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-[#1d4ed8] text-xs font-bold px-3 py-1 rounded-xl transition shadow-2xs"
+                            >
+                              <span>↩</span>
+                              <span>Voltar</span>
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => deleteVideo(video.id)}
+                            className="text-[#94a3b8] hover:text-[#f43f5e] p-1.5 rounded-lg hover:bg-rose-50 transition"
+                            title="Excluir"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 3 Variations: 33.3% Split Border (Nando, Duda, Sonora) + Title */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {[0, 1, 2].map((idx) => {
+                          const thumb = video.thumbs[idx];
+                          const title = video.titles[idx];
+
+                          return (
+                            <div key={idx} className="flex flex-col space-y-2">
+                              <div className="flex items-center justify-between text-[11px] font-extrabold text-[#2563eb] px-0.5">
+                                <span>OPÇÃO {idx + 1}</span>
+                                {thumb && (
+                                  <button
+                                    onClick={() => removeThumb(video.id, idx)}
+                                    className="text-[#94a3b8] hover:text-[#f43f5e] text-[10px] font-semibold transition"
+                                  >
+                                    Remover foto
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* Thumbnail with exact 33.3% Split Border */}
+                              <div
+                                className="thumb-split-box cursor-pointer group"
+                                style={borderStyle}
+                                onClick={() =>
+                                  document.getElementById(`saas-v11-${video.id}-${idx}`)?.click()
+                                }
+                              >
+                                <div className="thumb-split-inner">
+                                  {thumb ? (
+                                    <img
+                                      src={thumb}
+                                      alt={`Opção ${idx + 1}`}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="flex flex-col items-center justify-center p-4 text-[#94a3b8] group-hover:text-[#2563eb] transition">
+                                      <span className="text-base mb-1 opacity-60">📁</span>
+                                      <span className="text-xs font-bold">
+                                        Subir Thumbnail
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {thumb && (
+                                    <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 flex items-center justify-center transition backdrop-blur-xs">
+                                      <span className="text-xs font-bold text-white bg-black/60 px-3 py-1.5 rounded-xl">
+                                        Trocar Imagem
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <input
+                                  id={`saas-v11-${video.id}-${idx}`}
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    if (f) updateThumb(video.id, idx, f);
+                                  }}
+                                />
+                              </div>
+
+                              {/* Title Auto-saving textarea */}
+                              <textarea
+                                rows={2}
+                                value={title}
+                                onChange={(e) => updateTitle(video.id, idx, e.target.value)}
+                                placeholder={`Digite o título da Opção ${idx + 1}...`}
+                                className="w-full bg-[#f8faff] hover:bg-white focus:bg-white border border-[#e2e8f5] focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm font-bold text-[#0f172a] p-2.5 rounded-xl focus:outline-none resize-none transition leading-snug shadow-2xs"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+</html>
