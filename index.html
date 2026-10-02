@@ -197,7 +197,6 @@
       const [postingId, setPostingId] = useState(null);
       const [loaded, setLoaded] = useState(false);
 
-      // Never lose video: check v11, then fallback keys
       useEffect(() => {
         try {
           const saved =
@@ -364,7 +363,6 @@
         reader.readAsText(file);
       }
 
-      // Ordenação: vídeos postados antes ficam em cima (menor prazo/dias restantes no topo!)
       const activeVideos = [...videos]
         .filter((v) => !v.posted)
         .sort((a, b) => {
@@ -380,102 +378,99 @@
       const displayedVideos = activeTab === "producao" ? activeVideos : postedVideos;
 
       return (
-        <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col md:flex-row font-sans">
-          {/* 1. LADO ESQUERDO: PRETO PROFUNDO (OLED BLACK #000000) */}
-          <aside className="w-full md:w-60 bg-[#000000] text-zinc-100 border-r border-[#171717] p-4 flex flex-col justify-between shrink-0 z-10">
-            <div>
-              {/* YouTube Studio Brand Header */}
-              <div className="flex items-center gap-2.5 px-2 py-3 mb-6 border-b border-[#141414] pb-4">
-                <div className="w-9 h-6 rounded-md bg-[#ff0000] flex items-center justify-center text-white shadow-md shadow-red-600/30">
-                  <span className="text-xs font-black ml-0.5">▶</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <h1 className="font-black text-base tracking-tight text-white">
+        <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans">
+          {/* HEADER MINIMALISTA NO TOPO (ABINHA PEQUENA + TELONA CHEIA) */}
+          <header className="sticky top-0 z-30 bg-[#050505]/95 backdrop-blur-md border-b border-[#141414] px-4 sm:px-6 lg:px-8 py-2.5">
+            <div className="flex items-center justify-between gap-3 max-w-[1920px] mx-auto flex-wrap">
+              {/* Left: Brand + Small Tabs */}
+              <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div className="flex items-center gap-2 pr-2 border-r border-[#1a1a1a]">
+                  <div className="w-8 h-5.5 rounded-md bg-[#ff0000] flex items-center justify-center text-white shadow-sm shadow-red-600/30">
+                    <span className="text-xs font-black ml-0.5">▶</span>
+                  </div>
+                  <span className="font-black text-sm tracking-tight text-white hidden sm:inline">
                     Central
-                  </h1>
+                  </span>
                   <span className="text-[9px] bg-[#ff0000] text-white px-1.5 py-0.5 rounded font-black uppercase tracking-wider">
                     Studio
                   </span>
                 </div>
-              </div>
 
-              {/* Navigation Links */}
-              <nav className="space-y-1">
-                <button
-                  onClick={() => {
-                    playSound("click");
-                    setActiveTab("producao");
-                  }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
-                    activeTab === "producao"
-                      ? "bg-[#ff0000] text-white shadow-md shadow-red-600/30"
-                      : "text-zinc-400 hover:bg-[#0f0f0f] hover:text-white"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
+                {/* Abinha Pequena: Em Produção / Postados */}
+                <nav className="flex items-center gap-1 bg-[#0a0a0a] p-1 rounded-lg border border-[#1a1a1a]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playSound("click");
+                      setActiveTab("producao");
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-black transition active:scale-95 ${
+                      activeTab === "producao"
+                        ? "bg-[#ff0000] text-white shadow-md shadow-red-600/30"
+                        : "text-zinc-400 hover:text-white hover:bg-[#121212]"
+                    }`}
+                  >
                     <span>🎬</span>
                     <span>Em Produção</span>
-                  </div>
-                  <span
-                    className={`text-[11px] px-2 py-0.5 rounded-full font-black ${
-                      activeTab === "producao"
-                        ? "bg-white/25 text-white"
-                        : "bg-[#141414] text-zinc-400 border border-[#222]"
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                        activeTab === "producao"
+                          ? "bg-white/25 text-white"
+                          : "bg-[#181818] text-zinc-400"
+                      }`}
+                    >
+                      {activeVideos.length}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playSound("click");
+                      setActiveTab("postados");
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-black transition active:scale-95 ${
+                      activeTab === "postados"
+                        ? "bg-[#ff0000] text-white shadow-md shadow-red-600/30"
+                        : "text-zinc-400 hover:text-white hover:bg-[#121212]"
                     }`}
                   >
-                    {activeVideos.length}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    playSound("click");
-                    setActiveTab("postados");
-                  }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
-                    activeTab === "postados"
-                      ? "bg-[#ff0000] text-white shadow-md shadow-red-600/30"
-                      : "text-zinc-400 hover:bg-[#0f0f0f] hover:text-white"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
                     <span>✓</span>
                     <span>Postados</span>
-                  </div>
-                  <span
-                    className={`text-[11px] px-2 py-0.5 rounded-full font-black ${
-                      activeTab === "postados"
-                        ? "bg-white/25 text-white"
-                        : "bg-[#141414] text-zinc-400 border border-[#222]"
-                    }`}
-                  >
-                    {postedVideos.length}
-                  </span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                        activeTab === "postados"
+                          ? "bg-white/25 text-white"
+                          : "bg-[#181818] text-zinc-400"
+                      }`}
+                    >
+                      {postedVideos.length}
+                    </span>
+                  </button>
+                </nav>
+              </div>
+
+              {/* Right: Novo Projeto + Backup */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={addNewVideo}
+                  className="flex items-center gap-1.5 bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-black py-1.5 px-3.5 rounded-lg shadow-md shadow-red-600/25 transition active:scale-95"
+                >
+                  <span className="text-sm font-black">＋</span>
+                  <span>Novo Projeto</span>
                 </button>
-              </nav>
-            </div>
 
-            {/* Sidebar Actions & Backup */}
-            <div className="pt-4 border-t border-[#141414] mt-6 space-y-2">
-              <button
-                onClick={addNewVideo}
-                className="w-full flex items-center justify-center gap-2 bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-black py-2.5 px-3 rounded-xl shadow-md transition active:scale-95"
-              >
-                <span className="text-sm font-black">＋</span>
-                <span>Novo Projeto</span>
-              </button>
-
-              <div className="flex items-center gap-1.5 pt-1">
                 <button
                   type="button"
                   onClick={exportBackup}
-                  className="flex-1 text-[11px] font-bold text-zinc-400 hover:text-white bg-[#0a0a0a] hover:bg-[#141414] border border-[#1f1f1f] py-1.5 px-1 rounded-lg transition text-center"
+                  className="text-[11px] font-bold text-zinc-400 hover:text-white bg-[#0a0a0a] hover:bg-[#141414] border border-[#1f1f1f] py-1.5 px-2.5 rounded-lg transition"
                   title="Salvar backup em arquivo JSON"
                 >
                   💾 Salvar
                 </button>
+
                 <label
-                  className="flex-1 text-[11px] font-bold text-zinc-400 hover:text-white bg-[#0a0a0a] hover:bg-[#141414] border border-[#1f1f1f] py-1.5 px-1 rounded-lg transition text-center cursor-pointer"
+                  className="text-[11px] font-bold text-zinc-400 hover:text-white bg-[#0a0a0a] hover:bg-[#141414] border border-[#1f1f1f] py-1.5 px-2.5 rounded-lg transition cursor-pointer"
                   title="Restaurar backup existente"
                 >
                   📥 Carregar
@@ -488,34 +483,13 @@
                 </label>
               </div>
             </div>
-          </aside>
+          </header>
 
-          {/* 2. ÁREA DOS VÍDEOS: PRETO PROFUNDO (OLED BLACK #000000) */}
-          <main className="flex-1 flex flex-col min-w-0 p-4 sm:p-6 lg:p-7 space-y-5 overflow-y-auto bg-[#000000]">
-            {/* Minimalist Studio Sub-Header */}
-            <div className="flex items-center justify-between pb-1">
-              <div className="flex items-center gap-3">
-                <h2 className="text-base font-black text-white tracking-tight">
-                  {activeTab === "producao" ? "Vídeos em Produção" : "Vídeos Postados"}
-                </h2>
-                <span className="text-[11px] font-extrabold text-zinc-400 bg-[#0d0d0d] border border-[#1f1f1f] px-2.5 py-0.5 rounded-full">
-                  {displayedVideos.length} {displayedVideos.length === 1 ? "projeto" : "projetos"}
-                </span>
-              </div>
-
-              <button
-                onClick={addNewVideo}
-                className="flex items-center gap-1.5 bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-black px-3 py-1.5 rounded-lg shadow-sm transition active:scale-95"
-              >
-                <span>＋</span>
-                <span>Adicionar Vídeo</span>
-              </button>
-            </div>
-
-            {/* Video Projects List */}
+          {/* ÁREA DOS VÍDEOS EM TELONA CHEIA */}
+          <main className="flex-1 w-full max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto bg-[#000000]">
             {displayedVideos.length === 0 ? (
-              <div className="text-center py-20 bg-[#080808] rounded-2xl border border-[#171717] p-8">
-                <span className="text-3xl block mb-3 opacity-60">🎬</span>
+              <div className="text-center py-24 bg-[#080808] rounded-2xl border border-[#171717] p-8 max-w-xl mx-auto my-12">
+                <span className="text-4xl block mb-3 opacity-60">🎬</span>
                 <p className="text-zinc-500 text-sm mb-4 font-semibold">
                   {activeTab === "producao"
                     ? "Nenhum vídeo em produção no momento."
@@ -531,7 +505,7 @@
                 )}
               </div>
             ) : (
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {displayedVideos.map((video) => {
                   const dayInfo = calculatePostDayInfo(video.weekday, video.isNextWeek);
 
@@ -544,13 +518,12 @@
                   return (
                     <section
                       key={video.id}
-                      className="bg-[#080808] rounded-2xl p-4 sm:p-5 border border-[#1a1a1a] shadow-2xl space-y-4"
+                      className="bg-[#080808] rounded-2xl p-4 sm:p-5 lg:p-6 border border-[#1a1a1a] shadow-2xl space-y-4"
                     >
-                      {/* LAPIDATED CARD TOOLBAR */}
+                      {/* CARD TOOLBAR */}
                       <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#141414] flex-wrap">
-                        {/* Left: Weekday Selector + Clean Minimal Date Text */}
+                        {/* Left: Weekday Selector (Seg a Dom) + Date Info */}
                         <div className="flex items-center gap-3 flex-wrap">
-                          {/* Weekdays */}
                           <div className="flex items-center gap-0.5 bg-[#030303] p-1 rounded-lg border border-[#1a1a1a]">
                             {WEEKDAYS.map((w) => {
                               const isSelected = video.weekday === w.day;
@@ -583,7 +556,6 @@
                             })}
                           </div>
 
-                          {/* Clean Date Info */}
                           <div className="flex items-center gap-2 text-xs font-bold text-zinc-400">
                             <span className="text-zinc-200 font-extrabold">
                               {dayInfo.displayDay} ({dayInfo.formattedDate})
@@ -595,14 +567,14 @@
                           </div>
                         </div>
 
-                        {/* Middle / Right: Equipe (Nando, Duda, Sonora) in sleek studio design */}
-                        <div className="flex items-center gap-2 flex-wrap">
+                        {/* Equipe + Botão Vídeo Postado (Branco -> Verde) */}
+                        <div className="flex items-center gap-2.5 flex-wrap">
                           <div className="flex items-center gap-1.5 bg-[#030303] border border-[#1a1a1a] p-1 rounded-lg">
                             <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 px-1.5">
                               Status:
                             </span>
 
-                            {/* Nando Toggle */}
+                            {/* Nando */}
                             <button
                               type="button"
                               onClick={() => toggleProcess(video.id, "nandoSim")}
@@ -617,7 +589,7 @@
                               <span>{video.nandoSim ? "✓" : "✕"}</span>
                             </button>
 
-                            {/* Duda Toggle */}
+                            {/* Duda */}
                             <button
                               type="button"
                               onClick={() => toggleProcess(video.id, "dudaSim")}
@@ -632,7 +604,7 @@
                               <span>{video.dudaSim ? "✓" : "✕"}</span>
                             </button>
 
-                            {/* Sonora Toggle */}
+                            {/* Sonora */}
                             <button
                               type="button"
                               onClick={() => toggleProcess(video.id, "sonoraSim")}
@@ -648,14 +620,13 @@
                             </button>
                           </div>
 
-                          {/* 100% Ready Tag */}
                           {is100Percent && (
                             <span className="flex items-center gap-1 text-[10px] font-black bg-emerald-950/90 text-emerald-400 border border-emerald-800 px-2 py-1 rounded-lg animate-pulse">
                               ✨ 100% PRONTO
                             </span>
                           )}
 
-                          {/* Action Buttons */}
+                          {/* Botão Vídeo Postado (Branco -> Verde) */}
                           <div className="flex items-center gap-1.5 pl-1">
                             {!video.posted ? (
                               <button
@@ -694,8 +665,8 @@
                         </div>
                       </div>
 
-                      {/* 3 Variations: 3 Thumbs + 3 BIG TITLES */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      {/* 3 Variations: 3 Thumbs (Tela branca plana quando vazio) + 3 BIG TITLES em Telona Cheia */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
                         {[0, 1, 2].map((idx) => {
                           const thumb = video.thumbs[idx];
                           const title = video.titles[idx];
@@ -704,7 +675,7 @@
                           return (
                             <div
                               key={idx}
-                              className="flex flex-col space-y-2.5 bg-[#030303] p-3 rounded-xl border border-[#141414]"
+                              className="flex flex-col space-y-2.5 bg-[#030303] p-3.5 rounded-xl border border-[#141414]"
                             >
                               {/* Option Header + Mini 3-Segment Process Track */}
                               <div className="flex items-center justify-between">
@@ -738,7 +709,7 @@
                                 </div>
                               </div>
 
-                              {/* 16:9 Cinema Thumbnail Frame */}
+                              {/* 16:9 Cinema Thumbnail Frame (TELA PLANA BRANCA QUANDO SEM FOTO) */}
                               <div
                                 className={`relative rounded-lg overflow-hidden cursor-pointer group aspect-video transition duration-200 flex items-center justify-center ${
                                   thumb
@@ -748,7 +719,7 @@
                                     : "bg-white border-2 border-white shadow-md hover:opacity-95"
                                 }`}
                                 onClick={() =>
-                                  document.getElementById(`yt-v13-${video.id}-${idx}`)?.click()
+                                  document.getElementById(`yt-v14-${video.id}-${idx}`)?.click()
                                 }
                               >
                                 {thumb ? (
@@ -778,7 +749,7 @@
                                 )}
 
                                 <input
-                                  id={`yt-v13-${video.id}-${idx}`}
+                                  id={`yt-v14-${video.id}-${idx}`}
                                   type="file"
                                   accept="image/*"
                                   className="hidden"
