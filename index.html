@@ -13,16 +13,16 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     body {
-      background-color: #0f0f10;
-      color: #f1f5f9;
+      background-color: #000000;
+      color: #f4f4f5;
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       -webkit-font-smoothing: antialiased;
     }
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #0f0f10; }
-    ::-webkit-scrollbar-thumb { background: #27272f; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #000000; }
+    ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2e2e2e; }
   </style>
 </head>
 <body>
@@ -32,7 +32,7 @@
     const { useState, useEffect } = React;
     const STORAGE_KEY = "producao_videos_sonora_v11";
 
-    // Web Audio API Sound Effects (Zero latency, works offline)
+    // Web Audio API Sound Effects
     function playSound(type = "click") {
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -117,17 +117,17 @@
       const displayDay = `${prefix}${weekdayObj.name}`;
 
       let countdownText = "";
-      let badgeColor = "bg-zinc-800 text-zinc-300 border-zinc-700";
+      let badgeColor = "text-zinc-400";
 
       if (daysUntil === 0) {
         countdownText = "Posta Hoje! 🔥";
-        badgeColor = "bg-red-950/70 text-red-400 border-red-800/80 animate-pulse";
+        badgeColor = "text-red-400 font-black";
       } else if (daysUntil === 1) {
         countdownText = "Amanhã ⚡";
-        badgeColor = "bg-amber-950/60 text-amber-300 border-amber-800/70";
+        badgeColor = "text-amber-400 font-extrabold";
       } else {
         countdownText = `Faltam ${daysUntil} dias`;
-        badgeColor = "bg-zinc-800/90 text-zinc-300 border-zinc-700/80";
+        badgeColor = "text-zinc-400 font-medium";
       }
 
       return {
@@ -143,17 +143,13 @@
       return [
         {
           id: "v-1",
-          weekday: 1,
+          weekday: 6,
           isNextWeek: false,
           posted: false,
           nandoSim: true,
           dudaSim: false,
-          sonoraSim: false,
-          thumbs: [
-            "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&auto=format&fit=crop&q=80",
-            "",
-            "",
-          ],
+          sonoraSim: true,
+          thumbs: ["", "", ""],
           titles: [
             "O DIA QUE O REAL MADRID QUEBROU O MERCADO DA BOLA",
             "COMO O REAL MADRID MONTOU A MAIOR MÁQUINA DO FUTEBOL",
@@ -367,36 +363,33 @@
       const displayedVideos = activeTab === "producao" ? activeVideos : postedVideos;
 
       return (
-        <div className="min-h-screen bg-[#0f0f10] text-slate-100 flex flex-col md:flex-row font-sans">
-          {/* 1. LADO ESQUERDO: BRANCO ESTILO YOUTUBE */}
-          <aside className="w-full md:w-64 bg-white text-zinc-900 border-r border-zinc-200 p-4 flex flex-col justify-between shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.06)] z-10">
+        <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col md:flex-row font-sans">
+          {/* 1. LADO ESQUERDO: BRANCO LIMPO ESTILO YOUTUBE */}
+          <aside className="w-full md:w-60 bg-white text-zinc-900 border-r border-zinc-200 p-4 flex flex-col justify-between shrink-0 z-10">
             <div>
-              {/* YouTube Style Brand Header */}
-              <div className="flex items-center gap-3 px-2 py-3 mb-6">
-                <div className="w-10 h-7 rounded-lg bg-[#ff0000] flex items-center justify-center text-white shadow-md shadow-red-500/30">
-                  <span className="text-sm font-black ml-0.5">▶</span>
+              {/* YouTube Studio Brand Header */}
+              <div className="flex items-center gap-2.5 px-2 py-3 mb-6">
+                <div className="w-9 h-6 rounded-md bg-[#ff0000] flex items-center justify-center text-white shadow-sm">
+                  <span className="text-xs font-black ml-0.5">▶</span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h1 className="font-black text-lg tracking-tight text-zinc-900">
-                      Central
-                    </h1>
-                    <span className="text-[10px] bg-[#ff0000] text-white px-1.5 py-0.2 rounded font-extrabold uppercase tracking-wider">
-                      Studio
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-zinc-400 font-semibold">Produção & Thumbs</p>
+                <div className="flex items-center gap-1.5">
+                  <h1 className="font-black text-base tracking-tight text-zinc-950">
+                    Central
+                  </h1>
+                  <span className="text-[9px] bg-[#ff0000] text-white px-1.5 py-0.5 rounded font-black uppercase tracking-wider">
+                    Studio
+                  </span>
                 </div>
               </div>
 
               {/* Navigation Links */}
-              <nav className="space-y-1.5">
+              <nav className="space-y-1">
                 <button
                   onClick={() => {
                     playSound("click");
                     setActiveTab("producao");
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition active:scale-[0.98] ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                     activeTab === "producao"
                       ? "bg-[#ff0000] text-white shadow-md shadow-red-600/30"
                       : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950"
@@ -422,7 +415,7 @@
                     playSound("click");
                     setActiveTab("postados");
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition active:scale-[0.98] ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
                     activeTab === "postados"
                       ? "bg-[#ff0000] text-white shadow-md shadow-red-600/30"
                       : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950"
@@ -446,27 +439,27 @@
             </div>
 
             {/* Sidebar Actions & Backup */}
-            <div className="pt-4 border-t border-zinc-200 mt-6 space-y-2.5">
+            <div className="pt-4 border-t border-zinc-200 mt-6 space-y-2">
               <button
                 onClick={addNewVideo}
-                className="w-full flex items-center justify-center gap-2 bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-extrabold py-3 px-3 rounded-xl shadow-lg shadow-red-600/25 transition active:scale-95"
+                className="w-full flex items-center justify-center gap-2 bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-black py-2.5 px-3 rounded-xl shadow-md transition active:scale-95"
               >
-                <span className="text-base font-black">＋</span>
-                <span>Novo Projeto de Vídeo</span>
+                <span className="text-sm font-black">＋</span>
+                <span>Novo Projeto</span>
               </button>
 
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-1.5 pt-1">
                 <button
                   type="button"
                   onClick={exportBackup}
-                  className="flex-1 text-[11px] font-bold text-zinc-700 hover:text-[#ff0000] bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 py-2 px-1 rounded-xl transition text-center shadow-2xs"
-                  title="Baixar backup dos vídeos e fotos"
+                  className="flex-1 text-[11px] font-bold text-zinc-600 hover:text-[#ff0000] bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 py-1.5 px-1 rounded-lg transition text-center"
+                  title="Salvar backup em arquivo JSON"
                 >
                   💾 Salvar
                 </button>
                 <label
-                  className="flex-1 text-[11px] font-bold text-zinc-700 hover:text-[#ff0000] bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 py-2 px-1 rounded-xl transition text-center cursor-pointer shadow-2xs"
-                  title="Carregar backup existente"
+                  className="flex-1 text-[11px] font-bold text-zinc-600 hover:text-[#ff0000] bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 py-1.5 px-1 rounded-lg transition text-center cursor-pointer"
+                  title="Restaurar backup existente"
                 >
                   📥 Carregar
                   <input
@@ -477,40 +470,36 @@
                   />
                 </label>
               </div>
-
-              <div className="text-[10px] text-zinc-400 text-center font-medium pt-1">
-                🔔 Sons de clique ativos
-              </div>
             </div>
           </aside>
 
-          {/* 2. ÁREA DAS THUMBS & PROJETOS: FUNDO PRETO/CINZA CINEMA */}
-          <main className="flex-1 flex flex-col min-w-0 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto bg-[#0f0f10]">
-            {/* Top Header Bar */}
-            <div className="flex items-center justify-between bg-[#18181c] rounded-2xl px-6 py-4 border border-[#27272f] shadow-lg">
+          {/* 2. ÁREA DOS VÍDEOS: PRETO PROFUNDO (OLED BLACK #000000) */}
+          <main className="flex-1 flex flex-col min-w-0 p-4 sm:p-6 lg:p-7 space-y-5 overflow-y-auto bg-[#000000]">
+            {/* Minimalist Studio Sub-Header */}
+            <div className="flex items-center justify-between pb-1">
               <div className="flex items-center gap-3">
-                <h2 className="text-lg font-black text-white tracking-tight">
+                <h2 className="text-base font-black text-white tracking-tight">
                   {activeTab === "producao" ? "Vídeos em Produção" : "Vídeos Postados"}
                 </h2>
-                <span className="text-xs font-black text-red-400 bg-red-950/60 border border-red-800/60 px-3 py-1 rounded-full">
+                <span className="text-[11px] font-extrabold text-zinc-400 bg-[#0d0d0d] border border-[#1f1f1f] px-2.5 py-0.5 rounded-full">
                   {displayedVideos.length} {displayedVideos.length === 1 ? "projeto" : "projetos"}
                 </span>
               </div>
 
               <button
                 onClick={addNewVideo}
-                className="md:hidden flex items-center gap-1.5 bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-md transition"
+                className="flex items-center gap-1.5 bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-black px-3 py-1.5 rounded-lg shadow-sm transition active:scale-95"
               >
                 <span>＋</span>
-                <span>Novo</span>
+                <span>Adicionar Vídeo</span>
               </button>
             </div>
 
             {/* Video Projects List */}
             {displayedVideos.length === 0 ? (
-              <div className="text-center py-24 bg-[#18181c] rounded-2xl border border-[#27272f] p-8 shadow-inner">
-                <span className="text-4xl block mb-3 opacity-60">🎬</span>
-                <p className="text-zinc-400 text-sm mb-4 font-semibold">
+              <div className="text-center py-20 bg-[#080808] rounded-2xl border border-[#171717] p-8">
+                <span className="text-3xl block mb-3 opacity-60">🎬</span>
+                <p className="text-zinc-500 text-sm mb-4 font-semibold">
                   {activeTab === "producao"
                     ? "Nenhum vídeo em produção no momento."
                     : "Nenhum vídeo marcado como postado."}
@@ -518,14 +507,14 @@
                 {activeTab === "producao" && (
                   <button
                     onClick={addNewVideo}
-                    className="bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-black px-5 py-2.5 rounded-xl shadow-lg shadow-red-600/30 transition active:scale-95"
+                    className="bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-black px-4 py-2 rounded-xl transition active:scale-95"
                   >
                     ＋ Criar Primeiro Vídeo
                   </button>
                 )}
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {displayedVideos.map((video) => {
                   const dayInfo = calculatePostDayInfo(video.weekday, video.isNextWeek);
 
@@ -538,14 +527,14 @@
                   return (
                     <section
                       key={video.id}
-                      className="bg-[#18181c] rounded-2xl p-5 sm:p-6 border border-[#27272f] hover:border-zinc-700 shadow-xl transition space-y-5"
+                      className="bg-[#080808] rounded-2xl p-4 sm:p-5 border border-[#1a1a1a] shadow-2xl space-y-4"
                     >
-                      {/* Top Bar of Project */}
-                      <div className="flex items-center justify-between gap-4 pb-4 border-b border-[#27272f] flex-wrap">
-                        {/* Left: Weekday Selector + Countdown */}
+                      {/* LAPIDATED CARD TOOLBAR */}
+                      <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#141414] flex-wrap">
+                        {/* Left: Weekday Selector + Clean Minimal Date Text */}
                         <div className="flex items-center gap-3 flex-wrap">
                           {/* Weekdays */}
-                          <div className="flex items-center gap-1 bg-[#121214] p-1 rounded-xl border border-zinc-800 shadow-inner">
+                          <div className="flex items-center gap-0.5 bg-[#030303] p-1 rounded-lg border border-[#1a1a1a]">
                             {WEEKDAYS.map((w) => {
                               const isSelected = video.weekday === w.day;
                               return (
@@ -553,10 +542,10 @@
                                   key={w.day}
                                   type="button"
                                   onClick={() => handleWeekdayClick(video.id, w.day)}
-                                  className={`px-3 py-1.5 rounded-lg text-xs font-black transition active:scale-95 flex items-center gap-1 ${
+                                  className={`px-2.5 py-1 rounded-md text-xs font-black transition active:scale-95 flex items-center gap-1 ${
                                     isSelected
-                                      ? "bg-[#ff0000] text-white shadow-md shadow-red-600/40"
-                                      : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                                      ? "bg-[#ff0000] text-white shadow-sm"
+                                      : "text-zinc-500 hover:text-zinc-200 hover:bg-[#121212]"
                                   }`}
                                   title={
                                     isSelected
@@ -568,8 +557,8 @@
                                 >
                                   <span>{w.label}</span>
                                   {isSelected && video.isNextWeek && (
-                                    <span className="text-[9px] bg-white/30 text-white px-1 rounded-full font-black">
-                                      +1sem
+                                    <span className="text-[8px] bg-white/30 text-white px-1 rounded-full font-black">
+                                      +1
                                     </span>
                                   )}
                                 </button>
@@ -577,109 +566,111 @@
                             })}
                           </div>
 
-                          {/* Countdown */}
-                          <div
-                            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black border shadow-sm ${dayInfo.badgeColor}`}
-                          >
-                            <span>🕒</span>
-                            <span>
+                          {/* Clean Date Info */}
+                          <div className="flex items-center gap-2 text-xs font-bold text-zinc-400">
+                            <span className="text-zinc-200 font-extrabold">
                               {dayInfo.displayDay} ({dayInfo.formattedDate})
                             </span>
-                            <span>•</span>
-                            <span>{dayInfo.countdownText}</span>
+                            <span className="text-zinc-700">•</span>
+                            <span className={dayInfo.badgeColor}>
+                              {dayInfo.countdownText}
+                            </span>
                           </div>
                         </div>
 
-                        {/* Process Delivery Status: NANDO / DUDA / SONORA */}
-                        <div className="flex items-center gap-2.5 bg-[#121214] p-1.5 px-3 rounded-xl border border-zinc-800 flex-wrap">
-                          <span className="text-[11px] font-black text-zinc-400 uppercase tracking-wider mr-1">
-                            Equipe:
-                          </span>
+                        {/* Middle / Right: Equipe (Nando, Duda, Sonora) in sleek studio design */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center gap-1.5 bg-[#030303] border border-[#1a1a1a] p-1 rounded-lg">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 px-1.5">
+                              Status:
+                            </span>
 
-                          {/* Nando */}
-                          <button
-                            type="button"
-                            onClick={() => toggleProcess(video.id, "nandoSim")}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition active:scale-95 flex items-center gap-1.5 shadow-sm ${
-                              video.nandoSim
-                                ? "bg-emerald-600 text-white shadow-emerald-700/30"
-                                : "bg-red-600/80 text-white hover:bg-red-600"
-                            }`}
-                            title="Alternar entrega do Nando"
-                          >
-                            <span>Nando</span>
-                            <span>{video.nandoSim ? "✓" : "✕"}</span>
-                          </button>
+                            {/* Nando Toggle */}
+                            <button
+                              type="button"
+                              onClick={() => toggleProcess(video.id, "nandoSim")}
+                              className={`px-2.5 py-1 rounded-md text-[11px] font-black transition active:scale-95 flex items-center gap-1 border ${
+                                video.nandoSim
+                                  ? "bg-emerald-950/80 text-emerald-400 border-emerald-800/80 shadow-2xs"
+                                  : "bg-red-950/40 text-red-400 border-red-900/60 hover:bg-red-950/70"
+                              }`}
+                              title="Alternar entrega de Nando"
+                            >
+                              <span>Nando</span>
+                              <span>{video.nandoSim ? "✓" : "✕"}</span>
+                            </button>
 
-                          {/* Duda */}
-                          <button
-                            type="button"
-                            onClick={() => toggleProcess(video.id, "dudaSim")}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition active:scale-95 flex items-center gap-1.5 shadow-sm ${
-                              video.dudaSim
-                                ? "bg-emerald-600 text-white shadow-emerald-700/30"
-                                : "bg-red-600/80 text-white hover:bg-red-600"
-                            }`}
-                            title="Alternar entrega da Duda"
-                          >
-                            <span>Duda</span>
-                            <span>{video.dudaSim ? "✓" : "✕"}</span>
-                          </button>
+                            {/* Duda Toggle */}
+                            <button
+                              type="button"
+                              onClick={() => toggleProcess(video.id, "dudaSim")}
+                              className={`px-2.5 py-1 rounded-md text-[11px] font-black transition active:scale-95 flex items-center gap-1 border ${
+                                video.dudaSim
+                                  ? "bg-emerald-950/80 text-emerald-400 border-emerald-800/80 shadow-2xs"
+                                  : "bg-red-950/40 text-red-400 border-red-900/60 hover:bg-red-950/70"
+                              }`}
+                              title="Alternar entrega de Duda"
+                            >
+                              <span>Duda</span>
+                              <span>{video.dudaSim ? "✓" : "✕"}</span>
+                            </button>
 
-                          {/* Sonora */}
-                          <button
-                            type="button"
-                            onClick={() => toggleProcess(video.id, "sonoraSim")}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition active:scale-95 flex items-center gap-1.5 shadow-sm ${
-                              video.sonoraSim
-                                ? "bg-emerald-600 text-white shadow-emerald-700/30"
-                                : "bg-red-600/80 text-white hover:bg-red-600"
-                            }`}
-                            title="Alternar entrega da Sonora"
-                          >
-                            <span>🎵 Sonora</span>
-                            <span>{video.sonoraSim ? "✓" : "✕"}</span>
-                          </button>
+                            {/* Sonora Toggle */}
+                            <button
+                              type="button"
+                              onClick={() => toggleProcess(video.id, "sonoraSim")}
+                              className={`px-2.5 py-1 rounded-md text-[11px] font-black transition active:scale-95 flex items-center gap-1 border ${
+                                video.sonoraSim
+                                  ? "bg-emerald-950/80 text-emerald-400 border-emerald-800/80 shadow-2xs"
+                                  : "bg-red-950/40 text-red-400 border-red-900/60 hover:bg-red-950/70"
+                              }`}
+                              title="Alternar entrega da Sonora"
+                            >
+                              <span>Sonora</span>
+                              <span>{video.sonoraSim ? "✓" : "✕"}</span>
+                            </button>
+                          </div>
 
+                          {/* 100% Ready Tag */}
                           {is100Percent && (
-                            <span className="flex items-center gap-1 text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full ml-1 animate-pulse">
+                            <span className="flex items-center gap-1 text-[10px] font-black bg-emerald-950/90 text-emerald-400 border border-emerald-800 px-2 py-1 rounded-lg animate-pulse">
                               ✨ 100% PRONTO
                             </span>
                           )}
-                        </div>
 
-                        {/* Right: Postado Button & Delete */}
-                        <div className="flex items-center gap-2">
-                          {!video.posted ? (
-                            <button
-                              onClick={() => markAsPosted(video.id)}
-                              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-3.5 py-1.5 rounded-xl transition active:scale-95 flex items-center gap-1.5 shadow-md shadow-emerald-900/30"
-                            >
-                              <span>✓</span>
-                              <span>Vídeo Postado</span>
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => restoreToProduction(video.id)}
-                              className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-black px-3.5 py-1.5 rounded-xl transition shadow-sm"
-                            >
-                              <span>↩</span>
-                              <span>Voltar Produção</span>
-                            </button>
-                          )}
+                          {/* Action Buttons */}
+                          <div className="flex items-center gap-1.5 pl-1">
+                            {!video.posted ? (
+                              <button
+                                onClick={() => markAsPosted(video.id)}
+                                className="bg-emerald-950/80 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800 text-xs font-black px-3 py-1.5 rounded-lg transition active:scale-95 flex items-center gap-1 shadow-sm"
+                              >
+                                <span>✓</span>
+                                <span>Vídeo Postado</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => restoreToProduction(video.id)}
+                                className="flex items-center gap-1 bg-[#141414] hover:bg-[#202020] text-zinc-300 border border-[#262626] text-xs font-black px-3 py-1.5 rounded-lg transition"
+                              >
+                                <span>↩</span>
+                                <span>Voltar Produção</span>
+                              </button>
+                            )}
 
-                          <button
-                            onClick={() => deleteVideo(video.id)}
-                            className="text-zinc-500 hover:text-red-400 p-2 rounded-xl hover:bg-red-950/40 transition"
-                            title="Excluir Projeto"
-                          >
-                            🗑️
-                          </button>
+                            <button
+                              onClick={() => deleteVideo(video.id)}
+                              className="text-zinc-600 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-950/40 transition"
+                              title="Excluir Projeto"
+                            >
+                              🗑️
+                            </button>
+                          </div>
                         </div>
                       </div>
 
                       {/* 3 Variations: 3 Thumbs + 3 BIG TITLES */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {[0, 1, 2].map((idx) => {
                           const thumb = video.thumbs[idx];
                           const title = video.titles[idx];
@@ -688,35 +679,34 @@
                           return (
                             <div
                               key={idx}
-                              className="flex flex-col space-y-3 bg-[#121214] p-3.5 rounded-2xl border border-[#27272f]"
+                              className="flex flex-col space-y-2.5 bg-[#030303] p-3 rounded-xl border border-[#141414]"
                             >
-                              {/* Option Header + 3-Segment Process Track */}
+                              {/* Option Header + Mini 3-Segment Process Track */}
                               <div className="flex items-center justify-between">
-                                <span className="text-xs font-black text-red-500 uppercase tracking-wider flex items-center gap-1.5">
-                                  <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+                                <span className="text-[11px] font-black text-red-500 uppercase tracking-wider flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span>
                                   OPÇÃO {idx + 1}
                                 </span>
 
-                                {/* 33.3% Clear Progress Bar on the thumbnail */}
                                 <div
                                   className="flex items-center gap-1"
-                                  title="Progresso: Nando, Duda, Sonora"
+                                  title="Progresso das 3 etapas (Nando, Duda, Sonora)"
                                 >
                                   <div
-                                    className={`w-4 h-1.5 rounded-full ${
-                                      video.nandoSim ? "bg-emerald-500" : "bg-red-500/80"
+                                    className={`w-3.5 h-1 rounded-full ${
+                                      video.nandoSim ? "bg-emerald-500" : "bg-red-500/60"
                                     }`}
                                     title="Nando"
                                   />
                                   <div
-                                    className={`w-4 h-1.5 rounded-full ${
-                                      video.dudaSim ? "bg-emerald-500" : "bg-red-500/80"
+                                    className={`w-3.5 h-1 rounded-full ${
+                                      video.dudaSim ? "bg-emerald-500" : "bg-red-500/60"
                                     }`}
                                     title="Duda"
                                   />
                                   <div
-                                    className={`w-4 h-1.5 rounded-full ${
-                                      video.sonoraSim ? "bg-emerald-500" : "bg-red-500/80"
+                                    className={`w-3.5 h-1 rounded-full ${
+                                      video.sonoraSim ? "bg-emerald-500" : "bg-red-500/60"
                                     }`}
                                     title="Sonora"
                                   />
@@ -725,13 +715,13 @@
 
                               {/* 16:9 Cinema Thumbnail Frame */}
                               <div
-                                className={`relative rounded-xl overflow-hidden cursor-pointer group aspect-video bg-[#09090b] border-2 transition-all duration-200 flex items-center justify-center ${
+                                className={`relative rounded-lg overflow-hidden cursor-pointer group aspect-video bg-[#000000] border transition duration-200 flex items-center justify-center ${
                                   is100Percent
-                                    ? "border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.25)]"
-                                    : "border-zinc-800 hover:border-red-500/80 shadow-md"
+                                    ? "border-emerald-600 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                                    : "border-[#1c1c1c] hover:border-red-600/70"
                                 }`}
                                 onClick={() =>
-                                  document.getElementById(`yt-v12-${video.id}-${idx}`)?.click()
+                                  document.getElementById(`yt-v13-${video.id}-${idx}`)?.click()
                                 }
                               >
                                 {thumb ? (
@@ -741,8 +731,8 @@
                                     className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
                                   />
                                 ) : (
-                                  <div className="flex flex-col items-center justify-center p-4 text-zinc-500 group-hover:text-red-400 transition">
-                                    <span className="text-2xl mb-1.5 opacity-60">📁</span>
+                                  <div className="flex flex-col items-center justify-center p-3 text-zinc-600 group-hover:text-red-400 transition">
+                                    <span className="text-xl mb-1 opacity-50">📁</span>
                                     <span className="text-xs font-black tracking-tight">
                                       Subir Thumbnail (16:9)
                                     </span>
@@ -750,15 +740,15 @@
                                 )}
 
                                 {thumb && (
-                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition backdrop-blur-xs">
-                                    <span className="text-xs font-black text-white bg-red-600 px-3.5 py-2 rounded-xl shadow-lg">
+                                  <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex items-center justify-center transition backdrop-blur-xs">
+                                    <span className="text-xs font-black text-white bg-red-600 px-3 py-1.5 rounded-lg shadow-md">
                                       Trocar Thumbnail
                                     </span>
                                   </div>
                                 )}
 
                                 <input
-                                  id={`yt-v12-${video.id}-${idx}`}
+                                  id={`yt-v13-${video.id}-${idx}`}
                                   type="file"
                                   accept="image/*"
                                   className="hidden"
@@ -773,22 +763,22 @@
                                 <div className="flex justify-end">
                                   <button
                                     onClick={() => removeThumb(video.id, idx)}
-                                    className="text-[11px] font-bold text-zinc-500 hover:text-red-400 transition"
+                                    className="text-[10px] font-bold text-zinc-600 hover:text-red-400 transition"
                                   >
                                     Remover foto
                                   </button>
                                 </div>
                               )}
 
-                              {/* BIG TITLES (YouTube Studio Style: Big, bold, readable) */}
-                              <div className="space-y-1.5 pt-1">
-                                <div className="flex items-center justify-between text-[11px] text-zinc-400 font-bold">
+                              {/* BIG TITLES */}
+                              <div className="space-y-1 pt-0.5">
+                                <div className="flex items-center justify-between text-[10px] text-zinc-500 font-bold">
                                   <span>Título do Vídeo:</span>
                                   <span
                                     className={
                                       titleLength > 90
                                         ? "text-red-400 font-black"
-                                        : "text-zinc-500"
+                                        : "text-zinc-600"
                                     }
                                   >
                                     {titleLength} / 100
@@ -799,8 +789,8 @@
                                   rows={3}
                                   value={title}
                                   onChange={(e) => updateTitle(video.id, idx, e.target.value)}
-                                  placeholder={`Escreva aqui o título em destaque para a Opção ${idx + 1}...`}
-                                  className="w-full bg-[#18181c] hover:bg-[#1f1f24] focus:bg-[#1f1f24] border-2 border-zinc-800 focus:border-[#ff0000] focus:ring-2 focus:ring-red-500/20 text-base sm:text-lg font-black text-white p-3.5 rounded-xl focus:outline-none resize-none transition leading-snug placeholder:text-zinc-600 placeholder:font-normal shadow-inner"
+                                  placeholder={`Título em destaque para a Opção ${idx + 1}...`}
+                                  className="w-full bg-[#050505] hover:bg-[#0a0a0a] focus:bg-[#0a0a0a] border border-[#1a1a1a] focus:border-[#ff0000] focus:ring-1 focus:ring-red-500/25 text-base sm:text-lg font-black text-white p-3 rounded-lg focus:outline-none resize-none transition leading-snug placeholder:text-zinc-700 placeholder:font-normal"
                                 />
                               </div>
                             </div>
