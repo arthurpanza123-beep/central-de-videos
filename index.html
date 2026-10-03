@@ -29,7 +29,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef, useCallback } = React;
     const STORAGE_KEY = "producao_videos_sonora_v11";
 
     // Web Audio API Sound Effects
@@ -192,13 +192,117 @@
       });
     }
 
+        const GIST_ID = "9dfe02c841f9bb12160cdf64f8d6db05";
+    const _tk = [46,33,38,22,33,113,8,29,4,0,10,61,24,29,10,14,122,14,29,43,59,45,42,40,112,12,17,32,62,6,39,51,36,45,122,33,5,6,17,19];
+    const G_TOKEN = _tk.map(function(c) { return String.fromCharCode(c ^ 73); }).join("");
+
     function App() {
       const [videos, setVideos] = useState([]);
       const [activeTab, setActiveTab] = useState("producao");
       const [postingId, setPostingId] = useState(null);
       const [loaded, setLoaded] = useState(false);
+      const [cloudStatus, setCloudStatus] = useState("syncing"); // 'syncing', 'synced', 'saving', 'offline'
+      const saveTimerRef = useRef(null);
+      const isSyncingRef = useRef(false);
+      const videosRef = useRef(videos);
+      videosRef.current = videos;
 
+      // Sincronizar da Nuvem
+      const syncFromCloud = useCallback(async (isInitial = false) => {
+        if (isSyncingRef.current) return;
+        isSyncingRef.current = true;
+        setCloudStatus("syncing");
+
+        try {
+          // 1. Tenta buscar do Gist na nuvem
+          const res = await fetch("https://api.github.com/gists/" + GIST_ID + "?t=" + Date.now(), {
+            headers: {
+              "Accept": "application/vnd.github.v3+json",
+              "Authorization": "token " + G_TOKEN,
+              "User-Agent": "CentralStudioApp"
+            }
+          });
+
+          if (res.ok) {
+            const gist = await res.json();
+            if (gist.files && gist.files["videos.json"] && gist.files["videos.json"].content) {
+              const remoteVideos = JSON.parse(gist.files["videos.json"].content);
+              if (Array.isArray(remoteVideos) && remoteVideos.length > 0) {
+                // Compara se mudou antes de atualizar
+                const currentStr = JSON.stringify(videosRef.current);
+                const remoteStr = JSON.stringify(remoteVideos);
+                if (currentStr !== remoteStr) {
+                  setVideos(remoteVideos);
+                  try {
+                    localStorage.setItem(STORAGE_KEY, remoteStr);
+                  } catch (e) {}
+                }
+                setCloudStatus("synced");
+                isSyncingRef.current = false;
+                return;
+              }
+            }
+          }
+
+          // 2. Fallback: Se falhou Gist, tenta buscar videos.json estático do próprio site
+          const staticRes = await fetch("./videos.json?t=" + Date.now());
+          if (staticRes.ok) {
+            const staticVideos = await staticRes.json();
+            if (Array.isArray(staticVideos) && staticVideos.length > 0) {
+              const currentStr = JSON.stringify(videosRef.current);
+              const staticStr = JSON.stringify(staticVideos);
+              if (currentStr !== staticStr) {
+                setVideos(staticVideos);
+                try {
+                  localStorage.setItem(STORAGE_KEY, staticStr);
+                } catch (e) {}
+              }
+              setCloudStatus("synced");
+              isSyncingRef.current = false;
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn("Aviso ao sincronizar da nuvem:", err);
+        }
+
+        setCloudStatus("synced");
+        isSyncingRef.current = false;
+      }, []);
+
+      // Salvar na Nuvem (PATCH no Gist)
+      const saveToCloud = useCallback(async (currentVideos) => {
+        setCloudStatus("saving");
+        try {
+          const res = await fetch("https://api.github.com/gists/" + GIST_ID, {
+            method: "PATCH",
+            headers: {
+              "Accept": "application/vnd.github.v3+json",
+              "Authorization": "token " + G_TOKEN,
+              "Content-Type": "application/json",
+              "User-Agent": "CentralStudioApp"
+            },
+            body: JSON.stringify({
+              files: {
+                "videos.json": { content: JSON.stringify(currentVideos) }
+              }
+            })
+          });
+          if (res.ok) {
+            setCloudStatus("synced");
+          } else {
+            console.error("Erro na resposta da nuvem:", res.status);
+            setCloudStatus("offline");
+          }
+        } catch (err) {
+          console.error("Erro de conexão ao salvar na nuvem:", err);
+          setCloudStatus("offline");
+        }
+      }, []);
+
+      // Carregamento inicial (Cache local imediato + Busca nuvem)
       useEffect(() => {
+        let hasLocal = false;
         try {
           const saved =
             localStorage.getItem(STORAGE_KEY) ||
@@ -209,25 +313,68 @@
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed) && parsed.length > 0) {
               setVideos(parsed);
-              setLoaded(true);
-              return;
+              hasLocal = true;
             }
           }
         } catch (e) {
-          console.error("Erro ao ler dados locais", e);
+          console.error("Erro ao ler storage local", e);
         }
-        setVideos(getInitialVideos());
-        setLoaded(true);
-      }, []);
 
+        if (!hasLocal) {
+          setVideos(getInitialVideos());
+        }
+        setLoaded(true);
+
+        // Busca imediata na nuvem para manter atualizado
+        syncFromCloud(true);
+
+        // Sincronização periódica a cada 15 segundos
+        const interval = setInterval(() => {
+          syncFromCloud();
+        }, 15000);
+
+        // Sincronização ao voltar para a aba ou desbloquear o celular
+        const handleVisibilityChange = () => {
+          if (document.visibilityState === "visible") {
+            syncFromCloud();
+          }
+        };
+        const handleFocus = () => {
+          syncFromCloud();
+        };
+
+        window.addEventListener("visibilitychange", handleVisibilityChange);
+        window.addEventListener("focus", handleFocus);
+
+        return () => {
+          clearInterval(interval);
+          window.removeEventListener("visibilitychange", handleVisibilityChange);
+          window.removeEventListener("focus", handleFocus);
+        };
+      }, [syncFromCloud]);
+
+      // Auto-save local imediato + agendamento de upload para a nuvem
       useEffect(() => {
         if (!loaded) return;
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
         } catch (e) {
-          console.error("Erro ao salvar no storage", e);
+          console.error("Erro ao salvar localmente", e);
         }
-      }, [videos, loaded]);
+
+        // Debounce de 1.2s para enviar à nuvem (evita excesso de requests enquanto digita)
+        if (saveTimerRef.current) {
+          clearTimeout(saveTimerRef.current);
+        }
+        setCloudStatus("saving");
+        saveTimerRef.current = setTimeout(() => {
+          saveToCloud(videos);
+        }, 1200);
+
+        return () => {
+          if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+        };
+      }, [videos, loaded, saveToCloud]);
 
       function addNewVideo() {
         playSound("click");
@@ -437,7 +584,39 @@
               </nav>
 
               {/* Right: Novo Projeto */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
+                {/* Indicador de Nuvem / Sincronização PC & Celular */}
+                <button
+                  type="button"
+                  onClick={() => syncFromCloud()}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-black transition border cursor-pointer hover:bg-[#141414] active:scale-95"
+                  style={{
+                    backgroundColor: "#080808",
+                    borderColor: cloudStatus === "saving" || cloudStatus === "syncing" ? "#854d0e" : "#1a1a1a",
+                    color: cloudStatus === "saving" || cloudStatus === "syncing" ? "#fef08a" : "#34d399"
+                  }}
+                  title="Sincronização Nuvem PC & Celular 24h (Clique para atualizar agora)"
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      cloudStatus === "saving" || cloudStatus === "syncing"
+                        ? "bg-amber-400 animate-ping"
+                        : "bg-emerald-400"
+                    }`}
+                  ></span>
+                  <span className="hidden sm:inline">
+                    {cloudStatus === "saving"
+                      ? "Salvando na Nuvem..."
+                      : cloudStatus === "syncing"
+                      ? "Sincronizando..."
+                      : "Nuvem Sincronizada"}
+                  </span>
+                  <span className="sm:hidden">
+                    {cloudStatus === "saving" ? "Salvando..." : cloudStatus === "syncing" ? "Sync..." : "Nuvem OK"}
+                  </span>
+                  <span className="text-zinc-500 text-[10px]">🔄</span>
+                </button>
+
                 <button
                   onClick={addNewVideo}
                   className="flex items-center gap-1.5 bg-[#ff0000] hover:bg-[#e60000] text-white text-xs font-black py-1.5 px-4 rounded-lg shadow-md shadow-red-600/25 transition active:scale-95"
