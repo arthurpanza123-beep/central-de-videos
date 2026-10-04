@@ -24,41 +24,36 @@
     ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #2e2e2e; }
     :root { color-scheme: dark; }
-    body {
-      background:
-        radial-gradient(circle at 8% -12%, rgba(255, 34, 44, .17), transparent 31rem),
-        radial-gradient(circle at 91% 4%, rgba(44, 104, 255, .10), transparent 28rem),
-        #07090d !important;
-    }
-    #root > div { background: transparent !important; }
+    body { background: #090909 !important; }
+    #root > div { background: #090909 !important; }
     header {
-      background: rgba(9, 11, 16, .84) !important;
-      border-color: rgba(255,255,255,.07) !important;
-      box-shadow: 0 12px 34px rgba(0,0,0,.20);
+      background: #0c0c0c !important;
+      border-color: #202020 !important;
+      box-shadow: none;
     }
-    main { max-width: 1580px !important; background: transparent !important; }
+    main { max-width: 1920px !important; background: #090909 !important; }
     main > div > section {
-      background: linear-gradient(145deg, rgba(19,22,30,.96), rgba(9,11,16,.98)) !important;
-      border-color: rgba(255,255,255,.08) !important;
-      box-shadow: 0 22px 55px rgba(0,0,0,.24) !important;
+      background: #101010 !important;
+      border-color: #242424 !important;
+      box-shadow: none !important;
     }
-    main > div > section > div:first-child { border-color: rgba(255,255,255,.08) !important; }
+    main > div > section > div:first-child { border-color: #242424 !important; }
     main section .grid > div {
-      background: linear-gradient(160deg, #11151d, #0b0e14) !important;
-      border-color: rgba(255,255,255,.075) !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 12px 24px rgba(0,0,0,.16);
+      background: #0b0b0b !important;
+      border-color: #242424 !important;
+      box-shadow: none;
     }
-    main section .grid > div:hover { border-color: rgba(255, 61, 71, .46) !important; transform: translateY(-2px); transition: .2s ease; }
+    main section .grid > div:hover { border-color: #3a3a3a !important; transform: none; transition: .2s ease; }
     .day-picker { scrollbar-width: none; }
     .day-picker::-webkit-scrollbar { display: none; }
     main section [contenteditable="true"] {
-      background: rgba(3,5,9,.66) !important;
-      border-color: rgba(255,255,255,.09) !important;
-      border-radius: 10px !important;
+      background: #111111 !important;
+      border-color: #292929 !important;
+      border-radius: 8px !important;
       min-height: 84px;
     }
-    .thumb-empty { background: linear-gradient(135deg, #171d29, #0d1118) !important; color: #e8edf5 !important; }
-    .thumb-empty::before { content: ""; position: absolute; inset: 9px; border: 1px dashed rgba(255,255,255,.18); border-radius: 8px; pointer-events: none; }
+    .thumb-empty { background: #151515 !important; color: #ededed !important; }
+    .thumb-empty::before { content: ""; position: absolute; inset: 9px; border: 1px dashed #3a3a3a; border-radius: 8px; pointer-events: none; }
     @media (max-width: 640px) {
       header { position: relative !important; padding: .75rem !important; }
       header > div { gap: .65rem !important; }
@@ -582,14 +577,6 @@
           <header className="sticky top-0 z-30 bg-[#050505]/95 backdrop-blur-md border-b border-[#141414] px-4 sm:px-6 lg:px-8 py-2.5">
             <div className="flex items-center justify-between gap-3 max-w-[1920px] mx-auto flex-wrap">
               {/* Left: Abinhas (Em Produção / Postados) */}
-              <div className="flex items-center gap-3">
-                <div className="hidden md:flex items-center gap-2 pr-3 border-r border-white/10">
-                  <span className="w-8 h-8 grid place-items-center rounded-lg bg-red-600 text-base shadow-lg shadow-red-950/50">▶</span>
-                  <div className="leading-none">
-                    <strong className="block text-xs tracking-[.16em] text-white">CENTRAL</strong>
-                    <span className="text-[9px] font-bold tracking-[.2em] text-zinc-500">DE VÍDEOS</span>
-                  </div>
-                </div>
               <nav className="flex items-center gap-1 bg-[#0a0a0a] p-1 rounded-lg border border-[#1a1a1a]">
                 <button
                   type="button"
@@ -641,7 +628,6 @@
                   </span>
                 </button>
               </nav>
-              </div>
 
               {/* Right: Novo Projeto */}
               <div className="flex items-center gap-2.5">
@@ -728,8 +714,8 @@
                         {/* Left: Bloco do Dia Destacado, Maior e Seletor */}
                         <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                           {/* BADGE GIGANTE DO DIA */}
-                          <div className="flex items-center gap-3 bg-gradient-to-r from-[#1c0404] via-[#100303] to-[#0a0a0a] border-2 border-[#ff0000] px-4 py-2.5 rounded-xl shadow-lg shadow-red-950/40">
-                            <div className="w-10 h-10 rounded-lg bg-[#ff0000] flex items-center justify-center text-white text-xl font-black shadow-md shadow-red-600/50 select-none">
+                          <div className="flex items-center gap-3 bg-[#151515] border border-[#303030] px-4 py-2.5 rounded-xl">
+                            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-zinc-950 text-xl font-black select-none">
                               📅
                             </div>
                             <div className="flex flex-col">
