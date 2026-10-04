@@ -204,12 +204,21 @@
       const [cloudStatus, setCloudStatus] = useState("syncing"); // 'syncing', 'synced', 'saving', 'offline'
       const saveTimerRef = useRef(null);
       const isSyncingRef = useRef(false);
+      const pendingSaveRef = useRef(false);
+      const saveRevisionRef = useRef(0);
+      const skipNextSaveRef = useRef(true);
+      const loadedRef = useRef(loaded);
       const videosRef = useRef(videos);
       videosRef.current = videos;
+      loadedRef.current = loaded;
 
       // Sincronizar da Nuvem
       const syncFromCloud = useCallback(async (isInitial = false) => {
         if (isSyncingRef.current) return;
+        if (loadedRef.current && pendingSaveRef.current) {
+          setCloudStatus("saving");
+          return;
+        }
         isSyncingRef.current = true;
         setCloudStatus("syncing");
 
@@ -271,7 +280,7 @@
       }, []);
 
       // Salvar na Nuvem (PATCH no Gist)
-      const saveToCloud = useCallback(async (currentVideos) => {
+      const saveToCloud = useCallback(async (currentVideos, revision) => {
         setCloudStatus("saving");
         try {
           const res = await fetch("https://api.github.com/gists/" + GIST_ID, {
@@ -289,14 +298,23 @@
             })
           });
           if (res.ok) {
-            setCloudStatus("synced");
+            if (revision === saveRevisionRef.current) {
+              pendingSaveRef.current = false;
+              setCloudStatus("synced");
+            }
           } else {
             console.error("Erro na resposta da nuvem:", res.status);
-            setCloudStatus("offline");
+            if (revision === saveRevisionRef.current) {
+              pendingSaveRef.current = false;
+              setCloudStatus("offline");
+            }
           }
         } catch (err) {
           console.error("Erro de conexão ao salvar na nuvem:", err);
-          setCloudStatus("offline");
+          if (revision === saveRevisionRef.current) {
+            pendingSaveRef.current = false;
+            setCloudStatus("offline");
+          }
         }
       }, []);
 
@@ -320,42 +338,24 @@
           console.error("Erro ao ler storage local", e);
         }
 
-        if (!hasLocal) {
-          setVideos(getInitialVideos());
-        }
-        setLoaded(true);
+        if (!hasLocal) setVideos(getInitialVideos());
 
-        // Busca imediata na nuvem para manter atualizado
-        syncFromCloud(true);
-
-        // Sincronização periódica a cada 15 segundos
-        const interval = setInterval(() => {
-          syncFromCloud();
-        }, 15000);
-
-        // Sincronização ao voltar para a aba ou desbloquear o celular
-        const handleVisibilityChange = () => {
-          if (document.visibilityState === "visible") {
-            syncFromCloud();
-          }
-        };
-        const handleFocus = () => {
-          syncFromCloud();
-        };
-
-        window.addEventListener("visibilitychange", handleVisibilityChange);
-        window.addEventListener("focus", handleFocus);
-
-        return () => {
-          clearInterval(interval);
-          window.removeEventListener("visibilitychange", handleVisibilityChange);
-          window.removeEventListener("focus", handleFocus);
-        };
+        // A primeira leitura acontece antes de liberar qualquer gravação. Isso
+        // impede que a abertura da página salve um estado vazio na nuvem.
+        (async () => {
+          await syncFromCloud(true);
+          skipNextSaveRef.current = true;
+          setLoaded(true);
+        })();
       }, [syncFromCloud]);
 
       // Auto-save local imediato + agendamento de upload para a nuvem
       useEffect(() => {
         if (!loaded) return;
+        if (skipNextSaveRef.current) {
+          skipNextSaveRef.current = false;
+          return;
+        }
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
         } catch (e) {
@@ -366,9 +366,11 @@
         if (saveTimerRef.current) {
           clearTimeout(saveTimerRef.current);
         }
+        const revision = ++saveRevisionRef.current;
+        pendingSaveRef.current = true;
         setCloudStatus("saving");
         saveTimerRef.current = setTimeout(() => {
-          saveToCloud(videos);
+          saveToCloud(videos, revision);
         }, 1200);
 
         return () => {
