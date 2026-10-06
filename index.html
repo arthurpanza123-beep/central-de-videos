@@ -285,12 +285,10 @@
               // de converter o JSON — assim PC e celular recebem o mesmo estado.
               let cloudContent = cloudFile.content;
               if (cloudFile.truncated && cloudFile.raw_url) {
-                const rawRes = await fetch(cloudFile.raw_url + "?t=" + Date.now(), {
-                  headers: {
-                    "Authorization": "token " + G_TOKEN,
-                    "User-Agent": "CentralStudioApp"
-                  }
-                });
+                // O raw_url já é o link seguro do Gist. Não mandamos o token
+                // aqui porque o domínio de arquivos não aceita esse cabeçalho
+                // em requisições do navegador (CORS).
+                const rawRes = await fetch(cloudFile.raw_url + "?t=" + Date.now());
                 if (!rawRes.ok) throw new Error("Não foi possível baixar os dados completos da nuvem.");
                 cloudContent = await rawRes.text();
               }
