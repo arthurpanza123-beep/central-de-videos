@@ -279,7 +279,22 @@
           if (res.ok) {
             const gist = await res.json();
             if (gist.files && gist.files["videos.json"] && gist.files["videos.json"].content) {
-              const remoteVideos = JSON.parse(gist.files["videos.json"].content);
+              const cloudFile = gist.files["videos.json"];
+              // A API do Gist devolve `content` cortado quando o arquivo passa
+              // de 1 MB. Nesse caso, baixa o arquivo completo pelo raw_url antes
+              // de converter o JSON — assim PC e celular recebem o mesmo estado.
+              let cloudContent = cloudFile.content;
+              if (cloudFile.truncated && cloudFile.raw_url) {
+                const rawRes = await fetch(cloudFile.raw_url + "?t=" + Date.now(), {
+                  headers: {
+                    "Authorization": "token " + G_TOKEN,
+                    "User-Agent": "CentralStudioApp"
+                  }
+                });
+                if (!rawRes.ok) throw new Error("Não foi possível baixar os dados completos da nuvem.");
+                cloudContent = await rawRes.text();
+              }
+              const remoteVideos = JSON.parse(cloudContent);
               if (Array.isArray(remoteVideos) && remoteVideos.length > 0) {
                 // Compara se mudou antes de atualizar
                 const currentStr = JSON.stringify(videosRef.current);
