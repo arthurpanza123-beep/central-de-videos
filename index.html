@@ -137,7 +137,9 @@
       { label: "Dom", day: 0, name: "Domingo" },
     ];
 
-    function calculatePostDayInfo(targetWeekday, isNextWeek) {
+    function calculatePostDayInfo(targetWeekday, weekOffset = 0) {
+      // Compatibilidade com os dados antigos: true significava exatamente +1 semana.
+      if (typeof weekOffset === "boolean") weekOffset = weekOffset ? 1 : 0;
       const now = new Date();
       const currentWeekday = now.getDay();
 
@@ -145,9 +147,7 @@
       if (daysUntil < 0) {
         daysUntil += 7;
       }
-      if (isNextWeek) {
-        daysUntil += 7;
-      }
+      daysUntil += 7 * Math.max(0, Number(weekOffset) || 0);
 
       const targetDate = new Date(now);
       targetDate.setDate(now.getDate() + daysUntil);
@@ -158,7 +158,7 @@
       });
 
       const weekdayObj = WEEKDAYS.find((w) => w.day === targetWeekday) || WEEKDAYS[0];
-      const prefix = isNextWeek ? "Próx. " : "";
+      const prefix = weekOffset > 0 ? `+${weekOffset} sem. ` : "";
       const displayDay = `${prefix}${weekdayObj.name}`;
 
       let countdownText = "";
@@ -190,7 +190,7 @@
         {
           id: "v-1",
           weekday: 6,
-          isNextWeek: false,
+          weekOffset: 0,
           posted: false,
           nandoSim: true,
           dudaSim: false,
@@ -440,7 +440,7 @@
         const newV = {
           id: "v-" + Date.now(),
           weekday: 1,
-          isNextWeek: false,
+          weekOffset: 0,
           posted: false,
           nandoSim: false,
           dudaSim: false,
@@ -457,13 +457,14 @@
         setVideos((prev) =>
           prev.map((v) => {
             if (v.id !== id) return v;
-            if (v.weekday === clickedDay) {
-              return { ...v, isNextWeek: !v.isNextWeek };
-            } else {
-              return { ...v, weekday: clickedDay, isNextWeek: false };
-            }
+            return { ...v, weekday: clickedDay };
           })
         );
+      }
+
+      function handleWeekOffsetClick(id, offset) {
+        playSound("click");
+        setVideos((prev) => prev.map((v) => v.id === id ? { ...v, weekOffset: offset, isNextWeek: undefined } : v));
       }
 
       function toggleProcess(id, key) {
@@ -570,13 +571,9 @@
         reader.readAsText(file);
       }
 
-      const activeVideos = [...videos]
-        .filter((v) => !v.posted)
-        .sort((a, b) => {
-          const daysA = calculatePostDayInfo(a.weekday, a.isNextWeek).daysUntil;
-          const daysB = calculatePostDayInfo(b.weekday, b.isNextWeek).daysUntil;
-          return daysA - daysB;
-        });
+      // A ordem de criação é a ordem de trabalho. O calendário não deve mover um card
+      // para cima enquanto o usuário configura a data.
+      const activeVideos = videos.filter((v) => !v.posted);
 
       const postedVideos = [...videos]
         .filter((v) => v.posted)
@@ -709,7 +706,8 @@
             ) : (
               <div className="space-y-6">
                 {displayedVideos.map((video) => {
-                  const dayInfo = calculatePostDayInfo(video.weekday, video.isNextWeek);
+                  const selectedWeek = Number.isFinite(video.weekOffset) ? video.weekOffset : (video.isNextWeek ? 1 : 0);
+                  const dayInfo = calculatePostDayInfo(video.weekday, selectedWeek);
 
                   const deliveredCount =
                     (video.nandoSim ? 1 : 0) +
@@ -744,17 +742,19 @@
                                 <span className={`text-[11px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${dayInfo.badgeColor}`}>
                                   {dayInfo.countdownText}
                                 </span>
-                                {video.isNextWeek && (
-                                  <span className="text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded-md">
-                                    Próxima Semana
-                                  </span>
-                                )}
+                                {selectedWeek > 0 && <span className="text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded-md">Semana +{selectedWeek}</span>}
                               </div>
                             </div>
                           </div>
 
                           {/* Seletor de Dias (Seg a Dom) - Botões Maiores e Bem Visíveis */}
-                          <div className="day-picker flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222]">
+                          <div className="flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap">
+                            {[0, 1, 2, 3].map((offset) => (
+                              <button key={offset} type="button" onClick={() => handleWeekOffsetClick(video.id, offset)} className={`px-2.5 py-2 rounded-lg text-[10px] font-black transition-all ${selectedWeek === offset ? "bg-white text-black" : "text-zinc-400 hover:text-white hover:bg-[#181818]"}`} title={`Agendar para ${offset === 0 ? "esta semana" : `daqui a ${offset} semana${offset > 1 ? "s" : ""}`}`}>
+                                {offset === 0 ? "ESTA" : `+${offset} SEM.`}
+                              </button>
+                            ))}
+                            <span className="w-px h-6 bg-[#292929] mx-1" />
                             {WEEKDAYS.map((w) => {
                               const isSelected = video.weekday === w.day;
                               return (
@@ -769,18 +769,11 @@
                                   }`}
                                   title={
                                     isSelected
-                                      ? video.isNextWeek
-                                        ? "Esta semana selecionada (clique para alternar)"
-                                        : "Próxima semana selecionada (clique para alternar)"
+                                      ? `Dia selecionado: ${w.name}`
                                       : `Mudar para ${w.name}`
                                   }
                                 >
                                   <span>{w.label}</span>
-                                  {isSelected && video.isNextWeek && (
-                                    <span className="text-[9px] bg-black/50 text-white px-1.5 py-0.2 rounded-full font-black">
-                                      +1
-                                    </span>
-                                  )}
                                 </button>
                               );
                             })}
