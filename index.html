@@ -265,6 +265,7 @@
       const [videos, setVideos] = useState([]);
       const [activeTab, setActiveTab] = useState("producao");
       const [postingId, setPostingId] = useState(null);
+      const [expandedDetails, setExpandedDetails] = useState({});
       const [loaded, setLoaded] = useState(false);
       const [cloudStatus, setCloudStatus] = useState("syncing"); // 'syncing', 'synced', 'saving', 'offline'
       const saveTimerRef = useRef(null);
@@ -486,6 +487,11 @@
       function handleWeekOffsetClick(id, offset) {
         playSound("click");
         setVideos((prev) => prev.map((v) => v.id === id ? { ...v, weekOffset: offset, isNextWeek: undefined } : v));
+      }
+
+      function toggleDetails(id) {
+        playSound("click");
+        setExpandedDetails((prev) => ({ ...prev, [id]: !prev[id] }));
       }
 
       function toggleProcess(id, key) {
@@ -734,12 +740,12 @@
           <main className="flex-1 w-full max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto bg-[#000000]">
             {activeTab === "calendario" ? (
               <div className="max-w-5xl mx-auto space-y-5">
-                <div className="rounded-2xl border border-[#292929] bg-gradient-to-r from-[#171717] to-[#0d0d0d] p-5 sm:p-7 shadow-2xl">
+                  <div className="rounded-2xl border border-[#252525] bg-[#111111] p-5 sm:p-6 shadow-xl">
                   <div className="flex flex-wrap items-end justify-between gap-4">
                     <div>
-                      <p className="text-[10px] uppercase tracking-[.28em] text-red-400 font-black">Planejamento visual</p>
-                      <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">Calendário de publicação</h1>
-                      <p className="text-sm text-zinc-400 mt-2">Uma visão vertical das próximas semanas para manter o ritmo de 2 vídeos por semana.</p>
+                      <p className="text-[10px] uppercase tracking-[.28em] text-red-400 font-black">Agenda</p>
+                      <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">Próximas semanas</h1>
+                      <p className="text-sm text-zinc-500 mt-2">Duas vagas de publicação por semana.</p>
                     </div>
                     <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-center">
                       <div className="text-2xl font-black text-white">2</div>
@@ -755,16 +761,16 @@
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-red-500 to-transparent" />
                       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-[#222]">
                         <div className="flex items-center gap-3">
-                          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1b1b1b] text-lg">{offset === 0 ? "📍" : "🗓️"}</span>
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1b1b1b] text-sm">{offset === 0 ? "●" : "○"}</span>
                           <div><h2 className="font-black text-white">{offset === 0 ? "Esta semana" : `Semana +${offset}`}</h2><p className="text-xs text-zinc-500">Começa em {weekLabel}</p></div>
                         </div>
                         <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider ${filled === 2 ? "border-emerald-800 bg-emerald-950/40 text-emerald-400" : "border-amber-800 bg-amber-950/30 text-amber-300"}`}>{filled}/2 vídeos</span>
                       </div>
-                      <div className="grid gap-3 p-4 sm:grid-cols-2">
+                      <div className="grid gap-2 p-3 sm:grid-cols-2">
                         {weekVideos.filter((v) => !v.posted).map((video) => {
                           const info = calculatePostDayInfo(video.weekday, offset);
                           const title = video.titles?.find((t) => t?.trim()) || "Projeto sem título";
-                          return <button key={video.id} type="button" onClick={() => setActiveTab("producao")} className="group flex items-center gap-3 rounded-xl border border-[#252525] bg-[#141414] p-3 text-left transition hover:border-red-500/60 hover:bg-[#191919]"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#222] text-lg">🎬</div><div className="min-w-0"><div className="text-[10px] font-black uppercase tracking-wider text-red-400">{info.weekdayName} · {info.formattedDate}</div><div className="truncate text-sm font-bold text-zinc-100 group-hover:text-white">{title}</div></div></button>;
+                          return <button key={video.id} type="button" onClick={() => setActiveTab("producao")} className="group flex items-center gap-3 rounded-lg border border-[#222] bg-[#141414] p-3 text-left transition hover:border-red-500/60 hover:bg-[#191919]"><div className="flex h-2 w-2 shrink-0 rounded-full bg-red-500" /><div className="min-w-0"><div className="text-[10px] font-black uppercase tracking-wider text-zinc-500">{info.weekdayName} · {info.formattedDate}</div><div className="truncate text-sm font-bold text-zinc-100 group-hover:text-white">{title}</div></div></button>;
                         })}
                         {weekVideos.filter((v) => !v.posted).length === 0 && <div className="rounded-xl border border-dashed border-[#333] p-5 text-center text-xs font-semibold text-zinc-600 sm:col-span-2">Semana livre — adicione um projeto na produção.</div>}
                       </div>
@@ -831,10 +837,11 @@
                                 {selectedWeek > 0 && <span className="text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded-md">Semana +{selectedWeek}</span>}
                               </div>
                             </div>
+                            <button type="button" onClick={() => toggleDetails(video.id)} className="ml-1 rounded-lg px-2 py-1 text-lg leading-none text-zinc-500 hover:bg-[#262626] hover:text-white" title="Mostrar detalhes">⋯</button>
                           </div>
 
                           {/* Seletor de Dias (Seg a Dom) - Botões Maiores e Bem Visíveis */}
-                          <div className="production-picker flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap">
+                          <div className={`production-picker ${expandedDetails[video.id] ? "" : "hidden"} flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap`}>
                             {[0, 1, 2, 3].map((offset) => (
                               <button key={offset} type="button" onClick={() => handleWeekOffsetClick(video.id, offset)} className={`px-2.5 py-2 rounded-lg text-[10px] font-black transition-all ${selectedWeek === offset ? "bg-white text-black" : "text-zinc-400 hover:text-white hover:bg-[#181818]"}`} title={`Agendar para ${offset === 0 ? "esta semana" : `daqui a ${offset} semana${offset > 1 ? "s" : ""}`}`}>
                                 {offset === 0 ? "ESTA" : `+${offset} SEM.`}
@@ -867,7 +874,7 @@
                         </div>
 
                         {/* Equipe + Botão Vídeo Postado (Branco -> Verde) */}
-                        <div className="production-team flex items-center gap-2.5 flex-wrap">
+                        <div className={`production-team ${expandedDetails[video.id] ? "" : "hidden"} flex items-center gap-2.5 flex-wrap`}>
                           <div className="flex items-center gap-1.5 bg-[#030303] border border-[#1a1a1a] p-1 rounded-lg">
                             <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 px-1.5">
                               Status:
