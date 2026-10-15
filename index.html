@@ -561,12 +561,14 @@
       }
 
       function updateTitle(id, index, text) {
+        const nextText = String(text ?? "").slice(0, 100);
         setVideos((prev) =>
           prev.map((v) => {
             if (v.id !== id) return v;
             const newTitles = [...v.titles];
-            newTitles[index] = text;
-            return { ...v, titles: newTitles };
+            newTitles[index] = nextText;
+            const nextVideo = { ...v, titles: newTitles };
+            return nextVideo;
           })
         );
       }
@@ -1093,6 +1095,13 @@
                                   rows={3}
                                   value={title}
                                   onChange={(e) => updateTitle(video.id, idx, e.target.value)}
+                                  onInput={(e) => updateTitle(video.id, idx, e.currentTarget.value)}
+                                  onBlur={(e) => {
+                                    const finalText = e.currentTarget.value.slice(0, 100);
+                                    updateTitle(video.id, idx, finalText);
+                                    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(videosRef.current)); } catch (err) {}
+                                  }}
+                                  maxLength={100}
                                   placeholder={`Título em destaque para a Opção ${idx + 1}...`}
                                   className="w-full bg-[#050505] hover:bg-[#0a0a0a] focus:bg-[#0a0a0a] border border-[#1a1a1a] focus:border-[#ff0000] focus:ring-1 focus:ring-red-500/25 text-base sm:text-lg font-black text-white p-3 rounded-lg focus:outline-none resize-none transition leading-snug placeholder:text-zinc-700 placeholder:font-normal"
                                 />
