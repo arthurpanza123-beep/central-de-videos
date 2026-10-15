@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Central Studio - Produção & Thumbs</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -207,7 +210,24 @@
       ["coloracaoSim", "Coloração"], ["finalizacaoSim", "Finalização"]
     ];
 
-    function calculatePostDayInfo(targetWeekday, weekOffset = 0) {
+    function calculatePostDayInfo(targetWeekday, weekOffset = 0, postedAt = null) {
+      if (postedAt) {
+        const postDate = new Date(postedAt);
+        const weekdayObj = WEEKDAYS.find((w) => w.day === postDate.getDay()) || WEEKDAYS[0];
+        const formattedDate = postDate.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+        });
+        return {
+          displayDay: weekdayObj.name,
+          weekdayName: weekdayObj.name,
+          formattedDate,
+          countdownText: "Postado",
+          daysUntil: 0,
+          badgeColor: "bg-zinc-900 text-zinc-300 border-zinc-800",
+        };
+      }
+
       // Compatibilidade com os dados antigos: true significava exatamente +1 semana.
       if (typeof weekOffset === "boolean") weekOffset = weekOffset ? 1 : 0;
       const now = new Date();
@@ -253,6 +273,31 @@
         daysUntil,
         badgeColor,
       };
+    }
+
+    function getWeekMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      date.setDate(date.getDate() + diff);
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+
+    function getVideoWeekOffset(video) {
+      if (video.posted && video.postedAt) {
+        const postMonday = getWeekMonday(video.postedAt);
+        const currentMonday = getWeekMonday(new Date());
+        const diffDays = Math.round((postMonday.getTime() - currentMonday.getTime()) / (24 * 60 * 60 * 1000));
+        return Math.round(diffDays / 7);
+      }
+      if (Number.isFinite(video.weekOffset)) {
+        return video.weekOffset;
+      }
+      if (typeof video.isNextWeek === "boolean") {
+        return video.isNextWeek ? 1 : 0;
+      }
+      return 0;
     }
 
     function getInitialVideos() {
@@ -660,14 +705,21 @@
         .sort((a, b) => (b.postedAt || 0) - (a.postedAt || 0));
 
       const displayedVideos = activeTab === "producao" ? activeVideos : postedVideos;
-      const calendarWeeks = [0, 1, 2, 3].map((offset) => {
-        const weekVideos = videos.filter((video) => {
-          const videoWeek = Number.isFinite(video.weekOffset) ? video.weekOffset : (video.isNextWeek ? 1 : 0);
-          return videoWeek === offset;
-        });
-        const monday = new Date();
-        const today = monday.getDay();
-        monday.setDate(monday.getDate() + (today === 0 ? -6 : 1 - today) + offset * 7);
+
+      const upcomingOffsets = [0, 1, 2, 3];
+      const pastOffsets = [];
+      videos.forEach((video) => {
+        const off = getVideoWeekOffset(video);
+        if (off < 0 && !pastOffsets.includes(off)) {
+          pastOffsets.push(off);
+        }
+      });
+      pastOffsets.sort((a, b) => b - a);
+
+      const calendarWeeks = [...upcomingOffsets, ...pastOffsets].map((offset) => {
+        const weekVideos = videos.filter((video) => getVideoWeekOffset(video) === offset);
+        const monday = getWeekMonday(new Date());
+        monday.setDate(monday.getDate() + offset * 7);
         return { offset, weekVideos, monday };
       });
 
@@ -806,36 +858,74 @@
                     </div>
                   </div>
                 </div>
-                {calendarWeeks.map(({ offset, weekVideos, monday }) => {
+                {calendarWeeks.map(({ offset, weekVideos, monday }, index) => {
                   const weekLabel = monday.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
-                  const filled = Math.min(weekVideos.filter((v) => !v.posted).length, 2);
                   const weekProgress = Math.min(100, Math.round((weekVideos.length / 2) * 100));
                   const weekState = weekProgress === 100 ? "SEMANA CONCLUÍDA" : weekProgress > 0 ? "EM PRODUÇÃO" : "SEMANA LIVRE";
+                  const weekTitle = offset === 0 ? "Esta semana" : offset === 1 ? "Semana +1" : offset > 1 ? `Semana +${offset}` : offset === -1 ? "Semana anterior" : `${Math.abs(offset)} semanas atrás`;
+                  const weekSubtitle = offset >= 0 ? `Começa em ${weekLabel}` : `Semana concluída de ${weekLabel}`;
+                  const isFirstPast = offset < 0 && (index === 0 || calendarWeeks[index - 1].offset >= 0);
+
                   return (
-                    <section key={offset} className="calendar-week relative overflow-hidden rounded-2xl border border-[#252525] bg-[#0d0d0d] shadow-xl">
-                      <div className="absolute left-0 top-0 bottom-0 w-px bg-[#202024]" />
-                      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-[#222]">
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-11 w-14 items-center justify-center rounded-lg bg-[#1b1b1b] text-sm font-black text-white">{weekProgress}%</span>
-                          <div><h2 className="font-black text-white">{offset === 0 ? "Esta semana" : `Semana +${offset}`}</h2><p className="text-xs text-zinc-500">Começa em {weekLabel}</p></div>
+                    <React.Fragment key={offset}>
+                      {isFirstPast && (
+                        <div className="pt-6 pb-2 border-t border-[#202024]">
+                          <p className="text-[10px] uppercase tracking-[.25em] text-zinc-400 font-black">Histórico</p>
+                          <h3 className="text-lg font-black text-white mt-0.5">Semanas Concluídas Anteriores</h3>
                         </div>
-                        <span className="rounded-full bg-[#1b1b1d] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-zinc-300">{weekState} · {weekProgress}%</span>
-                      </div>
-                      <div className="grid gap-2 p-3 sm:grid-cols-2">
-                        {weekVideos.map((video) => {
-                          const info = calculatePostDayInfo(video.weekday, offset);
-                          const title = video.titles?.find((t) => t?.trim()) || "Projeto sem título";
-                          const thumb = video.thumbs?.find((item) => item);
-                          return <button key={video.id} type="button" onClick={() => setActiveTab("producao")} className="calendar-slot group flex items-center gap-4 rounded-lg bg-[#141414] p-3 text-left transition hover:bg-[#1b1b1d]">
-                            <div className="h-14 w-24 shrink-0 overflow-hidden rounded-md bg-[#0a0a0a]">
-                              {thumb ? <img src={thumb} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-[9px] font-black uppercase text-zinc-600">Sem thumb</div>}
+                      )}
+                      <section className="calendar-week relative overflow-hidden rounded-2xl border border-[#252525] bg-[#0d0d0d] shadow-xl">
+                        <div className="absolute left-0 top-0 bottom-0 w-px bg-[#202024]" />
+                        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-[#222]">
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-11 w-14 items-center justify-center rounded-lg bg-[#1b1b1b] text-sm font-black text-white">{weekProgress}%</span>
+                            <div>
+                              <h2 className="font-black text-white">{weekTitle}</h2>
+                              <p className="text-xs text-zinc-500">{weekSubtitle}</p>
                             </div>
-                            <div className="min-w-0"><div className="text-[10px] font-black uppercase tracking-wider text-zinc-500">{info.weekdayName} · {info.formattedDate} {video.posted ? "· POSTADO" : "· EM PRODUÇÃO"}</div><div className="truncate text-sm font-bold text-zinc-100 group-hover:text-white">{title}</div></div>
-                          </button>;
-                        })}
-                        {weekVideos.length === 0 && <div className="rounded-xl border border-dashed border-[#333] p-5 text-center text-xs font-semibold text-zinc-600 sm:col-span-2">Semana livre — adicione um projeto na produção.</div>}
-                      </div>
-                    </section>
+                          </div>
+                          <span className="rounded-full bg-[#1b1b1d] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-zinc-300">{weekState} · {weekProgress}%</span>
+                        </div>
+                        <div className="grid gap-2 p-3 sm:grid-cols-2">
+                          {weekVideos.map((video) => {
+                            const info = calculatePostDayInfo(video.weekday, offset, video.posted ? video.postedAt : null);
+                            const title = video.titles?.find((t) => t?.trim()) || "Projeto sem título";
+                            const thumb = video.thumbs?.find((item) => item);
+                            return (
+                              <button
+                                key={video.id}
+                                type="button"
+                                onClick={() => setActiveTab(video.posted ? "postados" : "producao")}
+                                className="calendar-slot group flex items-center gap-4 rounded-lg bg-[#141414] p-3 text-left transition hover:bg-[#1b1b1d]"
+                              >
+                                <div className="h-14 w-24 shrink-0 overflow-hidden rounded-md bg-[#0a0a0a]">
+                                  {thumb ? (
+                                    <img src={thumb} alt="" className="h-full w-full object-cover" />
+                                  ) : (
+                                    <div className="flex h-full items-center justify-center text-[9px] font-black uppercase text-zinc-600">
+                                      Sem thumb
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-[10px] font-black uppercase tracking-wider text-zinc-500">
+                                    {info.weekdayName} · {info.formattedDate} {video.posted ? "· POSTADO" : "· EM PRODUÇÃO"}
+                                  </div>
+                                  <div className="truncate text-sm font-bold text-zinc-100 group-hover:text-white">
+                                    {title}
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                          {weekVideos.length === 0 && (
+                            <div className="rounded-xl border border-dashed border-[#333] p-5 text-center text-xs font-semibold text-zinc-600 sm:col-span-2">
+                              Semana livre — adicione um projeto na produção.
+                            </div>
+                          )}
+                        </div>
+                      </section>
+                    </React.Fragment>
                   );
                 })}
               </div>
