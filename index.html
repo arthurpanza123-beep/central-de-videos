@@ -239,6 +239,8 @@
           formattedDate,
           countdownText: "Postado",
           daysUntil: 0,
+          targetDate: postDate,
+          timestamp: postDate.getTime(),
           badgeColor: "bg-zinc-900 text-zinc-300 border-zinc-800",
         };
       }
@@ -256,6 +258,7 @@
 
       const targetDate = new Date(now);
       targetDate.setDate(now.getDate() + daysUntil);
+      targetDate.setHours(0, 0, 0, 0);
 
       const formattedDate = targetDate.toLocaleDateString("pt-BR", {
         day: "2-digit",
@@ -286,6 +289,8 @@
         formattedDate,
         countdownText,
         daysUntil,
+        targetDate,
+        timestamp: targetDate.getTime(),
         badgeColor,
       };
     }
@@ -711,9 +716,17 @@
         reader.readAsText(file);
       }
 
-      // A ordem de criação é a ordem de trabalho. O calendário não deve mover um card
-      // para cima enquanto o usuário configura a data.
-      const activeVideos = videos.filter((v) => !v.posted);
+      // Os vídeos em produção são organizados por data de publicação:
+      // a data mais próxima aparece automaticamente no topo (ex: dia 18 antes do dia 22).
+      const activeVideos = [...videos]
+        .filter((v) => !v.posted)
+        .sort((a, b) => {
+          const offA = Number.isFinite(a.weekOffset) ? a.weekOffset : (a.isNextWeek ? 1 : 0);
+          const offB = Number.isFinite(b.weekOffset) ? b.weekOffset : (b.isNextWeek ? 1 : 0);
+          const infoA = calculatePostDayInfo(a.weekday, offA);
+          const infoB = calculatePostDayInfo(b.weekday, offB);
+          return (infoA.timestamp || 0) - (infoB.timestamp || 0);
+        });
 
       const postedVideos = [...videos]
         .filter((v) => v.posted)
