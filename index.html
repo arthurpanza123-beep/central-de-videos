@@ -54,6 +54,27 @@
     }
     .thumb-empty { background: #151515 !important; color: #ededed !important; }
     .thumb-empty::before { content: ""; position: absolute; inset: 9px; border: 1px dashed #3a3a3a; border-radius: 8px; pointer-events: none; }
+    /* Produção: hierarquia limpa em três focos — thumb, título e data. */
+    .production-card { background: #101010 !important; border: 1px solid #242424 !important; border-radius: 18px !important; padding: 18px !important; box-shadow: 0 18px 50px rgba(0,0,0,.18) !important; }
+    .production-toolbar { padding-bottom: 12px !important; border-bottom-color: #202020 !important; }
+    .production-date { background: #171717 !important; border-color: #303030 !important; padding: 9px 12px !important; border-radius: 12px !important; }
+    .production-date > div:first-child { width: 32px !important; height: 32px !important; font-size: 16px !important; }
+    .production-date span:first-child { font-size: 15px !important; }
+    .production-date .border { font-size: 10px !important; padding: 2px 6px !important; }
+    .production-date .uppercase { font-size: 9px !important; padding: 2px 6px !important; }
+    .production-picker { background: #0b0b0b !important; border-color: #252525 !important; padding: 4px !important; border-radius: 10px !important; }
+    .production-picker button { padding: 7px 9px !important; font-size: 10px !important; box-shadow: none !important; }
+    .production-picker button[class*="ring-2"] { transform: none !important; }
+    .production-team { opacity: .78; transform: scale(.92); transform-origin: right center; }
+    .production-team > div:first-child { display: none !important; }
+    .production-team .animate-pulse { display: none !important; }
+    .production-team button { font-size: 10px !important; padding: 6px 9px !important; }
+    .production-card .grid { gap: 10px !important; }
+    .production-card .grid > div { background: #0b0b0b !important; border-color: #252525 !important; border-radius: 12px !important; padding: 10px !important; }
+    .production-card [contenteditable="true"] { min-height: 62px !important; font-size: 14px !important; background: #151515 !important; }
+    @media (min-width: 900px) {
+      .production-card .grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+    }
     @media (max-width: 640px) {
       header { position: relative !important; padding: .75rem !important; }
       header > div { gap: .65rem !important; }
@@ -783,14 +804,14 @@
                   return (
                     <section
                       key={video.id}
-                      className="bg-[#080808] rounded-2xl p-4 sm:p-5 lg:p-6 border border-[#1a1a1a] shadow-2xl space-y-4"
+                      className="production-card bg-[#080808] rounded-2xl p-4 sm:p-5 lg:p-6 border border-[#1a1a1a] shadow-2xl space-y-4"
                     >
                       {/* CARD TOOLBAR */}
-                      <div className="flex items-center justify-between gap-4 pb-4 border-b border-[#161616] flex-wrap">
+                      <div className="production-toolbar flex items-center justify-between gap-4 pb-4 border-b border-[#161616] flex-wrap">
                         {/* Left: Bloco do Dia Destacado, Maior e Seletor */}
                         <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                           {/* BADGE GIGANTE DO DIA */}
-                          <div className="flex items-center gap-3 bg-[#151515] border border-[#303030] px-4 py-2.5 rounded-xl">
+                          <div className="production-date flex items-center gap-3 bg-[#151515] border border-[#303030] px-4 py-2.5 rounded-xl">
                             <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-zinc-950 text-xl font-black select-none">
                               📅
                             </div>
@@ -813,7 +834,7 @@
                           </div>
 
                           {/* Seletor de Dias (Seg a Dom) - Botões Maiores e Bem Visíveis */}
-                          <div className="flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap">
+                          <div className="production-picker flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap">
                             {[0, 1, 2, 3].map((offset) => (
                               <button key={offset} type="button" onClick={() => handleWeekOffsetClick(video.id, offset)} className={`px-2.5 py-2 rounded-lg text-[10px] font-black transition-all ${selectedWeek === offset ? "bg-white text-black" : "text-zinc-400 hover:text-white hover:bg-[#181818]"}`} title={`Agendar para ${offset === 0 ? "esta semana" : `daqui a ${offset} semana${offset > 1 ? "s" : ""}`}`}>
                                 {offset === 0 ? "ESTA" : `+${offset} SEM.`}
@@ -846,7 +867,7 @@
                         </div>
 
                         {/* Equipe + Botão Vídeo Postado (Branco -> Verde) */}
-                        <div className="flex items-center gap-2.5 flex-wrap">
+                        <div className="production-team flex items-center gap-2.5 flex-wrap">
                           <div className="flex items-center gap-1.5 bg-[#030303] border border-[#1a1a1a] p-1 rounded-lg">
                             <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 px-1.5">
                               Status:
