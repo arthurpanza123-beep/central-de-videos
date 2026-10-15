@@ -73,11 +73,23 @@
     @media (min-width: 900px) {
       .production-card .grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
     }
-    /* Identidade única: azul, preto e branco. */
-    [class*="red-"], [class*="amber-"], [class*="emerald-"] { color: #60a5fa !important; border-color: #2563eb !important; }
-    [class*="bg-red-"], [class*="bg-amber-"], [class*="bg-emerald-"] { background-color: rgba(37,99,235,.16) !important; }
-    [class*="bg-[#ff0000]"], [class*="bg-[#e60000]"] { background-color: #2563eb !important; }
-    [class*="shadow-red-"] { box-shadow: 0 8px 22px rgba(37,99,235,.18) !important; }
+    /* Identidade neutra: preto, branco e cinza. */
+    [class*="red-"], [class*="amber-"], [class*="emerald-"], [class*="blue-"] { color: #f4f4f5 !important; border-color: #52525b !important; }
+    [class*="bg-red-"], [class*="bg-amber-"], [class*="bg-emerald-"], [class*="bg-blue-"] { background-color: #202023 !important; }
+    [class*="bg-[#ff0000]"], [class*="bg-[#e60000]"] { background-color: #f4f4f5 !important; color: #090909 !important; }
+    [class*="shadow-red-"], [class*="shadow-emerald-"] { box-shadow: 0 8px 22px rgba(255,255,255,.08) !important; }
+    .production-date .text-blue-300, .production-date .text-blue-200 { color: #d4d4d8 !important; }
+    .production-date .bg-blue-500\/10 { background: #1d1d20 !important; border-color: #52525b !important; }
+    .production-card .text-blue-300, .production-card .text-blue-200 { color: #d4d4d8 !important; }
+    .production-card .border-blue-500\/40 { border-color: #52525b !important; }
+    .production-card .bg-blue-500\/10 { background: #1d1d20 !important; }
+    .production-picker button[class*="bg-white"] { background: #f4f4f5 !important; color: #090909 !important; }
+    .calendar-view { max-width: 860px !important; }
+    .calendar-view .calendar-hero { background: #111113 !important; border-color: #29292d !important; box-shadow: none !important; padding: 22px !important; }
+    .calendar-view .calendar-week { background: #101012 !important; border-color: #29292d !important; box-shadow: none !important; }
+    .calendar-view .calendar-week > div:first-child { border-color: #242428 !important; }
+    .calendar-view .calendar-week button { background: #171719 !important; border-color: #2e2e33 !important; }
+    .calendar-view .calendar-week button:hover { border-color: #e4e4e7 !important; background: #1e1e21 !important; }
     [class*="shadow-red-"], [class*="shadow-emerald-"] { box-shadow: 0 8px 22px rgba(37,99,235,.18) !important; }
     .production-toolbar:has(.production-picker:not(.hidden)) { flex-direction: column !important; align-items: stretch !important; }
     .production-toolbar:has(.production-picker:not(.hidden)) > div:first-child { width: 100%; }
@@ -749,8 +761,8 @@
           {/* ÁREA DOS VÍDEOS EM TELONA CHEIA */}
           <main className="flex-1 w-full max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto bg-[#000000]">
             {activeTab === "calendario" ? (
-              <div className="max-w-5xl mx-auto space-y-5">
-                  <div className="rounded-2xl border border-[#252525] bg-[#111111] p-5 sm:p-6 shadow-xl">
+              <div className="calendar-view max-w-5xl mx-auto space-y-5">
+                <div className="calendar-hero rounded-2xl border border-[#252525] bg-[#111111] p-5 sm:p-6 shadow-xl">
                   <div className="flex flex-wrap items-end justify-between gap-4">
                     <div>
                       <p className="text-[10px] uppercase tracking-[.28em] text-red-400 font-black">Agenda</p>
@@ -767,7 +779,7 @@
                   const weekLabel = monday.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
                   const filled = Math.min(weekVideos.filter((v) => !v.posted).length, 2);
                   return (
-                    <section key={offset} className="relative overflow-hidden rounded-2xl border border-[#252525] bg-[#0d0d0d] shadow-xl">
+                    <section key={offset} className="calendar-week relative overflow-hidden rounded-2xl border border-[#252525] bg-[#0d0d0d] shadow-xl">
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-red-500 to-transparent" />
                       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-[#222]">
                         <div className="flex items-center gap-3">
