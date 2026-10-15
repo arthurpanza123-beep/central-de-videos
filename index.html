@@ -200,6 +200,12 @@
       { label: "Sáb", day: 6, name: "Sábado" },
       { label: "Dom", day: 0, name: "Domingo" },
     ];
+    const POSTING_DAYS = new Set([3, 4, 6, 0]); // quarta, quinta, sábado e domingo
+    const PRODUCTION_STEPS = [
+      ["nandoSim", "Nando"], ["dudaSim", "Duda"], ["sonoraSim", "Sonorização"],
+      ["legendasSim", "Legendas"], ["tvSim", "Vídeos TV"], ["depoisSim", "Depois"],
+      ["coloracaoSim", "Coloração"], ["finalizacaoSim", "Finalização"]
+    ];
 
     function calculatePostDayInfo(targetWeekday, weekOffset = 0) {
       // Compatibilidade com os dados antigos: true significava exatamente +1 semana.
@@ -259,6 +265,7 @@
           nandoSim: true,
           dudaSim: false,
           sonoraSim: true,
+          legendasSim: false, tvSim: false, depoisSim: false, coloracaoSim: false, finalizacaoSim: false,
           thumbs: ["", "", ""],
           titles: [
             "O DIA QUE O REAL MADRID QUEBROU O MERCADO DA BOLA",
@@ -510,6 +517,7 @@
           nandoSim: false,
           dudaSim: false,
           sonoraSim: false,
+          legendasSim: false, tvSim: false, depoisSim: false, coloracaoSim: false, finalizacaoSim: false,
           thumbs: ["", "", ""],
           titles: ["", "", ""],
         };
@@ -854,11 +862,9 @@
                   const selectedWeek = Number.isFinite(video.weekOffset) ? video.weekOffset : (video.isNextWeek ? 1 : 0);
                   const dayInfo = calculatePostDayInfo(video.weekday, selectedWeek);
 
-                  const deliveredCount =
-                    (video.nandoSim ? 1 : 0) +
-                    (video.dudaSim ? 1 : 0) +
-                    (video.sonoraSim ? 1 : 0);
-                  const is100Percent = deliveredCount === 3;
+                  const thumbsComplete = Array.isArray(video.thumbs) && video.thumbs.filter(Boolean).length === 3;
+                  const completedSteps = PRODUCTION_STEPS.filter(([key]) => video[key]).length + (thumbsComplete ? 1 : 0);
+                  const is100Percent = completedSteps === PRODUCTION_STEPS.length + 1;
 
                   return (
                     <section
@@ -896,7 +902,7 @@
                               </button>
                             ))}
                             <span className="w-px h-6 bg-[#292929] mx-1" />
-                            {WEEKDAYS.map((w) => {
+                            {WEEKDAYS.filter((w) => POSTING_DAYS.has(w.day)).map((w) => {
                               const isSelected = video.weekday === w.day;
                               return (
                                 <button
@@ -972,6 +978,15 @@
                               <span>Sonora</span>
                               <span>{video.sonoraSim ? "✓" : "✕"}</span>
                             </button>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-1.5 bg-[#030303] p-1 rounded-lg">
+                            {PRODUCTION_STEPS.slice(3).map(([key, label]) => (
+                              <button key={key} type="button" onClick={() => toggleProcess(video.id, key)} className={`px-2.5 py-1 rounded-md text-[10px] font-black transition flex items-center gap-1 ${video[key] ? "bg-white text-black" : "bg-[#171719] text-zinc-400 hover:text-white"}`} title={`Alternar ${label}`}>
+                                <span>{label}</span><span>{video[key] ? "✓" : "·"}</span>
+                              </button>
+                            ))}
+                            <span className={`px-2.5 py-1 rounded-md text-[10px] font-black ${thumbsComplete ? "bg-white text-black" : "bg-[#171719] text-zinc-400"}`}>Thumbs {thumbsComplete ? "✓" : "·"}</span>
                           </div>
 
                           {is100Percent && (
