@@ -831,21 +831,10 @@
                             <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-zinc-950 text-xl font-black select-none">
                               📅
                             </div>
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight">
-                                  {dayInfo.displayDay}
-                                </span>
-                                <span className="text-xs sm:text-sm font-black text-zinc-200 bg-[#222222] border border-[#3a3a3a] px-2.5 py-0.5 rounded-md">
-                                  {dayInfo.formattedDate}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className={`text-[11px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${dayInfo.badgeColor}`}>
-                                  {dayInfo.countdownText}
-                                </span>
-                                {selectedWeek > 0 && <span className="text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded-md">Semana +{selectedWeek}</span>}
-                              </div>
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                              <span className="text-sm sm:text-base font-black text-white uppercase tracking-tight">{dayInfo.weekdayName}</span>
+                              <span className="text-xs font-black text-blue-200 bg-blue-500/10 border border-blue-500/40 px-2 py-1 rounded-md">{dayInfo.formattedDate}</span>
+                              <span className="text-[10px] font-black uppercase tracking-wider text-blue-300">{selectedWeek === 0 ? "esta semana" : `+${selectedWeek} semana${selectedWeek > 1 ? "s" : ""}`}</span>
                             </div>
                             <button type="button" onClick={() => toggleDetails(video.id)} className="ml-1 rounded-lg px-2 py-1 text-lg leading-none text-zinc-500 hover:bg-[#262626] hover:text-white" title="Mostrar detalhes">⋯</button>
                           </div>
