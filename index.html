@@ -75,6 +75,18 @@
     @media (min-width: 900px) {
       .production-card .grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
     }
+    /* Identidade única: azul, preto e branco. */
+    [class*="red-"], [class*="amber-"], [class*="emerald-"] { color: #60a5fa !important; border-color: #2563eb !important; }
+    [class*="bg-red-"], [class*="bg-amber-"], [class*="bg-emerald-"] { background-color: rgba(37,99,235,.16) !important; }
+    [class*="bg-[#ff0000]"], [class*="bg-[#e60000]"] { background-color: #2563eb !important; }
+    [class*="shadow-red-"] { box-shadow: 0 8px 22px rgba(37,99,235,.18) !important; }
+    [class*="shadow-red-"], [class*="shadow-emerald-"] { box-shadow: 0 8px 22px rgba(37,99,235,.18) !important; }
+    .production-toolbar:has(.production-picker:not(.hidden)) { flex-direction: column !important; align-items: stretch !important; }
+    .production-toolbar:has(.production-picker:not(.hidden)) > div:first-child { width: 100%; }
+    .production-toolbar:has(.production-picker:not(.hidden)) .production-picker { width: 100%; justify-content: flex-start; }
+    .production-toolbar:has(.production-picker:not(.hidden)) .production-team { width: 100%; justify-content: flex-start; border-top: 1px solid #222; padding-top: 10px; }
+    .production-toolbar:has(.production-picker.hidden) .production-date { min-width: 310px; }
+    .production-card .thumb-empty { color: #bfdbfe !important; }
     @media (max-width: 640px) {
       header { position: relative !important; padding: .75rem !important; }
       header > div { gap: .65rem !important; }
@@ -990,29 +1002,7 @@
                                   OPÇÃO {idx + 1}
                                 </span>
 
-                                <div
-                                  className="flex items-center gap-1"
-                                  title="Progresso das 3 etapas (Nando, Duda, Sonora)"
-                                >
-                                  <div
-                                    className={`w-3.5 h-1 rounded-full ${
-                                      video.nandoSim ? "bg-emerald-500" : "bg-red-500/60"
-                                    }`}
-                                    title="Nando"
-                                  />
-                                  <div
-                                    className={`w-3.5 h-1 rounded-full ${
-                                      video.dudaSim ? "bg-emerald-500" : "bg-red-500/60"
-                                    }`}
-                                    title="Duda"
-                                  />
-                                  <div
-                                    className={`w-3.5 h-1 rounded-full ${
-                                      video.sonoraSim ? "bg-emerald-500" : "bg-red-500/60"
-                                    }`}
-                                    title="Sonora"
-                                  />
-                                </div>
+                                {thumb && <span className="text-[9px] font-black uppercase tracking-wider text-blue-300">Selecionada</span>}
                               </div>
 
                               {/* 16:9 Cinema Thumbnail Frame (TELA PLANA BRANCA QUANDO SEM FOTO) */}
