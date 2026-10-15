@@ -84,7 +84,8 @@
     .production-card .border-blue-500\/40 { border-color: #52525b !important; }
     .production-card .bg-blue-500\/10 { background: #1d1d20 !important; }
     .production-picker button[class*="bg-white"] { background: #f4f4f5 !important; color: #090909 !important; }
-    .calendar-view { width: 100% !important; max-width: 860px !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; overflow-x: hidden !important; }
+    .calendar-view { width: 100% !important; max-width: 1120px !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; overflow-x: hidden !important; }
+    .calendar-view .calendar-hero { display: none !important; }
     .calendar-view .calendar-week, .calendar-view .calendar-hero { width: 100% !important; box-sizing: border-box !important; }
     .calendar-view .calendar-week button { min-width: 0 !important; max-width: 100% !important; }
     .calendar-view .calendar-hero { background: #111113 !important; border-color: #29292d !important; box-shadow: none !important; padding: 22px !important; }
@@ -95,6 +96,10 @@
     /* Contornos discretos: nenhum painel deve ficar com moldura branca. */
     .calendar-view, .calendar-view * { border: 0 !important; }
     .calendar-view .calendar-week button:hover { border-color: #202024 !important; }
+    .calendar-view .calendar-week { min-height: 250px !important; }
+    .calendar-view .calendar-week .calendar-slot { min-height: 150px !important; }
+    .calendar-view .calendar-week .calendar-slot > div:first-child { width: 220px !important; height: 124px !important; }
+    .calendar-view .calendar-week .calendar-slot img { width: 220px !important; height: 124px !important; }
     .production-card, .production-card * { --tw-ring-color: #111113 !important; }
     .production-card, .production-card * { border: 0 !important; }
     .production-card [class*="border-white"], .production-card [class*="border-blue-"], .production-card [class*="border-red-"], .production-card [class*="border-emerald-"] { border-color: #111113 !important; }
@@ -793,6 +798,7 @@
                 {calendarWeeks.map(({ offset, weekVideos, monday }) => {
                   const weekLabel = monday.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
                   const filled = Math.min(weekVideos.filter((v) => !v.posted).length, 2);
+                  const weekState = filled === 2 ? "SEMANA CONCLUÍDA" : filled > 0 ? "EM PRODUÇÃO" : "SEMANA LIVRE";
                   return (
                     <section key={offset} className="calendar-week relative overflow-hidden rounded-2xl border border-[#252525] bg-[#0d0d0d] shadow-xl">
                       <div className="absolute left-0 top-0 bottom-0 w-px bg-[#202024]" />
@@ -801,14 +807,14 @@
                           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1b1b1b] text-sm">{offset === 0 ? "●" : "○"}</span>
                           <div><h2 className="font-black text-white">{offset === 0 ? "Esta semana" : `Semana +${offset}`}</h2><p className="text-xs text-zinc-500">Começa em {weekLabel}</p></div>
                         </div>
-                        <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider ${filled === 2 ? "border-emerald-800 bg-emerald-950/40 text-emerald-400" : "border-amber-800 bg-amber-950/30 text-amber-300"}`}>{filled}/2 vídeos</span>
+                        <span className="rounded-full bg-[#1b1b1d] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-zinc-300">{weekState} · {filled}/2</span>
                       </div>
                       <div className="grid gap-2 p-3 sm:grid-cols-2">
                         {weekVideos.filter((v) => !v.posted).map((video) => {
                           const info = calculatePostDayInfo(video.weekday, offset);
                           const title = video.titles?.find((t) => t?.trim()) || "Projeto sem título";
                           const thumb = video.thumbs?.find((item) => item);
-                          return <button key={video.id} type="button" onClick={() => setActiveTab("producao")} className="group flex items-center gap-3 rounded-lg bg-[#141414] p-2.5 text-left transition hover:bg-[#1b1b1d]">
+                          return <button key={video.id} type="button" onClick={() => setActiveTab("producao")} className="calendar-slot group flex items-center gap-4 rounded-lg bg-[#141414] p-3 text-left transition hover:bg-[#1b1b1d]">
                             <div className="h-14 w-24 shrink-0 overflow-hidden rounded-md bg-[#0a0a0a]">
                               {thumb ? <img src={thumb} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-[9px] font-black uppercase text-zinc-600">Sem thumb</div>}
                             </div>
