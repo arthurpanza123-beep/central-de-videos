@@ -73,15 +73,6 @@
       color: #e4e4e7 !important;
       border-color: #3f3f46 !important;
     }
-    .calendar-view { width: 100% !important; max-width: 1120px !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; overflow-x: hidden !important; }
-    .calendar-view { position: relative; isolation: isolate; }
-    .calendar-view .calendar-hero { display: none !important; }
-    .calendar-view .calendar-week, .calendar-view .calendar-hero { width: 100% !important; box-sizing: border-box !important; }
-    .calendar-view .calendar-week button { min-width: 0 !important; max-width: 100% !important; }
-    .calendar-view .calendar-week { background: #101012 !important; border-color: #29292d !important; box-shadow: none !important; min-height: 250px !important; }
-    .calendar-view .calendar-week .calendar-slot { min-height: 150px !important; }
-    .calendar-view .calendar-week .calendar-slot > div:first-child { width: 220px !important; height: 124px !important; }
-    .calendar-view .calendar-week .calendar-slot img { width: 220px !important; height: 124px !important; }
     input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
     @media (max-width: 640px) {
       header { position: relative !important; padding: .75rem !important; }
@@ -303,7 +294,6 @@
       }
 
       const offset = getWeekOffsetFromDate(fullDateStr);
-      const weekTag = offset === 0 ? "Esta semana" : offset === 1 ? "Próxima semana" : offset > 1 ? `Semana +${offset}` : `${Math.abs(offset)} semanas atrás`;
 
       return {
         dateStr: fullDateStr,
@@ -313,7 +303,6 @@
         countdownText,
         daysUntil,
         weekOffset: offset,
-        weekTag,
         targetDate,
         timestamp: targetDate.getTime(),
         badgeColor,
@@ -755,31 +744,6 @@
 
       const displayedVideos = activeTab === "producao" ? activeVideos : postedVideos;
 
-      const upcomingOffsets = [0, 1, 2, 3];
-      videos.forEach((video) => {
-        const off = getVideoWeekOffset(video);
-        if (off > 3 && !upcomingOffsets.includes(off)) {
-          upcomingOffsets.push(off);
-        }
-      });
-      upcomingOffsets.sort((a, b) => a - b);
-
-      const pastOffsets = [];
-      videos.forEach((video) => {
-        const off = getVideoWeekOffset(video);
-        if (off < 0 && !pastOffsets.includes(off)) {
-          pastOffsets.push(off);
-        }
-      });
-      pastOffsets.sort((a, b) => b - a);
-
-      const calendarWeeks = [...upcomingOffsets, ...pastOffsets].map((offset) => {
-        const weekVideos = videos.filter((video) => getVideoWeekOffset(video) === offset);
-        const monday = getWeekMonday(new Date());
-        monday.setDate(monday.getDate() + offset * 7);
-        return { offset, weekVideos, monday };
-      });
-
       return (
         <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans">
           {/* HEADER MINIMALISTA NO TOPO (ABINHA PEQUENA + TELONA CHEIA) */}
@@ -787,20 +751,6 @@
             <div className="flex items-center justify-between gap-3 max-w-[1920px] mx-auto flex-wrap">
               {/* Left: Abinhas (Em Produção / Postados) */}
               <nav className="flex items-center gap-1 bg-[#0a0a0a] p-1 rounded-lg border border-[#1a1a1a]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    playSound("click");
-                    setActiveTab("calendario");
-                  }}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-black transition active:scale-95 ${
-                    activeTab === "calendario" ? "bg-white text-black shadow-md" : "text-zinc-400 hover:text-white hover:bg-[#121212]"
-                  }`}
-                >
-                  <span>📅</span>
-                  <span>Calendário</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full font-black bg-[#181818] text-zinc-400">2/sem.</span>
-                </button>
 
                 <button
                   type="button"
@@ -900,95 +850,7 @@
 
           {/* ÁREA DOS VÍDEOS EM TELONA CHEIA */}
           <main className="flex-1 w-full max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto overflow-x-hidden bg-[#000000]">
-            {activeTab === "calendario" ? (
-              <div className="calendar-view max-w-5xl mx-auto space-y-5">
-                <div className="calendar-hero rounded-2xl border border-[#252525] bg-[#111111] p-5 sm:p-6 shadow-xl">
-                  <div className="flex flex-wrap items-end justify-between gap-4">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[.28em] text-red-400 font-black">Agenda</p>
-                      <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">Próximas semanas</h1>
-                      <p className="text-sm text-zinc-500 mt-2">Duas vagas de publicação por semana.</p>
-                    </div>
-                    <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-center">
-                      <div className="text-2xl font-black text-white">2</div>
-                      <div className="text-[10px] uppercase tracking-widest text-red-300 font-black">por semana</div>
-                    </div>
-                  </div>
-                </div>
-                {calendarWeeks.map(({ offset, weekVideos, monday }, index) => {
-                  const weekLabel = monday.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
-                  const postedVideosInWeek = weekVideos.filter((v) => v.posted);
-                  const postedCount = postedVideosInWeek.length;
-                  const weekProgress = Math.min(100, Math.round((postedCount / 2) * 100));
-                  const weekState = postedCount >= 2 ? "SEMANA CONCLUÍDA" : weekVideos.length > 0 ? "EM PRODUÇÃO" : "SEMANA LIVRE";
-                  const weekTitle = offset === 0 ? "Esta semana" : offset === 1 ? "Semana +1" : offset > 1 ? `Semana +${offset}` : offset === -1 ? "Semana anterior" : `${Math.abs(offset)} semanas atrás`;
-                  const weekSubtitle = offset >= 0 ? `Começa em ${weekLabel}` : `Semana concluída de ${weekLabel}`;
-                  const isFirstPast = offset < 0 && (index === 0 || calendarWeeks[index - 1].offset >= 0);
-
-                  return (
-                    <React.Fragment key={offset}>
-                      {isFirstPast && (
-                        <div className="pt-6 pb-2 border-t border-[#202024]">
-                          <p className="text-[10px] uppercase tracking-[.25em] text-zinc-400 font-black">Histórico</p>
-                          <h3 className="text-lg font-black text-white mt-0.5">Semanas Concluídas Anteriores</h3>
-                        </div>
-                      )}
-                      <section className="calendar-week relative overflow-hidden rounded-2xl border border-[#252525] bg-[#0d0d0d] shadow-xl">
-                        <div className="absolute left-0 top-0 bottom-0 w-px bg-[#202024]" />
-                        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-[#222]">
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-11 w-14 items-center justify-center rounded-lg bg-[#1b1b1b] text-sm font-black text-white">{weekProgress}%</span>
-                            <div>
-                              <h2 className="font-black text-white">{weekTitle}</h2>
-                              <p className="text-xs text-zinc-500">{weekSubtitle}</p>
-                            </div>
-                          </div>
-                          <span className="rounded-full bg-[#1b1b1d] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-zinc-300">{weekState} · {weekProgress}%</span>
-                        </div>
-                        <div className="grid gap-2 p-3 sm:grid-cols-2">
-                          {weekVideos.map((video) => {
-                            const info = calculatePostDayInfo(video);
-                            const title = video.titles?.find((t) => t?.trim()) || "Projeto sem título";
-                            const thumb = video.thumbs?.find((item) => item);
-                            return (
-                              <button
-                                key={video.id}
-                                type="button"
-                                onClick={() => setActiveTab(video.posted ? "postados" : "producao")}
-                                className="calendar-slot group flex items-center gap-4 rounded-lg bg-[#141414] p-3 text-left transition hover:bg-[#1b1b1d]"
-                              >
-                                <div className="h-14 w-24 shrink-0 overflow-hidden rounded-md bg-[#0a0a0a]">
-                                  {thumb ? (
-                                    <img src={thumb} alt="" className="h-full w-full object-cover" />
-                                  ) : (
-                                    <div className="flex h-full items-center justify-center text-[9px] font-black uppercase text-zinc-600">
-                                      Sem thumb
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="min-w-0">
-                                  <div className="text-[10px] font-black uppercase tracking-wider text-zinc-500">
-                                    {info.weekdayName} · {info.formattedDate} {video.posted ? "· POSTADO" : "· EM PRODUÇÃO"}
-                                  </div>
-                                  <div className="truncate text-sm font-bold text-zinc-100 group-hover:text-white">
-                                    {title}
-                                  </div>
-                                </div>
-                              </button>
-                            );
-                          })}
-                          {weekVideos.length === 0 && (
-                            <div className="rounded-xl border border-dashed border-[#333] p-5 text-center text-xs font-semibold text-zinc-600 sm:col-span-2">
-                              Semana livre — adicione um projeto na produção.
-                            </div>
-                          )}
-                        </div>
-                      </section>
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            ) : displayedVideos.length === 0 ? (
+            {displayedVideos.length === 0 ? (
               <div className="text-center py-24 bg-[#080808] rounded-2xl border border-[#171717] p-8 max-w-xl mx-auto my-12">
                 <span className="text-4xl block mb-3 opacity-60">🎬</span>
                 <p className="text-zinc-500 text-sm mb-4 font-semibold">
@@ -1038,7 +900,6 @@
                                   <>
                                     <span className="text-base sm:text-lg font-black text-white uppercase tracking-tight">{dayInfo.weekdayName}</span>
                                     <span className="text-xs font-black text-zinc-200 bg-[#22222a] border border-[#353542] px-2.5 py-1 rounded-lg">{dayInfo.formattedDate}</span>
-                                    <span className="text-[11px] font-black uppercase tracking-wider text-zinc-400">{dayInfo.weekTag}</span>
                                     <span className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border ${dayInfo.badgeColor}`}>{dayInfo.countdownText}</span>
                                   </>
                                 )}
@@ -1113,9 +974,9 @@
                         {/* Painel Expansível de Configurações (Some quando fechado!) */}
                         {!video.posted && expandedDetails[video.id] && (
                           <div className="bg-[#0f0f13] border border-[#262630] p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 animate-in fade-in duration-200">
-                            {/* Seletor de Data Direto no Calendário */}
+                            {/* Seletor de Data de Publicação */}
                             <div className="flex items-center gap-2.5 flex-wrap">
-                              <span className="text-xs font-black uppercase tracking-wider text-zinc-400">Data no Calendário:</span>
+                              <span className="text-xs font-black uppercase tracking-wider text-zinc-400">Data de Publicação:</span>
                               <label className="flex items-center gap-2 bg-[#18181f] border border-[#353545] rounded-xl px-3 py-1.5 hover:border-zinc-400 transition cursor-pointer">
                                 <span className="text-sm select-none">🗓️</span>
                                 <input
@@ -1194,8 +1055,8 @@
                             >
                               {/* Option Header */}
                               <div className="flex items-center justify-between pb-2 border-b border-[#1c1c22]">
-                                <span className="text-xs font-black text-red-500 uppercase tracking-wider flex items-center gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-red-500 inline-block shadow-sm shadow-red-500/50"></span>
+                                <span className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-white inline-block shadow-sm shadow-white/40"></span>
                                   OPÇÃO {idx + 1}
                                 </span>
                                 {thumb && (
