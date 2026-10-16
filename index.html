@@ -135,6 +135,7 @@
     .production-toolbar .production-picker { width: 100%; justify-content: flex-start; }
     .production-toolbar .production-team { width: 100%; justify-content: flex-start; border-top: 1px solid #222; padding-top: 10px; }
     .production-card .thumb-empty { color: #bfdbfe !important; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
     @media (max-width: 640px) {
       header { position: relative !important; padding: .75rem !important; }
       header > div { gap: .65rem !important; }
@@ -224,61 +225,130 @@
       ["coloracaoSim", "Coloração"], ["finalizacaoSim", "Finalização"]
     ];
 
-    function calculatePostDayInfo(targetWeekday, weekOffset = 0, postedAt = null) {
-      if (postedAt) {
-        const postDate = new Date(postedAt);
-        const weekdayObj = WEEKDAYS.find((w) => w.day === postDate.getDay()) || WEEKDAYS[0];
-        const formattedDate = postDate.toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-        });
-        return {
-          displayDay: weekdayObj.name,
-          weekdayName: weekdayObj.name,
-          formattedDate,
-          countdownText: "Postado",
-          daysUntil: 0,
-          targetDate: postDate,
-          timestamp: postDate.getTime(),
-          badgeColor: "bg-zinc-900 text-zinc-300 border-zinc-800",
-        };
+    function getWeekMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      date.setDate(date.getDate() + diff);
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+
+    function getWeekOffsetFromDate(dateStr) {
+      if (!dateStr || typeof dateStr !== "string") return 0;
+      const parts = dateStr.split("-").map(Number);
+      if (parts.length < 3 || isNaN(parts[0])) return 0;
+      const targetDate = new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
+      const videoMonday = getWeekMonday(targetDate);
+      const currentMonday = getWeekMonday(new Date());
+      const diffMs = videoMonday.getTime() - currentMonday.getTime();
+      return Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+    }
+
+    function getVideoScheduledDate(video) {
+      if (!video) return new Date().toISOString().slice(0, 10);
+      if (video.scheduledDate) return video.scheduledDate;
+      if (video.posted && video.postedAt) {
+        const d = new Date(video.postedAt);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
       }
-
-      if (typeof weekOffset === "boolean") weekOffset = weekOffset ? 1 : 0;
-      const safeOffset = Math.max(-52, Math.min(52, Number(weekOffset) || 0));
-
+      const safeOffset = Number(video.weekOffset) || 0;
       const now = new Date();
       const currentMonday = getWeekMonday(now);
-
-      // Âncora na Segunda-feira da semana alvo (offset 0 = esta semana, offset 1 = próxima semana)
       const targetMonday = new Date(currentMonday);
       targetMonday.setDate(currentMonday.getDate() + safeOffset * 7);
-
-      // Offset do dia da semana a partir da Segunda-feira (Seg=0, Ter=1, Qua=2, Qui=3, Sex=4, Sáb=5, Dom=6)
+      const targetWeekday = typeof video.weekday === "number" ? video.weekday : 4;
       const dayOffsetFromMonday = targetWeekday === 0 ? 6 : targetWeekday - 1;
-
       const targetDate = new Date(targetMonday);
       targetDate.setDate(targetMonday.getDate() + dayOffsetFromMonday);
-      targetDate.setHours(0, 0, 0, 0);
+      const y = targetDate.getFullYear();
+      const m = String(targetDate.getMonth() + 1).padStart(2, "0");
+      const day = String(targetDate.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
 
+    function getUpcomingPostingDates(count = 6) {
+      const result = [];
+      const cur = new Date();
+      cur.setHours(0, 0, 0, 0);
+      for (let i = 0; i < 30 && result.length < count; i++) {
+        const d = new Date(cur);
+        d.setDate(cur.getDate() + i);
+        const dayOfWeek = d.getDay();
+        if (POSTING_DAYS.has(dayOfWeek)) {
+          const wObj = WEEKDAYS.find((w) => w.day === dayOfWeek) || WEEKDAYS[0];
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, "0");
+          const dayNum = String(d.getDate()).padStart(2, "0");
+          const dateStr = `${y}-${m}-${dayNum}`;
+          const formatted = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+          result.push({
+            dateStr,
+            label: `${wObj.label} ${formatted}`,
+            weekdayName: wObj.name,
+            isToday: i === 0,
+            isTomorrow: i === 1,
+          });
+        }
+      }
+      return result;
+    }
+
+    function calculatePostDayInfo(videoOrWeekday, weekOffset = 0, postedAt = null) {
+      let targetDate;
+      let isPosted = false;
+
+      if (typeof videoOrWeekday === "object" && videoOrWeekday !== null) {
+        const v = videoOrWeekday;
+        if (v.posted && v.postedAt) {
+          targetDate = new Date(v.postedAt);
+          isPosted = true;
+        } else {
+          const dateStr = getVideoScheduledDate(v);
+          const parts = dateStr.split("-").map(Number);
+          targetDate = new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
+        }
+      } else if (postedAt) {
+        targetDate = new Date(postedAt);
+        isPosted = true;
+      } else {
+        const targetWeekday = Number(videoOrWeekday) || 0;
+        const safeOffset = Math.max(-52, Math.min(52, Number(weekOffset) || 0));
+        const now = new Date();
+        const currentMonday = getWeekMonday(now);
+        const targetMonday = new Date(currentMonday);
+        targetMonday.setDate(currentMonday.getDate() + safeOffset * 7);
+        const dayOffsetFromMonday = targetWeekday === 0 ? 6 : targetWeekday - 1;
+        targetDate = new Date(targetMonday);
+        targetDate.setDate(targetMonday.getDate() + dayOffsetFromMonday);
+        targetDate.setHours(0, 0, 0, 0);
+      }
+
+      const weekdayObj = WEEKDAYS.find((w) => w.day === targetDate.getDay()) || WEEKDAYS[0];
       const formattedDate = targetDate.toLocaleDateString("pt-BR", {
         day: "2-digit",
         month: "2-digit",
       });
+      const y = targetDate.getFullYear();
+      const m = String(targetDate.getMonth() + 1).padStart(2, "0");
+      const day = String(targetDate.getDate()).padStart(2, "0");
+      const fullDateStr = `${y}-${m}-${day}`;
 
-      const weekdayObj = WEEKDAYS.find((w) => w.day === targetWeekday) || WEEKDAYS[0];
-      const prefix = safeOffset > 0 ? `+${safeOffset} sem. ` : "";
-      const displayDay = `${prefix}${weekdayObj.name}`;
-
-      const todayMidnight = new Date(now);
-      todayMidnight.setHours(0, 0, 0, 0);
+      const now = new Date();
+      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
       const diffTime = targetDate.getTime() - todayMidnight.getTime();
       const daysUntil = Math.round(diffTime / (24 * 60 * 60 * 1000));
 
       let countdownText = "";
       let badgeColor = "bg-zinc-900 text-zinc-300 border-zinc-800";
 
-      if (daysUntil === 0) {
+      if (isPosted) {
+        countdownText = "Postado";
+        badgeColor = "bg-zinc-900 text-zinc-300 border-zinc-800";
+      } else if (daysUntil === 0) {
         countdownText = "Posta Hoje! 🔥";
         badgeColor = "bg-red-950/90 text-red-400 border-red-700 animate-pulse";
       } else if (daysUntil === 1) {
@@ -292,25 +362,22 @@
         badgeColor = "bg-zinc-900 text-zinc-400 border-zinc-800";
       }
 
+      const offset = getWeekOffsetFromDate(fullDateStr);
+      const weekTag = offset === 0 ? "Esta semana" : offset === 1 ? "Próxima semana" : offset > 1 ? `Semana +${offset}` : `${Math.abs(offset)} semanas atrás`;
+
       return {
-        displayDay,
+        dateStr: fullDateStr,
+        displayDay: weekdayObj.name,
         weekdayName: weekdayObj.name,
         formattedDate,
         countdownText,
         daysUntil,
+        weekOffset: offset,
+        weekTag,
         targetDate,
         timestamp: targetDate.getTime(),
         badgeColor,
       };
-    }
-
-    function getWeekMonday(d) {
-      const date = new Date(d);
-      const day = date.getDay();
-      const diff = day === 0 ? -6 : 1 - day;
-      date.setDate(date.getDate() + diff);
-      date.setHours(0, 0, 0, 0);
-      return date;
     }
 
     function getVideoWeekOffset(video) {
@@ -320,13 +387,8 @@
         const diffDays = Math.round((postMonday.getTime() - currentMonday.getTime()) / (24 * 60 * 60 * 1000));
         return Math.round(diffDays / 7);
       }
-      if (video.weekOffset !== undefined && video.weekOffset !== null && !isNaN(Number(video.weekOffset))) {
-        return Number(video.weekOffset);
-      }
-      if (typeof video.isNextWeek === "boolean") {
-        return video.isNextWeek ? 1 : 0;
-      }
-      return 0;
+      const dateStr = getVideoScheduledDate(video);
+      return getWeekOffsetFromDate(dateStr);
     }
 
     function getInitialVideos() {
@@ -583,10 +645,15 @@
 
       function addNewVideo() {
         playSound("click");
+        const nextDates = getUpcomingPostingDates(1);
+        const defaultDate = nextDates.length > 0 ? nextDates[0].dateStr : new Date().toISOString().slice(0, 10);
+        const parts = defaultDate.split("-").map(Number);
+        const dt = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
         const newV = {
           id: "v-" + Date.now(),
-          weekday: 1,
-          weekOffset: 0,
+          scheduledDate: defaultDate,
+          weekday: dt.getDay(),
+          weekOffset: getWeekOffsetFromDate(defaultDate),
           posted: false,
           nandoSim: false,
           dudaSim: false,
@@ -599,24 +666,26 @@
         setActiveTab("producao");
       }
 
-      function handleWeekdayClick(id, clickedDay) {
+      function handleDateChange(id, dateStr) {
+        if (!dateStr) return;
         playSound("click");
+        const parts = dateStr.split("-").map(Number);
+        const dt = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+        const weekday = dt.getDay();
+        const offset = getWeekOffsetFromDate(dateStr);
         setVideos((prev) =>
-          prev.map((v) => {
-            if (v.id !== id) return v;
-            return { ...v, weekday: clickedDay };
-          })
+          prev.map((v) =>
+            v.id === id
+              ? {
+                  ...v,
+                  scheduledDate: dateStr,
+                  weekday,
+                  weekOffset: offset,
+                  isNextWeek: undefined,
+                }
+              : v
+          )
         );
-      }
-
-      function handleWeekOffsetClick(id, offset) {
-        playSound("click");
-        setVideos((prev) => prev.map((v) => v.id === id ? { ...v, weekOffset: offset, isNextWeek: undefined } : v));
-      }
-
-      function toggleDetails(id) {
-        playSound("click");
-        setExpandedDetails((prev) => ({ ...prev, [id]: !prev[id] }));
       }
 
       function toggleProcess(id, key) {
@@ -730,10 +799,8 @@
       const activeVideos = [...videos]
         .filter((v) => !v.posted)
         .sort((a, b) => {
-          const offA = getVideoWeekOffset(a);
-          const offB = getVideoWeekOffset(b);
-          const infoA = calculatePostDayInfo(a.weekday, offA);
-          const infoB = calculatePostDayInfo(b.weekday, offB);
+          const infoA = calculatePostDayInfo(a);
+          const infoB = calculatePostDayInfo(b);
           return (infoA.timestamp || 0) - (infoB.timestamp || 0);
         });
 
@@ -935,7 +1002,7 @@
                         </div>
                         <div className="grid gap-2 p-3 sm:grid-cols-2">
                           {weekVideos.map((video) => {
-                            const info = calculatePostDayInfo(video.weekday, offset, video.posted ? video.postedAt : null);
+                            const info = calculatePostDayInfo(video);
                             const title = video.titles?.find((t) => t?.trim()) || "Projeto sem título";
                             const thumb = video.thumbs?.find((item) => item);
                             return (
@@ -996,8 +1063,9 @@
             ) : (
               <div className="space-y-6">
                 {displayedVideos.map((video) => {
-                  const selectedWeek = getVideoWeekOffset(video);
-                  const dayInfo = calculatePostDayInfo(video.weekday, selectedWeek);
+                  const dayInfo = calculatePostDayInfo(video);
+                  const upcomingPostingDays = getUpcomingPostingDates(6);
+                  const todayStr = new Date().toISOString().slice(0, 10);
 
                   const thumbsComplete = Array.isArray(video.thumbs) && video.thumbs.filter(Boolean).length === 3;
                   const completedSteps = PRODUCTION_STEPS.filter(([key]) => video[key]).length + (thumbsComplete ? 1 : 0);
@@ -1024,43 +1092,50 @@
                                 <>
                                   <span className="text-sm sm:text-base font-black text-white uppercase tracking-tight">{dayInfo.weekdayName}</span>
                                   <span className="text-xs font-black text-zinc-300 bg-[#1d1d20] px-2 py-1 rounded-md">{dayInfo.formattedDate}</span>
-                                  <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">{selectedWeek === 0 ? "esta semana" : `+${selectedWeek} semana${selectedWeek > 1 ? "s" : ""}`}</span>
+                                  <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">{dayInfo.weekTag}</span>
+                                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${dayInfo.badgeColor}`}>{dayInfo.countdownText}</span>
                                 </>
                               )}
                             </div>
                           </div>
 
-                          {/* Seletor de Dias (Seg a Dom) - Botões Maiores e Bem Visíveis */}
-                          {!video.posted && <div className="production-picker flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap">
-                            {[0, 1, 2, 3].map((offset) => (
-                              <button key={offset} type="button" onClick={() => handleWeekOffsetClick(video.id, offset)} className={`px-2.5 py-2 rounded-lg text-[10px] font-black transition-all ${selectedWeek === offset ? "bg-white text-black" : "text-zinc-400 hover:text-white hover:bg-[#181818]"}`} title={`Agendar para ${offset === 0 ? "esta semana" : `daqui a ${offset} semana${offset > 1 ? "s" : ""}`}`}>
-                                {offset === 0 ? "ESTA" : `+${offset} SEM.`}
-                              </button>
-                            ))}
-                            <span className="w-px h-6 bg-[#292929] mx-1" />
-                            {WEEKDAYS.filter((w) => POSTING_DAYS.has(w.day)).map((w) => {
-                              const isSelected = video.weekday === w.day;
-                              return (
-                                <button
-                                  key={w.day}
-                                  type="button"
-                                  onClick={() => handleWeekdayClick(video.id, w.day)}
-                                  className={`px-3 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-black transition-all active:scale-95 flex items-center gap-1.5 ${
-                                    isSelected
-                                      ? "bg-[#ff0000] text-white shadow-lg shadow-red-600/40 ring-2 ring-red-400 scale-105 z-10"
-                                      : "text-zinc-400 hover:text-white hover:bg-[#181818]"
-                                  }`}
-                                  title={
-                                    isSelected
-                                      ? `Dia selecionado: ${w.name}`
-                                      : `Mudar para ${w.name}`
-                                  }
-                                >
-                                  <span>{w.label}</span>
-                                </button>
-                              );
-                            })}
-                          </div>}
+                          {/* Seletor com Calendário e Próximas Datas de Publicação */}
+                          {!video.posted && (
+                            <div className="production-picker flex items-center gap-1.5 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap">
+                              {upcomingPostingDays.map((u) => {
+                                const isSelected = dayInfo.dateStr === u.dateStr;
+                                return (
+                                  <button
+                                    key={u.dateStr}
+                                    type="button"
+                                    onClick={() => handleDateChange(video.id, u.dateStr)}
+                                    className={`px-3 py-2 rounded-lg text-xs font-black transition-all active:scale-95 flex items-center gap-1 cursor-pointer ${
+                                      isSelected
+                                        ? "bg-white text-black shadow-lg shadow-white/10 ring-2 ring-white scale-105 z-10"
+                                        : "text-zinc-400 hover:text-white hover:bg-[#181818]"
+                                    }`}
+                                    title={`Agendar para ${u.label}`}
+                                  >
+                                    <span>{u.label}</span>
+                                  </button>
+                                );
+                              })}
+
+                              <span className="w-px h-6 bg-[#292929] mx-1" />
+
+                              {/* Input Calendário para escolher qualquer dia */}
+                              <label className="flex items-center gap-1.5 bg-[#121214] border border-[#26262a] rounded-lg px-2.5 py-1.5 hover:border-zinc-500 transition cursor-pointer" title="Clique para escolher no calendário">
+                                <span className="text-xs select-none">🗓️</span>
+                                <input
+                                  type="date"
+                                  value={dayInfo.dateStr}
+                                  min={todayStr}
+                                  onChange={(e) => handleDateChange(video.id, e.target.value)}
+                                  className="bg-transparent text-white text-xs font-black border-0 outline-none cursor-pointer [color-scheme:dark]"
+                                />
+                              </label>
+                            </div>
+                          )}
                         </div>
 
                         {/* Equipe + Botão Vídeo Postado */}
