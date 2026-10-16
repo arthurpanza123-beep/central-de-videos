@@ -57,29 +57,6 @@
     }
     .thumb-empty { background: #151515 !important; color: #ededed !important; }
     .thumb-empty::before { content: ""; position: absolute; inset: 9px; border: 1px dashed #3a3a3a; border-radius: 8px; pointer-events: none; }
-    /* Produção: hierarquia limpa em três focos — thumb, título e data. */
-    .production-card { background: #101010 !important; border: 1px solid #242424 !important; border-radius: 18px !important; padding: 18px !important; box-shadow: 0 18px 50px rgba(0,0,0,.18) !important; }
-    .production-toolbar { padding-bottom: 12px !important; border-bottom-color: #202020 !important; }
-    .production-date { background: #171717 !important; border-color: #303030 !important; padding: 9px 12px !important; border-radius: 12px !important; }
-    .production-date > div:first-child { width: 32px !important; height: 32px !important; font-size: 16px !important; }
-    .production-date span:first-child { font-size: 15px !important; }
-    .production-date .border { font-size: 10px !important; padding: 2px 6px !important; }
-    .production-date .uppercase { font-size: 9px !important; padding: 2px 6px !important; }
-    .production-picker { background: #0b0b0b !important; border-color: #252525 !important; padding: 4px !important; border-radius: 10px !important; }
-    .production-picker button { padding: 7px 9px !important; font-size: 10px !important; box-shadow: none !important; }
-    .production-picker button[class*="ring-2"] { transform: none !important; }
-    .production-team { opacity: 1; }
-    .production-team button { font-size: 10px !important; padding: 6px 9px !important; }
-    .production-card .grid { gap: 10px !important; }
-    .production-card .grid > div { background: #0b0b0b !important; border-color: #252525 !important; border-radius: 12px !important; padding: 10px !important; }
-    .production-card [contenteditable="true"] { min-height: 62px !important; font-size: 14px !important; background: #151515 !important; }
-    @media (min-width: 900px) {
-      .production-card .grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-    }
-    /* Identidade neutra */
-    [class*="red-"], [class*="amber-"], [class*="blue-"] { color: #f4f4f5 !important; border-color: #52525b !important; }
-    [class*="bg-red-"], [class*="bg-amber-"], [class*="bg-blue-"] { background-color: #202023 !important; }
-    [class*="bg-[#ff0000]"], [class*="bg-[#e60000]"] { background-color: #f4f4f5 !important; color: #090909 !important; }
     .status-btn-active {
       background-color: #059669 !important;
       color: #ffffff !important;
@@ -96,58 +73,21 @@
       color: #e4e4e7 !important;
       border-color: #3f3f46 !important;
     }
-    .production-date .text-blue-300, .production-date .text-blue-200 { color: #d4d4d8 !important; }
-    .production-date .bg-blue-500\/10 { background: #1d1d20 !important; border-color: #52525b !important; }
-    .production-card .text-blue-300, .production-card .text-blue-200 { color: #d4d4d8 !important; }
-    .production-card .border-blue-500\/40 { border-color: #52525b !important; }
-    .production-card .bg-blue-500\/10 { background: #1d1d20 !important; }
-    .production-picker button[class*="bg-white"] { background: #f4f4f5 !important; color: #090909 !important; }
     .calendar-view { width: 100% !important; max-width: 1120px !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; overflow-x: hidden !important; }
     .calendar-view { position: relative; isolation: isolate; }
-    .calendar-view::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .22; background: radial-gradient(circle at 15% 20%, rgba(255,255,255,.09), transparent 28%), radial-gradient(circle at 85% 70%, rgba(255,255,255,.06), transparent 30%); animation: calendarDrift 18s ease-in-out infinite alternate; }
-    @keyframes calendarDrift { from { transform: translate3d(-2%, -1%, 0) scale(1); } to { transform: translate3d(2%, 1%, 0) scale(1.06); } }
     .calendar-view .calendar-hero { display: none !important; }
     .calendar-view .calendar-week, .calendar-view .calendar-hero { width: 100% !important; box-sizing: border-box !important; }
     .calendar-view .calendar-week button { min-width: 0 !important; max-width: 100% !important; }
-    .calendar-view .calendar-hero { background: #111113 !important; border-color: #29292d !important; box-shadow: none !important; padding: 22px !important; }
-    .calendar-view .calendar-week { background: #101012 !important; border-color: #29292d !important; box-shadow: none !important; }
-    .calendar-view .calendar-week > div:first-child { border-color: #242428 !important; }
-    .calendar-view .calendar-week button { background: #171719 !important; border-color: #2e2e33 !important; }
-    .calendar-view .calendar-week button:hover { border-color: #e4e4e7 !important; background: #1e1e21 !important; }
-    /* Contornos discretos: nenhum painel deve ficar com moldura branca. */
-    .calendar-view, .calendar-view * { border: 0 !important; }
-    .calendar-view .calendar-week button:hover { border-color: #202024 !important; }
-    .calendar-view .calendar-week { min-height: 250px !important; }
+    .calendar-view .calendar-week { background: #101012 !important; border-color: #29292d !important; box-shadow: none !important; min-height: 250px !important; }
     .calendar-view .calendar-week .calendar-slot { min-height: 150px !important; }
     .calendar-view .calendar-week .calendar-slot > div:first-child { width: 220px !important; height: 124px !important; }
     .calendar-view .calendar-week .calendar-slot img { width: 220px !important; height: 124px !important; }
-    .production-card, .production-card * { --tw-ring-color: #111113 !important; }
-    .production-card, .production-card * { border: 0 !important; }
-    .production-card [class*="border-white"], .production-card [class*="border-blue-"], .production-card [class*="border-red-"], .production-card [class*="border-emerald-"] { border-color: #111113 !important; }
-    .production-card, .production-card > *, .production-card .grid > div, .production-card .production-date, .production-card .production-picker, .production-card [contenteditable="true"] { border-color: #050505 !important; }
-    .production-card .aspect-video { border-color: #050505 !important; box-shadow: none !important; }
-    .production-card textarea,
-    .production-card textarea:focus,
-    .production-card textarea:hover { border: 0 !important; outline: 0 !important; box-shadow: none !important; background: #050505 !important; }
-    [class*="shadow-red-"], [class*="shadow-emerald-"] { box-shadow: 0 8px 22px rgba(37,99,235,.18) !important; }
-    .production-toolbar { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
-    .production-toolbar > div:first-child { width: 100%; }
-    .production-toolbar .production-picker { width: 100%; justify-content: flex-start; }
-    .production-toolbar .production-team { width: 100%; justify-content: flex-start; border-top: 1px solid #222; padding-top: 10px; }
-    .production-card .thumb-empty { color: #bfdbfe !important; }
     input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
     @media (max-width: 640px) {
       header { position: relative !important; padding: .75rem !important; }
       header > div { gap: .65rem !important; }
       main { padding: .75rem !important; }
       main > div { gap: .9rem !important; }
-      main > div > section { padding: .8rem !important; border-radius: 16px !important; }
-      main > div > section > div:first-child { gap: .85rem !important; padding-bottom: .8rem !important; }
-      main section .grid { gap: .8rem !important; }
-      main section .grid > div { padding: .8rem !important; border-radius: 14px !important; }
-      main section [contenteditable="true"] { min-height: 72px; font-size: 1rem !important; line-height: 1.25 !important; }
-      .day-picker { width: 100%; max-width: 100%; overflow-x: auto; justify-content: flex-start; }
-      .day-picker button { flex: 0 0 auto; }
     }
   </style>
 </head>
@@ -688,6 +628,11 @@
         );
       }
 
+      function toggleDetails(id) {
+        playSound("click");
+        setExpandedDetails((prev) => ({ ...prev, [id]: !prev[id] }));
+      }
+
       function toggleProcess(id, key) {
         playSound("toggle");
         setVideos((prev) =>
@@ -1077,111 +1022,52 @@
                       className="production-card bg-[#080808] rounded-2xl p-4 sm:p-5 lg:p-6 border border-[#1a1a1a] shadow-2xl space-y-4"
                     >
                       {/* CARD TOOLBAR */}
-                      <div className="production-toolbar flex items-center justify-between gap-4 pb-4 border-b border-[#161616] flex-wrap">
-                        {/* Left: Bloco do Dia Destacado, Maior e Seletor */}
-                        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-                          {/* BADGE GIGANTE DO DIA */}
-                          <div className="production-date flex items-center gap-3 bg-[#151515] border border-[#303030] px-4 py-2.5 rounded-xl">
-                            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-zinc-950 text-xl font-black select-none">
-                              📅
-                            </div>
-                            <div className="flex items-center gap-2 whitespace-nowrap">
-                              {video.posted ? (
-                                <span className="text-sm sm:text-base font-black text-zinc-300 uppercase tracking-tight">POSTADO</span>
-                              ) : (
-                                <>
-                                  <span className="text-sm sm:text-base font-black text-white uppercase tracking-tight">{dayInfo.weekdayName}</span>
-                                  <span className="text-xs font-black text-zinc-300 bg-[#1d1d20] px-2 py-1 rounded-md">{dayInfo.formattedDate}</span>
-                                  <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">{dayInfo.weekTag}</span>
-                                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${dayInfo.badgeColor}`}>{dayInfo.countdownText}</span>
-                                </>
+                      <div className="flex flex-col space-y-3 pb-4 border-b border-[#202026]">
+                        {/* Top bar: Badge do Dia + Configurar ⋯ + Botão Postar */}
+                        <div className="flex items-center justify-between gap-4 flex-wrap">
+                          {/* Left: Badge do Dia com botão de expandir ⋯ */}
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <div className="flex items-center gap-3 bg-[#131317] border border-[#2b2b34] px-4 py-2.5 rounded-2xl shadow-md">
+                              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-zinc-950 text-xl font-black select-none shadow-sm">
+                                📅
+                              </div>
+                              <div className="flex items-center gap-2.5 whitespace-nowrap">
+                                {video.posted ? (
+                                  <span className="text-base font-black text-emerald-400 uppercase tracking-tight">POSTADO NO YOUTUBE ✓</span>
+                                ) : (
+                                  <>
+                                    <span className="text-base sm:text-lg font-black text-white uppercase tracking-tight">{dayInfo.weekdayName}</span>
+                                    <span className="text-xs font-black text-zinc-200 bg-[#22222a] border border-[#353542] px-2.5 py-1 rounded-lg">{dayInfo.formattedDate}</span>
+                                    <span className="text-[11px] font-black uppercase tracking-wider text-zinc-400">{dayInfo.weekTag}</span>
+                                    <span className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border ${dayInfo.badgeColor}`}>{dayInfo.countdownText}</span>
+                                  </>
+                                )}
+                              </div>
+                              {!video.posted && (
+                                <button
+                                  type="button"
+                                  onClick={() => toggleDetails(video.id)}
+                                  className={`ml-2 px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                                    expandedDetails[video.id]
+                                      ? "bg-white text-black shadow-md"
+                                      : "bg-[#202028] text-zinc-300 hover:text-white hover:bg-[#2c2c38]"
+                                  }`}
+                                  title={expandedDetails[video.id] ? "Ocultar configurações" : "Configurar data e status"}
+                                >
+                                  {expandedDetails[video.id] ? "Fechar ✕" : "Configurar ⋯"}
+                                </button>
                               )}
                             </div>
                           </div>
 
-                          {/* Seletor com Calendário e Próximas Datas de Publicação */}
-                          {!video.posted && (
-                            <div className="production-picker flex items-center gap-1.5 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap">
-                              {upcomingPostingDays.map((u) => {
-                                const isSelected = dayInfo.dateStr === u.dateStr;
-                                return (
-                                  <button
-                                    key={u.dateStr}
-                                    type="button"
-                                    onClick={() => handleDateChange(video.id, u.dateStr)}
-                                    className={`px-3 py-2 rounded-lg text-xs font-black transition-all active:scale-95 flex items-center gap-1 cursor-pointer ${
-                                      isSelected
-                                        ? "bg-white text-black shadow-lg shadow-white/10 ring-2 ring-white scale-105 z-10"
-                                        : "text-zinc-400 hover:text-white hover:bg-[#181818]"
-                                    }`}
-                                    title={`Agendar para ${u.label}`}
-                                  >
-                                    <span>{u.label}</span>
-                                  </button>
-                                );
-                              })}
-
-                              <span className="w-px h-6 bg-[#292929] mx-1" />
-
-                              {/* Input Calendário para escolher qualquer dia */}
-                              <label className="flex items-center gap-1.5 bg-[#121214] border border-[#26262a] rounded-lg px-2.5 py-1.5 hover:border-zinc-500 transition cursor-pointer" title="Clique para escolher no calendário">
-                                <span className="text-xs select-none">🗓️</span>
-                                <input
-                                  type="date"
-                                  value={dayInfo.dateStr}
-                                  min={todayStr}
-                                  onChange={(e) => handleDateChange(video.id, e.target.value)}
-                                  className="bg-transparent text-white text-xs font-black border-0 outline-none cursor-pointer [color-scheme:dark]"
-                                />
-                              </label>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Equipe + Botão Vídeo Postado */}
-                        <div className="production-team flex items-center gap-2.5 flex-wrap">
-                          <div className="flex flex-wrap items-center gap-1.5 bg-[#08080a] border border-[#1e1e24] p-1.5 rounded-xl">
-                            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 px-1">
-                              Status:
-                            </span>
-
-                            {PRODUCTION_STEPS.map(([key, label]) => {
-                              const isActive = !!video[key];
-                              return (
-                                <button
-                                  key={key}
-                                  type="button"
-                                  onClick={() => toggleProcess(video.id, key)}
-                                  className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all active:scale-95 flex items-center gap-1 cursor-pointer ${
-                                    isActive ? "status-btn-active" : "status-btn-inactive"
-                                  }`}
-                                  title={`Alternar ${label}: ${isActive ? "Concluído" : "Pendente"}`}
-                                >
-                                  <span>{label}</span>
-                                  <span>{isActive ? "✓" : "·"}</span>
-                                </button>
-                              );
-                            })}
-
-                            <span
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-black flex items-center gap-1 transition-all ${
-                                thumbsComplete ? "status-btn-active" : "status-btn-inactive"
-                              }`}
-                              title={thumbsComplete ? "3 thumbnails enviadas" : "Envie as 3 thumbnails abaixo para completar esta etapa"}
-                            >
-                              <span>Thumbs</span>
-                              <span>{thumbsComplete ? "✓" : `${video.thumbs?.filter(Boolean).length || 0}/3`}</span>
-                            </span>
-                          </div>
-
-                          {/* Botão Vídeo Postado: Só pode ser clicado quando marcar todas as caixas */}
-                          <div className="flex items-center gap-1.5 pl-1">
+                          {/* Right: Botão Postar e Lixeira */}
+                          <div className="flex items-center gap-2">
                             {!video.posted ? (
                               is100Percent ? (
                                 <button
                                   type="button"
                                   onClick={() => markAsPosted(video.id)}
-                                  className={`text-xs font-black px-4 py-1.5 rounded-lg transition-all duration-200 active:scale-95 flex items-center gap-1.5 shadow-md cursor-pointer ${
+                                  className={`text-xs sm:text-sm font-black px-4 py-2 rounded-xl transition-all duration-200 active:scale-95 flex items-center gap-2 shadow-lg cursor-pointer ${
                                     postingId === video.id
                                       ? "bg-[#10b981] text-white border border-[#10b981] scale-105 shadow-emerald-500/40"
                                       : "bg-emerald-500 hover:bg-emerald-400 text-black border border-emerald-400 shadow-emerald-500/25"
@@ -1195,7 +1081,7 @@
                                 <button
                                   type="button"
                                   disabled
-                                  className="text-xs font-black px-3.5 py-1.5 rounded-lg opacity-40 cursor-not-allowed bg-[#18181b] text-zinc-500 border border-[#27272a] flex items-center gap-1.5 select-none"
+                                  className="text-xs sm:text-sm font-black px-4 py-2 rounded-xl opacity-40 cursor-not-allowed bg-[#18181b] text-zinc-400 border border-[#27272a] flex items-center gap-2 select-none"
                                   title={`Marque todas as caixas de produção para liberar (${completedSteps}/9 concluídas)`}
                                 >
                                   <span>🔒</span>
@@ -1206,7 +1092,7 @@
                               <button
                                 type="button"
                                 onClick={() => restoreToProduction(video.id)}
-                                className="bg-[#10b981] hover:bg-[#059669] text-white border border-[#10b981] text-xs font-black px-3.5 py-1.5 rounded-lg transition-all active:scale-95 flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                className="bg-[#10b981] hover:bg-[#059669] text-white border border-[#10b981] text-xs sm:text-sm font-black px-4 py-2 rounded-xl transition-all active:scale-95 flex items-center gap-1.5 shadow-sm cursor-pointer"
                                 title="Vídeo postado! (Clique para voltar a Em Produção)"
                               >
                                 <span>✓</span>
@@ -1216,17 +1102,86 @@
 
                             <button
                               onClick={() => deleteVideo(video.id)}
-                              className="text-zinc-600 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-950/40 transition cursor-pointer"
+                              className="text-zinc-500 hover:text-red-400 p-2 rounded-xl hover:bg-red-950/40 transition cursor-pointer"
                               title="Excluir Projeto"
                             >
                               🗑️
                             </button>
                           </div>
                         </div>
+
+                        {/* Painel Expansível de Configurações (Some quando fechado!) */}
+                        {!video.posted && expandedDetails[video.id] && (
+                          <div className="bg-[#0f0f13] border border-[#262630] p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 animate-in fade-in duration-200">
+                            {/* Seletor de Data Direto no Calendário */}
+                            <div className="flex items-center gap-2.5 flex-wrap">
+                              <span className="text-xs font-black uppercase tracking-wider text-zinc-400">Data no Calendário:</span>
+                              <label className="flex items-center gap-2 bg-[#18181f] border border-[#353545] rounded-xl px-3 py-1.5 hover:border-zinc-400 transition cursor-pointer">
+                                <span className="text-sm select-none">🗓️</span>
+                                <input
+                                  type="date"
+                                  value={dayInfo.dateStr}
+                                  min={todayStr}
+                                  onChange={(e) => handleDateChange(video.id, e.target.value)}
+                                  className="bg-transparent text-white text-xs sm:text-sm font-black border-0 outline-none cursor-pointer [color-scheme:dark]"
+                                />
+                              </label>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {upcomingPostingDays.slice(0, 3).map((u) => (
+                                  <button
+                                    key={u.dateStr}
+                                    type="button"
+                                    onClick={() => handleDateChange(video.id, u.dateStr)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-black transition active:scale-95 cursor-pointer ${
+                                      dayInfo.dateStr === u.dateStr
+                                        ? "bg-white text-black shadow-sm"
+                                        : "bg-[#18181f] text-zinc-400 hover:text-white hover:bg-[#23232c]"
+                                    }`}
+                                  >
+                                    {u.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Checklist de Etapas de Produção */}
+                            <div className="flex flex-wrap items-center gap-1.5 bg-[#09090c] border border-[#1f1f26] p-1.5 rounded-xl">
+                              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 px-1.5">
+                                Checklist:
+                              </span>
+                              {PRODUCTION_STEPS.map(([key, label]) => {
+                                const isActive = !!video[key];
+                                return (
+                                  <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => toggleProcess(video.id, key)}
+                                    className={`px-2.5 py-1.5 rounded-lg text-xs font-black transition-all active:scale-95 flex items-center gap-1 cursor-pointer ${
+                                      isActive ? "status-btn-active" : "status-btn-inactive"
+                                    }`}
+                                    title={`Alternar ${label}: ${isActive ? "Concluído" : "Pendente"}`}
+                                  >
+                                    <span>{label}</span>
+                                    <span>{isActive ? "✓" : "·"}</span>
+                                  </button>
+                                );
+                              })}
+                              <span
+                                className={`px-2.5 py-1.5 rounded-lg text-xs font-black flex items-center gap-1 transition-all ${
+                                  thumbsComplete ? "status-btn-active" : "status-btn-inactive"
+                                }`}
+                                title={thumbsComplete ? "3 thumbnails enviadas" : "Envie as 3 thumbnails abaixo para completar esta etapa"}
+                              >
+                                <span>Thumbs</span>
+                                <span>{thumbsComplete ? "✓" : `${video.thumbs?.filter(Boolean).length || 0}/3`}</span>
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      {/* 3 Variations: 3 Thumbs (Tela branca plana quando vazio) + 3 BIG TITLES em Telona Cheia */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
+                      {/* 3 Variations: 3 Thumbs + 3 BIG TITLES com Separação Nítida */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 pt-2">
                         {[0, 1, 2].map((idx) => {
                           const thumb = video.thumbs[idx];
                           const title = video.titles[idx];
@@ -1235,89 +1190,96 @@
                           return (
                             <div
                               key={idx}
-                              className="flex flex-col space-y-2.5 bg-[#030303] p-3.5 rounded-xl border border-[#141414]"
+                              className="flex flex-col bg-[#0b0b0e] border border-[#23232a] hover:border-[#383844] p-4 sm:p-5 rounded-2xl transition shadow-xl space-y-4"
                             >
-                              {/* Option Header + Mini 3-Segment Process Track */}
-                              <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-black text-red-500 uppercase tracking-wider flex items-center gap-1.5">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span>
+                              {/* Option Header */}
+                              <div className="flex items-center justify-between pb-2 border-b border-[#1c1c22]">
+                                <span className="text-xs font-black text-red-500 uppercase tracking-wider flex items-center gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-red-500 inline-block shadow-sm shadow-red-500/50"></span>
                                   OPÇÃO {idx + 1}
                                 </span>
-
-                                {thumb && <span className="text-[9px] font-black uppercase tracking-wider text-blue-300">Selecionada</span>}
+                                {thumb && (
+                                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded-md">
+                                    Thumb pronta ✓
+                                  </span>
+                                )}
                               </div>
 
-                              {/* 16:9 Cinema Thumbnail Frame (TELA PLANA BRANCA QUANDO SEM FOTO) */}
-                              <div
-                                className={`relative rounded-lg overflow-hidden cursor-pointer group aspect-video transition duration-200 flex items-center justify-center ${
-                                  thumb
-                                    ? is100Percent
-                                      ? "bg-black border border-emerald-600 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
-                                      : "bg-black border border-[#1c1c1c] hover:border-red-600/70"
-                                    : "bg-[#111827] border-2 border-dashed border-slate-600 shadow-md hover:border-red-500"
-                                }`}
-                                onClick={() =>
-                                  document.getElementById(`yt-v14-${video.id}-${idx}`)?.click()
-                                }
-                              >
-                                {thumb ? (
-                                  <img
-                                    src={thumb}
-                                    alt={`Opção ${idx + 1}`}
-                                    className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                              {/* 16:9 Thumbnail Box com moldura nítida */}
+                              <div className="space-y-2">
+                                <div
+                                  className={`relative rounded-xl overflow-hidden cursor-pointer group aspect-video transition duration-200 flex items-center justify-center border-2 ${
+                                    thumb
+                                      ? "bg-black border-[#2d2d38] hover:border-red-500"
+                                      : "bg-[#111116] border-dashed border-[#363644] hover:border-red-500"
+                                  }`}
+                                  onClick={() =>
+                                    document.getElementById(`yt-v14-${video.id}-${idx}`)?.click()
+                                  }
+                                >
+                                  {thumb ? (
+                                    <img
+                                      src={thumb}
+                                      alt={`Opção ${idx + 1}`}
+                                      className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                                    />
+                                  ) : (
+                                    <div className="relative w-full h-full flex flex-col items-center justify-center p-3 text-zinc-400 group-hover:text-white transition">
+                                      <span className="text-3xl mb-1.5 opacity-80 group-hover:scale-110 transition">📁</span>
+                                      <span className="text-xs font-black tracking-wider uppercase text-zinc-300">
+                                        Subir Thumbnail
+                                      </span>
+                                      <span className="text-[10px] text-zinc-500 font-bold mt-0.5">
+                                        Formato 16:9
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {thumb && (
+                                    <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                                      <span className="text-xs font-black text-white bg-red-600 px-3 py-1.5 rounded-lg shadow-md">
+                                        Trocar Thumbnail
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  <input
+                                    id={`yt-v14-${video.id}-${idx}`}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const f = e.target.files?.[0];
+                                      if (f) updateThumb(video.id, idx, f);
+                                    }}
                                   />
-                                ) : (
-                                  <div className="thumb-empty relative w-full h-full flex flex-col items-center justify-center p-3 transition">
-                                    <span className="text-2xl mb-1 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition">📁</span>
-                                    <span className="text-xs font-black tracking-tight uppercase">
-                                      Subir Thumbnail
-                                    </span>
-                                    <span className="text-[10px] text-slate-400 font-bold">
-                                      16:9
-                                    </span>
-                                  </div>
-                                )}
+                                </div>
 
                                 {thumb && (
-                                  <div className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex items-center justify-center transition backdrop-blur-xs">
-                                    <span className="text-xs font-black text-white bg-red-600 px-3 py-1.5 rounded-lg shadow-md">
-                                      Trocar Thumbnail
-                                    </span>
+                                  <div className="flex justify-end">
+                                    <button
+                                      type="button"
+                                      onClick={() => removeThumb(video.id, idx)}
+                                      className="text-xs font-bold text-zinc-500 hover:text-red-400 transition cursor-pointer"
+                                    >
+                                      Remover foto ✕
+                                    </button>
                                   </div>
                                 )}
-
-                                <input
-                                  id={`yt-v14-${video.id}-${idx}`}
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const f = e.target.files?.[0];
-                                    if (f) updateThumb(video.id, idx, f);
-                                  }}
-                                />
                               </div>
 
-                              {thumb && (
-                                <div className="flex justify-end">
-                                  <button
-                                    onClick={() => removeThumb(video.id, idx)}
-                                    className="text-[10px] font-bold text-zinc-600 hover:text-red-400 transition"
-                                  >
-                                    Remover foto
-                                  </button>
-                                </div>
-                              )}
+                              {/* LINHA DE SEPARAÇÃO NÍTIDA ENTRE THUMBNAIL E TÍTULO */}
+                              <div className="border-t border-[#1c1c24] my-1" />
 
-                              {/* BIG TITLES */}
-                              <div className="space-y-1 pt-0.5">
-                                <div className="flex items-center justify-between text-[10px] text-zinc-500 font-bold">
+                              {/* Title Section com caixa e borda visualmente separadas */}
+                              <div className="space-y-2 flex-1 flex flex-col justify-between">
+                                <div className="flex items-center justify-between text-xs font-bold text-zinc-400">
                                   <span>Título do Vídeo:</span>
                                   <span
                                     className={
                                       titleLength > 90
                                         ? "text-red-400 font-black"
-                                        : "text-zinc-600"
+                                        : "text-zinc-500"
                                     }
                                   >
                                     {titleLength} / 100
@@ -1336,7 +1298,7 @@
                                   }}
                                   maxLength={100}
                                   placeholder={`Título em destaque para a Opção ${idx + 1}...`}
-                                  className="w-full bg-[#050505] hover:bg-[#0a0a0a] focus:bg-[#0a0a0a] border border-[#1a1a1a] focus:border-[#ff0000] focus:ring-1 focus:ring-red-500/25 text-base sm:text-lg font-black text-white p-3 rounded-lg focus:outline-none resize-none transition leading-snug placeholder:text-zinc-700 placeholder:font-normal"
+                                  className="w-full bg-[#131318] hover:bg-[#16161d] focus:bg-[#16161d] border border-[#2b2b36] focus:border-red-500 focus:ring-1 focus:ring-red-500/25 text-base sm:text-lg font-black text-white p-3.5 rounded-xl focus:outline-none resize-none transition leading-snug placeholder:text-zinc-600 placeholder:font-normal shadow-inner"
                                 />
                               </div>
                             </div>
