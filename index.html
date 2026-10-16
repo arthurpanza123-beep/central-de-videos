@@ -68,7 +68,7 @@
     .production-picker { background: #0b0b0b !important; border-color: #252525 !important; padding: 4px !important; border-radius: 10px !important; }
     .production-picker button { padding: 7px 9px !important; font-size: 10px !important; box-shadow: none !important; }
     .production-picker button[class*="ring-2"] { transform: none !important; }
-    .production-team { opacity: .78; transform: scale(.92); transform-origin: right center; }
+    .production-team { opacity: 1; }
     .production-team button { font-size: 10px !important; padding: 6px 9px !important; }
     .production-card .grid { gap: 10px !important; }
     .production-card .grid > div { background: #0b0b0b !important; border-color: #252525 !important; border-radius: 12px !important; padding: 10px !important; }
@@ -130,11 +130,10 @@
     .production-card textarea:focus,
     .production-card textarea:hover { border: 0 !important; outline: 0 !important; box-shadow: none !important; background: #050505 !important; }
     [class*="shadow-red-"], [class*="shadow-emerald-"] { box-shadow: 0 8px 22px rgba(37,99,235,.18) !important; }
-    .production-toolbar:has(.production-picker:not(.hidden)) { flex-direction: column !important; align-items: stretch !important; }
-    .production-toolbar:has(.production-picker:not(.hidden)) > div:first-child { width: 100%; }
-    .production-toolbar:has(.production-picker:not(.hidden)) .production-picker { width: 100%; justify-content: flex-start; }
-    .production-toolbar:has(.production-picker:not(.hidden)) .production-team { width: 100%; justify-content: flex-start; border-top: 1px solid #222; padding-top: 10px; }
-    .production-toolbar:has(.production-picker.hidden) .production-date { min-width: 310px; }
+    .production-toolbar { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
+    .production-toolbar > div:first-child { width: 100%; }
+    .production-toolbar .production-picker { width: 100%; justify-content: flex-start; }
+    .production-toolbar .production-team { width: 100%; justify-content: flex-start; border-top: 1px solid #222; padding-top: 10px; }
     .production-card .thumb-empty { color: #bfdbfe !important; }
     @media (max-width: 640px) {
       header { position: relative !important; padding: .75rem !important; }
@@ -245,19 +244,21 @@
         };
       }
 
-      // Compatibilidade com os dados antigos: true significava exatamente +1 semana.
       if (typeof weekOffset === "boolean") weekOffset = weekOffset ? 1 : 0;
+      const safeOffset = Math.max(-52, Math.min(52, Number(weekOffset) || 0));
+
       const now = new Date();
-      const currentWeekday = now.getDay();
+      const currentMonday = getWeekMonday(now);
 
-      let daysUntil = targetWeekday - currentWeekday;
-      if (daysUntil < 0) {
-        daysUntil += 7;
-      }
-      daysUntil += 7 * Math.max(0, Number(weekOffset) || 0);
+      // Âncora na Segunda-feira da semana alvo (offset 0 = esta semana, offset 1 = próxima semana)
+      const targetMonday = new Date(currentMonday);
+      targetMonday.setDate(currentMonday.getDate() + safeOffset * 7);
 
-      const targetDate = new Date(now);
-      targetDate.setDate(now.getDate() + daysUntil);
+      // Offset do dia da semana a partir da Segunda-feira (Seg=0, Ter=1, Qua=2, Qui=3, Sex=4, Sáb=5, Dom=6)
+      const dayOffsetFromMonday = targetWeekday === 0 ? 6 : targetWeekday - 1;
+
+      const targetDate = new Date(targetMonday);
+      targetDate.setDate(targetMonday.getDate() + dayOffsetFromMonday);
       targetDate.setHours(0, 0, 0, 0);
 
       const formattedDate = targetDate.toLocaleDateString("pt-BR", {
@@ -266,8 +267,13 @@
       });
 
       const weekdayObj = WEEKDAYS.find((w) => w.day === targetWeekday) || WEEKDAYS[0];
-      const prefix = weekOffset > 0 ? `+${weekOffset} sem. ` : "";
+      const prefix = safeOffset > 0 ? `+${safeOffset} sem. ` : "";
       const displayDay = `${prefix}${weekdayObj.name}`;
+
+      const todayMidnight = new Date(now);
+      todayMidnight.setHours(0, 0, 0, 0);
+      const diffTime = targetDate.getTime() - todayMidnight.getTime();
+      const daysUntil = Math.round(diffTime / (24 * 60 * 60 * 1000));
 
       let countdownText = "";
       let badgeColor = "bg-zinc-900 text-zinc-300 border-zinc-800";
@@ -278,9 +284,12 @@
       } else if (daysUntil === 1) {
         countdownText = "Amanhã ⚡";
         badgeColor = "bg-amber-950/90 text-amber-300 border-amber-700";
-      } else {
+      } else if (daysUntil > 1) {
         countdownText = `Faltam ${daysUntil} dias`;
         badgeColor = "bg-zinc-900 text-zinc-300 border-zinc-800";
+      } else {
+        countdownText = daysUntil === -1 ? "Ontem" : `Passou há ${Math.abs(daysUntil)} dias`;
+        badgeColor = "bg-zinc-900 text-zinc-400 border-zinc-800";
       }
 
       return {
@@ -311,8 +320,8 @@
         const diffDays = Math.round((postMonday.getTime() - currentMonday.getTime()) / (24 * 60 * 60 * 1000));
         return Math.round(diffDays / 7);
       }
-      if (Number.isFinite(video.weekOffset)) {
-        return video.weekOffset;
+      if (video.weekOffset !== undefined && video.weekOffset !== null && !isNaN(Number(video.weekOffset))) {
+        return Number(video.weekOffset);
       }
       if (typeof video.isNextWeek === "boolean") {
         return video.isNextWeek ? 1 : 0;
@@ -721,8 +730,8 @@
       const activeVideos = [...videos]
         .filter((v) => !v.posted)
         .sort((a, b) => {
-          const offA = Number.isFinite(a.weekOffset) ? a.weekOffset : (a.isNextWeek ? 1 : 0);
-          const offB = Number.isFinite(b.weekOffset) ? b.weekOffset : (b.isNextWeek ? 1 : 0);
+          const offA = getVideoWeekOffset(a);
+          const offB = getVideoWeekOffset(b);
           const infoA = calculatePostDayInfo(a.weekday, offA);
           const infoB = calculatePostDayInfo(b.weekday, offB);
           return (infoA.timestamp || 0) - (infoB.timestamp || 0);
@@ -735,6 +744,14 @@
       const displayedVideos = activeTab === "producao" ? activeVideos : postedVideos;
 
       const upcomingOffsets = [0, 1, 2, 3];
+      videos.forEach((video) => {
+        const off = getVideoWeekOffset(video);
+        if (off > 3 && !upcomingOffsets.includes(off)) {
+          upcomingOffsets.push(off);
+        }
+      });
+      upcomingOffsets.sort((a, b) => a - b);
+
       const pastOffsets = [];
       videos.forEach((video) => {
         const off = getVideoWeekOffset(video);
@@ -888,8 +905,10 @@
                 </div>
                 {calendarWeeks.map(({ offset, weekVideos, monday }, index) => {
                   const weekLabel = monday.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
-                  const weekProgress = Math.min(100, Math.round((weekVideos.length / 2) * 100));
-                  const weekState = weekProgress === 100 ? "SEMANA CONCLUÍDA" : weekProgress > 0 ? "EM PRODUÇÃO" : "SEMANA LIVRE";
+                  const postedVideosInWeek = weekVideos.filter((v) => v.posted);
+                  const postedCount = postedVideosInWeek.length;
+                  const weekProgress = Math.min(100, Math.round((postedCount / 2) * 100));
+                  const weekState = postedCount >= 2 ? "SEMANA CONCLUÍDA" : weekVideos.length > 0 ? "EM PRODUÇÃO" : "SEMANA LIVRE";
                   const weekTitle = offset === 0 ? "Esta semana" : offset === 1 ? "Semana +1" : offset > 1 ? `Semana +${offset}` : offset === -1 ? "Semana anterior" : `${Math.abs(offset)} semanas atrás`;
                   const weekSubtitle = offset >= 0 ? `Começa em ${weekLabel}` : `Semana concluída de ${weekLabel}`;
                   const isFirstPast = offset < 0 && (index === 0 || calendarWeeks[index - 1].offset >= 0);
@@ -977,7 +996,7 @@
             ) : (
               <div className="space-y-6">
                 {displayedVideos.map((video) => {
-                  const selectedWeek = Number.isFinite(video.weekOffset) ? video.weekOffset : (video.isNextWeek ? 1 : 0);
+                  const selectedWeek = getVideoWeekOffset(video);
                   const dayInfo = calculatePostDayInfo(video.weekday, selectedWeek);
 
                   const thumbsComplete = Array.isArray(video.thumbs) && video.thumbs.filter(Boolean).length === 3;
@@ -1009,11 +1028,10 @@
                                 </>
                               )}
                             </div>
-                            <button type="button" onClick={() => toggleDetails(video.id)} className="ml-1 rounded-lg px-2 py-1 text-lg leading-none text-zinc-500 hover:bg-[#262626] hover:text-white" title="Mostrar detalhes">⋯</button>
                           </div>
 
                           {/* Seletor de Dias (Seg a Dom) - Botões Maiores e Bem Visíveis */}
-                          {!video.posted && <div className={`production-picker ${expandedDetails[video.id] ? "" : "hidden"} flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap`}>
+                          {!video.posted && <div className="production-picker flex items-center gap-1 bg-[#050505] p-1.5 rounded-xl border border-[#222222] flex-wrap">
                             {[0, 1, 2, 3].map((offset) => (
                               <button key={offset} type="button" onClick={() => handleWeekOffsetClick(video.id, offset)} className={`px-2.5 py-2 rounded-lg text-[10px] font-black transition-all ${selectedWeek === offset ? "bg-white text-black" : "text-zinc-400 hover:text-white hover:bg-[#181818]"}`} title={`Agendar para ${offset === 0 ? "esta semana" : `daqui a ${offset} semana${offset > 1 ? "s" : ""}`}`}>
                                 {offset === 0 ? "ESTA" : `+${offset} SEM.`}
@@ -1046,7 +1064,7 @@
                         </div>
 
                         {/* Equipe + Botão Vídeo Postado */}
-                        <div className={`production-team ${expandedDetails[video.id] ? "" : "hidden"} flex items-center gap-2.5 flex-wrap`}>
+                        <div className="production-team flex items-center gap-2.5 flex-wrap">
                           <div className="flex flex-wrap items-center gap-1.5 bg-[#08080a] border border-[#1e1e24] p-1.5 rounded-xl">
                             <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 px-1">
                               Status:
