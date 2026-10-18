@@ -80,6 +80,84 @@
       main { padding: .75rem !important; }
       main > div { gap: .9rem !important; }
     }
+
+    * { box-sizing: border-box; }
+    .production-card { min-width: 0; }
+    .video-date-toolbar { flex-wrap: wrap; min-width: 0; }
+    .video-date-summary { flex-wrap: wrap; min-width: 0; }
+    .settings-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); gap: 24px; padding: 24px; border: 1px solid #2b2b30; border-radius: 18px; background: #111113; align-items: start; }
+    .posting-calendar, .production-checklist { min-width: 0; width: 100%; }
+    .calendar-heading h3, .checklist-heading h3 { margin: 0; font-size: 15px; font-weight: 800; color: #fafafa; }
+    .calendar-heading p { margin: 6px 0 18px; font-size: 12px; color: #92929d; }
+    .calendar-month { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; }
+    .calendar-month strong { font-size: 14px; text-transform: capitalize; }
+    .calendar-month button, .dialog-close { width: 40px; height: 40px; border: 1px solid #33333c; border-radius: 10px; background: #202024; color: #fafafa; font-size: 23px; cursor: pointer; }
+    .calendar-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; color: #a1a1aa; margin-bottom: 14px; }
+    .legend-free { color: #6ee7b7; } .legend-busy { color: #fda4af; }
+    .calendar-days { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
+    .calendar-weekday { text-align: center; color: #8b8b97; font-size: 11px; font-weight: 800; padding: 4px 0; text-transform: uppercase; letter-spacing: .06em; }
+    .calendar-date { position: relative; min-height: 66px; min-width: 0; border: 1px solid; border-radius: 11px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: border-color .15s, background .15s; }
+    .calendar-date strong { font-size: 17px; line-height: 1.2; }
+    .calendar-date small { font-size: 10px; font-weight: 600; }
+    .calendar-date.free { background: #0a2821; border-color: #185341; color: #6ee7b7; }
+    .calendar-date.busy { background: #35151c; border-color: #75303e; color: #fda4af; }
+    .calendar-date.selected { outline: 2px solid #fafafa; outline-offset: 1px; }
+    .date-check { position: absolute; top: 5px; right: 6px; font-size: 10px; color: white; }
+    .calendar-date:disabled { background: #19191d; border-color: #27272d; color: #555561; cursor: not-allowed; }
+    .calendar-month button:disabled { opacity: .3; cursor: not-allowed; }
+    .schedule-preview { background: #19191d; border: 1px solid #2b2b33; border-radius: 12px; padding: 14px; margin-top: 18px; font-size: 12px; line-height: 1.6; }
+    .schedule-preview > strong { color: #fafafa; }
+    .schedule-preview p { color: #a1a1aa; margin: 5px 0 0; }
+    .schedule-preview ul { list-style: none; padding: 0; margin: 10px 0 0; max-height: 190px; overflow-y: auto; }
+    .schedule-preview li { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; padding: 8px 0; border-top: 1px solid #303036; }
+    .schedule-preview li span { min-width: 0; flex: 1 1 150px; overflow-wrap: anywhere; }
+    .schedule-preview li b { color: #fda4af; white-space: nowrap; }
+    .calendar-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .schedule-confirm, .schedule-cancel { min-height: 44px; padding: 12px 16px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .schedule-confirm { flex: 1; background: #ef2525; color: white; border: 1px solid #ff4747; }
+    .schedule-confirm:hover { background: #dc1717; }
+    .schedule-confirm:disabled { opacity: .4; cursor: not-allowed; }
+    .schedule-cancel { background: #24242a; border: 1px solid #3a3a44; color: #ddd; }
+    .checklist-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+    .checklist-heading > span { font-size: 11px; color: #a1a1aa; }
+    .checklist-progress { margin: 16px 0 18px; background: #28282f; height: 5px; border-radius: 10px; overflow: hidden; }
+    .checklist-progress > span { display: block; height: 100%; background: #34d399; border-radius: inherit; transition: width .2s; }
+    .checklist-items { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+    .checklist-item { min-height: 50px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #1b1b20; color: #b1b1bd; border: 1px solid #33333b; border-radius: 10px; padding: 12px; font-size: 12px; font-weight: 700; text-align: left; }
+    button.checklist-item { cursor: pointer; }
+    .checklist-item.complete { color: #6ee7b7; border-color: #24604e; background: #102a23; }
+    button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+    .schedule-dialog-backdrop { position: fixed; inset: 0; z-index: 80; background: #000b; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .schedule-dialog { position: relative; width: 100%; max-width: 520px; max-height: calc(100dvh - 40px); overflow-y: auto; padding: 28px; background: #121214; border: 1px solid #3a3a42; border-radius: 20px; box-shadow: 0 30px 100px #0008; }
+    .schedule-dialog .calendar-heading { padding-right: 35px; }
+    .dialog-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; font-size: 13px; }
+    .schedule-notice { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; background: #102a23; color: #a7f3d0; font-size: 12px; }
+    .schedule-notice button { min-height: 32px; min-width: 32px; }
+    @media (max-width: 900px) {
+      .settings-panel { grid-template-columns: minmax(0,1fr); padding: 18px; gap: 26px; }
+    }
+    @media (max-width: 640px) {
+      header > div > nav, header > div > div { width: 100%; justify-content: space-between; }
+      header nav button { flex: 1; justify-content: center; }
+      .production-card { padding: 12px !important; }
+      .production-card > div:first-child > div:first-child { gap: 12px; }
+      .production-card > div:first-child > div:first-child > div:first-child { width: 100%; min-width: 0; }
+      .video-date-toolbar { width: 100%; padding: 12px !important; gap: 10px !important; border-radius: 12px !important; }
+      .video-date-toolbar > div:first-child { display: none; }
+      .video-date-summary { flex: 1 1 100%; gap: 8px !important; }
+      .video-date-summary > span:first-child { font-size: 14px; }
+      .video-date-toolbar > button { margin-left: 0 !important; min-height: 40px; width: 100%; }
+      .settings-panel { padding: 12px; border-radius: 12px; }
+      .calendar-days { gap: 6px; }
+      .calendar-date { min-height: 61px; border-radius: 9px; }
+      .checklist-item { padding: 11px 9px; font-size: 11px; }
+      .schedule-dialog-backdrop { padding: 10px; }
+      .schedule-dialog { padding: 20px 14px; max-height: calc(100dvh - 20px); border-radius: 16px; }
+      .calendar-actions { flex-wrap: wrap; }
+      .schedule-confirm { flex-basis: 190px; }
+      textarea { font-size: 16px !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -152,7 +230,7 @@
     const POSTING_DAYS = new Set([3, 4, 6, 0]); // quarta, quinta, sábado e domingo
     const PRODUCTION_STEPS = [
       ["nandoSim", "Nando"], ["dudaSim", "Duda"], ["sonoraSim", "Sonora"],
-      ["legendasSim", "Legendas"], ["tvSim", "Vídeos TV"], ["depoisSim", "Depois"],
+      ["legendasSim", "Legendas"], ["tvSim", "Vídeos TV"],
       ["coloracaoSim", "Coloração"], ["finalizacaoSim", "Finalização"]
     ];
 
@@ -330,7 +408,7 @@
           nandoSim: true,
           dudaSim: false,
           sonoraSim: true,
-          legendasSim: false, tvSim: false, depoisSim: false, coloracaoSim: false, finalizacaoSim: false,
+          legendasSim: false, tvSim: false, coloracaoSim: false, finalizacaoSim: false,
           thumbs: ["", "", ""],
           titles: [
             "O DIA QUE O REAL MADRID QUEBROU O MERCADO DA BOLA",
@@ -373,12 +451,154 @@
     }
 
         const GIST_ID = "9dfe02c841f9bb12160cdf64f8d6db05";
-    const _tk = [46,33,38,22,33,113,8,29,4,0,10,61,24,29,10,14,122,14,29,43,59,45,42,40,112,12,17,32,62,6,39,51,36,45,122,33,5,6,17,19];
-    const G_TOKEN = _tk.map(function(c) { return String.fromCharCode(c ^ 73); }).join("");
+    const CLOUD_SESSION_KEY = "central_studio_cloud_session";
+    const PENDING_KEY = STORAGE_KEY + "_pending";
+    function getCloudToken() {
+      try { return sessionStorage.getItem(CLOUD_SESSION_KEY) || ""; } catch { return ""; }
+    }
+    function cloudHeaders() {
+      const token = getCloudToken();
+      return { "Accept": "application/vnd.github.v3+json", ...(token ? {"Authorization": "Bearer " + token} : {}) };
+    }
+
+
+    function localDateKey(date = new Date()) {
+      return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+    }
+    function parseDateKey(value) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return null;
+      const [y, m, d] = value.split("-").map(Number);
+      const date = new Date(y, m - 1, d, 12);
+      return localDateKey(date) === value ? date : null;
+    }
+    function nextPostingDate(value) {
+      const date = parseDateKey(value);
+      if (!date) throw new Error("Data inválida");
+      do { date.setDate(date.getDate() + 1); } while (!POSTING_DAYS.has(date.getDay()));
+      return localDateKey(date);
+    }
+    function withScheduledDate(video, dateStr) {
+      return { ...video, scheduledDate: dateStr, weekday: parseDateKey(dateStr).getDay(),
+        weekOffset: getWeekOffsetFromDate(dateStr), isNextWeek: undefined };
+    }
+    // Insert the selected video first; keep the remaining queue in its original order.
+    // Only a collision starts a cascade. Posted videos and dates before it stay untouched.
+    function scheduleVideo(items, selected, dateStr) {
+      const date = parseDateKey(dateStr);
+      if (!date || !POSTING_DAYS.has(date.getDay()) || dateStr < localDateKey()) {
+        throw new Error("Escolha uma quarta, quinta, sábado ou domingo a partir de hoje.");
+      }
+      const others = items.filter(v => v.id !== selected.id);
+      const queue = others.filter(v => !v.posted && getVideoScheduledDate(v) >= dateStr)
+        .map((v, index) => ({ v, index, date: getVideoScheduledDate(v) }))
+        .sort((a, b) => a.date.localeCompare(b.date) || a.index - b.index);
+      const updates = new Map([[selected.id, withScheduledDate(selected, dateStr)]]);
+      const moves = [];
+      let cursor = dateStr;
+      for (const {v, date: original} of queue) {
+        if (original <= cursor) {
+          const target = nextPostingDate(cursor);
+          updates.set(v.id, withScheduledDate(v, target));
+          moves.push({ id: v.id, title: v.titles?.find(Boolean) || "Vídeo sem título", from: original, to: target });
+          cursor = target;
+        } else {
+          break;
+        }
+      }
+      const result = items.map(v => updates.get(v.id) || v);
+      if (!items.some(v => v.id === selected.id)) result.unshift(updates.get(selected.id));
+      return { videos: result, moves };
+    }
+    function shortDate(value) {
+      return parseDateKey(value)?.toLocaleDateString("pt-BR", {day:"2-digit", month:"2-digit"}) || value;
+    }
+
+    function PostingCalendar({ videos, video, onSchedule, onCancel, isNew = false }) {
+      const today = localDateKey();
+      const initial = getVideoScheduledDate(video);
+      const [selected, setSelected] = useState(initial >= today ? initial : "");
+      const [month, setMonth] = useState(() => {
+        const date = parseDateKey(initial >= today ? initial : today);
+        return new Date(date.getFullYear(), date.getMonth(), 1, 12);
+      });
+      const [error, setError] = useState("");
+      const dates = [];
+      const firstMonday = getWeekMonday(month);
+      for (let week = 0; week < 6; week++) {
+        const row = [3, 4, 6, 0].map(day => {
+          const date = new Date(firstMonday);
+          date.setDate(firstMonday.getDate() + week * 7 + (day === 0 ? 6 : day - 1));
+          return date.getMonth() === month.getMonth() ? date : null;
+        });
+        if (row.some(Boolean)) dates.push(...row);
+      }
+      const occupied = new Map();
+      videos.filter(v => !v.posted && v.id !== video.id).forEach(v => {
+        const key = getVideoScheduledDate(v);
+        const list = occupied.get(key) || [];
+        occupied.set(key, [...list, v]);
+      });
+      let preview = null;
+      try { if (selected) preview = scheduleVideo(videos, video, selected); } catch (e) {}
+      const currentMonth = month.getFullYear() === new Date().getFullYear() && month.getMonth() === new Date().getMonth();
+      function changeMonth(delta) { setMonth(new Date(month.getFullYear(), month.getMonth() + delta, 1, 12)); }
+      return (
+        <div className="posting-calendar">
+          <div className="calendar-heading">
+            <div><h3>{isNew ? "Agendar novo vídeo" : "Data de publicação"}</h3><p>Quarta, quinta, sábado e domingo</p></div>
+          </div>
+          <div className="calendar-month">
+            <button type="button" aria-label="Mês anterior" disabled={currentMonth} onClick={() => changeMonth(-1)}>‹</button>
+            <strong aria-live="polite">{month.toLocaleDateString("pt-BR", {month:"long", year:"numeric"})}</strong>
+            <button type="button" aria-label="Próximo mês" onClick={() => changeMonth(1)}>›</button>
+          </div>
+          <div className="calendar-legend"><span className="legend-free">● Livre</span><span className="legend-busy">● Ocupado</span><span>✓ Selecionado</span></div>
+          <div className="calendar-days">
+            {["Qua", "Qui", "Sáb", "Dom"].map(label => <span key={label} className="calendar-weekday">{label}</span>)}
+            {dates.map((date, index) => {
+              if (!date) return <span key={"empty-" + index} aria-hidden="true" />;
+              const key = localDateKey(date);
+              const busy = occupied.get(key);
+              const past = key < today;
+              const chosen = selected === key;
+              const title = busy?.map(v => v.titles?.find(Boolean) || "Vídeo sem título").join("; ");
+              return <button key={key} type="button" disabled={past} aria-pressed={chosen}
+                aria-label={date.toLocaleDateString("pt-BR", {weekday:"long", day:"numeric", month:"long"}) + (past ? ", indisponível" : busy ? ", ocupado: " + title + ". Selecionar e remanejar." : ", livre")}
+                title={busy ? title : "Data livre"}
+                className={"calendar-date " + (busy ? "busy" : "free") + (chosen ? " selected" : "")}
+                onClick={() => {setSelected(key); setError("");}}>
+                <strong>{date.getDate()}{chosen && <span className="date-check">✓</span>}</strong>
+                <small>{past ? "Passou" : busy ? "Ocupado" : "Livre"}</small>
+              </button>;
+            })}
+          </div>
+          <div className="schedule-preview" aria-live="polite">
+            {preview ? <><strong>Seu vídeo fica em {shortDate(selected)}</strong>
+              {preview.moves.length > 0 ? <>
+                <p>Os vídeos abaixo avançam automaticamente, na mesma ordem:</p>
+                <ul>{preview.moves.map(move => <li key={move.id}><span>{move.title}</span><b>{shortDate(move.from)} → {shortDate(move.to)}</b></li>)}</ul>
+              </> : <p>Nenhum outro vídeo será remanejado.</p>}
+            </> : <p>Selecione uma data disponível ou ocupada para agendar.</p>}
+          </div>
+          {error && <p role="alert">{error}</p>}
+          <div className="calendar-actions">
+            {onCancel && <button type="button" className="schedule-cancel" onClick={onCancel}>Cancelar</button>}
+            <button type="button" className="schedule-confirm" disabled={!preview}
+              onClick={() => {try {onSchedule(selected);} catch(e) {setError(e.message);}}}>
+              {isNew ? "Criar e agendar vídeo" : preview?.moves.length ? "Salvar e remanejar" : "Salvar data"}
+            </button>
+          </div>
+        </div>
+      );
+    }
 
     function App() {
       const [videos, setVideos] = useState([]);
       const [activeTab, setActiveTab] = useState("producao");
+      const [cloudAuthOpen, setCloudAuthOpen] = useState(false);
+      const [cloudAuthError, setCloudAuthError] = useState("");
+      const [newVideo, setNewVideo] = useState(null);
+      const [scheduleNotice, setScheduleNotice] = useState("");
       const [postingId, setPostingId] = useState(null);
       const [expandedDetails, setExpandedDetails] = useState({});
       const [loaded, setLoaded] = useState(false);
@@ -393,6 +613,27 @@
       videosRef.current = videos;
       loadedRef.current = loaded;
 
+      useEffect(() => {
+        if (!newVideo) return;
+        const previous = document.activeElement;
+        const oldOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        function trapFocus(event) {
+          if (event.key !== "Tab") return;
+          const dialog = document.querySelector(".schedule-dialog");
+          const controls = dialog ? Array.from(dialog.querySelectorAll('button:not([disabled]), [tabindex="0"]')) : [];
+          const first = controls[0], last = controls[controls.length - 1];
+          if (event.shiftKey && document.activeElement === first) {event.preventDefault(); last?.focus();}
+          else if (!event.shiftKey && document.activeElement === last) {event.preventDefault(); first?.focus();}
+        }
+        document.addEventListener("keydown", trapFocus);
+        return () => {
+          document.body.style.overflow = oldOverflow;
+          document.removeEventListener("keydown", trapFocus);
+          previous?.focus();
+        };
+      }, [newVideo]);
+
       // Sincronizar da Nuvem
       const syncFromCloud = useCallback(async (isInitial = false) => {
         if (isSyncingRef.current) return;
@@ -406,11 +647,7 @@
         try {
           // 1. Tenta buscar do Gist na nuvem
           const res = await fetch("https://api.github.com/gists/" + GIST_ID + "?t=" + Date.now(), {
-            headers: {
-              "Accept": "application/vnd.github.v3+json",
-              "Authorization": "token " + G_TOKEN,
-              "User-Agent": "CentralStudioApp"
-            }
+            headers: cloudHeaders()
           });
 
           if (res.ok) {
@@ -435,12 +672,13 @@
                 const currentStr = JSON.stringify(videosRef.current);
                 const remoteStr = JSON.stringify(remoteVideos);
                 if (currentStr !== remoteStr) {
+                  if (loadedRef.current) skipNextSaveRef.current = true;
                   setVideos(remoteVideos);
                   try {
                     localStorage.setItem(STORAGE_KEY, remoteStr);
                   } catch (e) {}
                 }
-                setCloudStatus("synced");
+                setCloudStatus(getCloudToken() ? "synced" : "readonly");
                 isSyncingRef.current = false;
                 return;
               }
@@ -455,12 +693,13 @@
               const currentStr = JSON.stringify(videosRef.current);
               const staticStr = JSON.stringify(staticVideos);
               if (currentStr !== staticStr) {
+                if (loadedRef.current) skipNextSaveRef.current = true;
                 setVideos(staticVideos);
                 try {
                   localStorage.setItem(STORAGE_KEY, staticStr);
                 } catch (e) {}
               }
-              setCloudStatus("synced");
+              setCloudStatus(getCloudToken() ? "synced" : "readonly");
               isSyncingRef.current = false;
               return;
             }
@@ -469,22 +708,21 @@
           console.warn("Aviso ao sincronizar da nuvem:", err);
         }
 
-        setCloudStatus("synced");
+        setCloudStatus("offline");
         isSyncingRef.current = false;
       }, []);
 
       // Salvar na Nuvem (PATCH no Gist)
       const saveToCloud = useCallback(async (currentVideos, revision) => {
+        if (!getCloudToken()) {
+          setCloudStatus("local");
+          return;
+        }
         setCloudStatus("saving");
         try {
           const res = await fetch("https://api.github.com/gists/" + GIST_ID, {
             method: "PATCH",
-            headers: {
-              "Accept": "application/vnd.github.v3+json",
-              "Authorization": "token " + G_TOKEN,
-              "Content-Type": "application/json",
-              "User-Agent": "CentralStudioApp"
-            },
+            headers: {...cloudHeaders(), "Content-Type": "application/json"},
             body: JSON.stringify({
               files: {
                 "videos.json": { content: JSON.stringify(currentVideos) }
@@ -494,19 +732,18 @@
           if (res.ok) {
             if (revision === saveRevisionRef.current) {
               pendingSaveRef.current = false;
+              try { localStorage.removeItem(PENDING_KEY); } catch {}
               setCloudStatus("synced");
             }
           } else {
             console.error("Erro na resposta da nuvem:", res.status);
             if (revision === saveRevisionRef.current) {
-              pendingSaveRef.current = false;
               setCloudStatus("offline");
             }
           }
         } catch (err) {
           console.error("Erro de conexão ao salvar na nuvem:", err);
           if (revision === saveRevisionRef.current) {
-            pendingSaveRef.current = false;
             setCloudStatus("offline");
           }
         }
@@ -537,7 +774,10 @@
         // A primeira leitura acontece antes de liberar qualquer gravação. Isso
         // impede que a abertura da página salve um estado vazio na nuvem.
         (async () => {
-          await syncFromCloud(true);
+          const hasPending = hasLocal && localStorage.getItem(PENDING_KEY) === "1";
+          pendingSaveRef.current = hasPending;
+          if (hasPending) setCloudStatus(getCloudToken() ? "offline" : "local");
+          else await syncFromCloud(true);
           skipNextSaveRef.current = true;
           setLoaded(true);
         })();
@@ -562,7 +802,8 @@
         }
         const revision = ++saveRevisionRef.current;
         pendingSaveRef.current = true;
-        setCloudStatus("saving");
+        try { localStorage.setItem(PENDING_KEY, "1"); } catch {}
+        setCloudStatus(getCloudToken() ? "saving" : "local");
         saveTimerRef.current = setTimeout(() => {
           saveToCloud(videos, revision);
         }, 1200);
@@ -571,6 +812,23 @@
           if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
         };
       }, [videos, loaded, saveToCloud]);
+
+      async function connectCloud(event) {
+        event.preventDefault();
+        const token = new FormData(event.currentTarget).get("cloudToken")?.trim();
+        if (!token) return;
+        setCloudAuthError("");
+        try {
+          const response = await fetch("https://api.github.com/gists/" + GIST_ID, {
+            headers: {"Accept": "application/vnd.github.v3+json", "Authorization": "Bearer " + token}
+          });
+          if (!response.ok) throw new Error("Não foi possível conectar. Confira o token e a permissão de Gist.");
+          sessionStorage.setItem(CLOUD_SESSION_KEY, token);
+          setCloudAuthOpen(false);
+          if (pendingSaveRef.current) await saveToCloud(videosRef.current, saveRevisionRef.current);
+          else await syncFromCloud();
+        } catch (error) { setCloudAuthError(error.message); }
+      }
 
       function addNewVideo() {
         playSound("click");
@@ -587,34 +845,22 @@
           nandoSim: false,
           dudaSim: false,
           sonoraSim: false,
-          legendasSim: false, tvSim: false, depoisSim: false, coloracaoSim: false, finalizacaoSim: false,
+          legendasSim: false, tvSim: false, coloracaoSim: false, finalizacaoSim: false,
           thumbs: ["", "", ""],
           titles: ["", "", ""],
         };
-        setVideos((prev) => [newV, ...prev]);
-        setActiveTab("producao");
+        setNewVideo(newV);
       }
 
       function handleDateChange(id, dateStr) {
-        if (!dateStr) return;
-        playSound("click");
-        const parts = dateStr.split("-").map(Number);
-        const dt = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
-        const weekday = dt.getDay();
-        const offset = getWeekOffsetFromDate(dateStr);
-        setVideos((prev) =>
-          prev.map((v) =>
-            v.id === id
-              ? {
-                  ...v,
-                  scheduledDate: dateStr,
-                  weekday,
-                  weekOffset: offset,
-                  isNextWeek: undefined,
-                }
-              : v
-          )
-        );
+        const selected = newVideo?.id === id ? newVideo : videosRef.current.find(v => v.id === id);
+        if (!selected) return;
+        const result = scheduleVideo(videosRef.current, selected, dateStr);
+        playSound("success");
+        setVideos(result.videos);
+        setScheduleNotice("Vídeo agendado para " + shortDate(dateStr) + (result.moves.length ? ". " + result.moves.length + " vídeo(s) remanejado(s)." : "."));
+        setNewVideo(null);
+        setActiveTab("producao");
       }
 
       function toggleDetails(id) {
@@ -685,7 +931,7 @@
       function restoreToProduction(id) {
         playSound("click");
         setVideos((prev) =>
-          prev.map((v) => (v.id === id ? { ...v, posted: false } : v))
+          scheduleVideo(prev, { ...prev.find(v => v.id === id), posted: false }, getUpcomingPostingDates(1)[0].dateStr).videos
         );
       }
 
@@ -808,20 +1054,20 @@
                 {/* Indicador de Nuvem / Sincronização PC & Celular */}
                 <button
                   type="button"
-                  onClick={() => syncFromCloud()}
+                  onClick={() => { if (!getCloudToken()) setCloudAuthOpen(true); else if (pendingSaveRef.current) saveToCloud(videosRef.current, saveRevisionRef.current); else syncFromCloud(); }}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-black transition border cursor-pointer hover:bg-[#141414] active:scale-95"
                   style={{
                     backgroundColor: "#080808",
                     borderColor: cloudStatus === "saving" || cloudStatus === "syncing" ? "#854d0e" : "#1a1a1a",
-                    color: cloudStatus === "saving" || cloudStatus === "syncing" ? "#fef08a" : "#34d399"
+                    color: cloudStatus === "synced" ? "#34d399" : "#fef08a"
                   }}
-                  title="Sincronização Nuvem PC & Celular 24h (Clique para atualizar agora)"
+                  title="Conectar a sincronização ou atualizar os vídeos da nuvem"
                 >
                   <span
                     className={`w-2 h-2 rounded-full ${
                       cloudStatus === "saving" || cloudStatus === "syncing"
                         ? "bg-amber-400 animate-ping"
-                        : "bg-emerald-400"
+                        : cloudStatus === "synced" ? "bg-emerald-400" : "bg-amber-400"
                     }`}
                   ></span>
                   <span className="hidden sm:inline">
@@ -829,10 +1075,10 @@
                       ? "Salvando na Nuvem..."
                       : cloudStatus === "syncing"
                       ? "Sincronizando..."
-                      : "Nuvem Sincronizada"}
+                      : cloudStatus === "synced" ? "Nuvem sincronizada" : cloudStatus === "offline" ? "Reconectar nuvem" : "Conectar nuvem"}
                   </span>
                   <span className="sm:hidden">
-                    {cloudStatus === "saving" ? "Salvando..." : cloudStatus === "syncing" ? "Sync..." : "Nuvem OK"}
+                    {cloudStatus === "saving" ? "Salvando..." : cloudStatus === "syncing" ? "Sync..." : cloudStatus === "synced" ? "Nuvem OK" : "Conectar nuvem"}
                   </span>
                   <span className="text-zinc-500 text-[10px]">🔄</span>
                 </button>
@@ -848,6 +1094,27 @@
             </div>
           </header>
 
+          {cloudStatus !== "synced" && cloudStatus !== "saving" && cloudStatus !== "syncing" && <div className="schedule-notice" role="status">
+            <span>{cloudStatus === "local" ? "Alterações salvas neste navegador. Conecte a nuvem para sincronizar com o PC e celular." : cloudStatus === "readonly" ? "Vídeos carregados da nuvem. Conecte para salvar alterações entre PC e celular." : "Sem conexão com a nuvem. Seus vídeos continuam salvos neste navegador."}</span>
+          </div>}
+          {cloudAuthOpen && <div className="schedule-dialog-backdrop">
+            <form className="schedule-dialog" role="dialog" aria-modal="true" aria-label="Conectar nuvem" onSubmit={connectCloud}>
+              <h2 className="text-lg font-bold mb-3">Conectar nuvem</h2>
+              <p className="text-sm text-zinc-400 mb-4">Use um token GitHub com acesso ao Gist dos vídeos. Ele fica somente nesta sessão do navegador e é enviado apenas ao GitHub.</p>
+              <label className="block text-sm mb-2" htmlFor="cloud-token">Token GitHub</label>
+              <input autoFocus id="cloud-token" type="password" name="cloudToken" required autoComplete="off" className="w-full p-3 rounded-lg bg-zinc-900 border border-zinc-600" />
+              {cloudAuthError && <p role="alert" className="text-red-300 text-sm mt-3">{cloudAuthError}</p>}
+              <div className="calendar-actions"><button type="button" className="schedule-cancel" onClick={() => setCloudAuthOpen(false)}>Cancelar</button><button type="submit" className="schedule-confirm">Conectar</button></div>
+            </form>
+          </div>}
+          {newVideo && <div className="schedule-dialog-backdrop" onClick={(e) => {if(e.target === e.currentTarget) setNewVideo(null);}}>
+            <div className="schedule-dialog" role="dialog" aria-modal="true" aria-label="Agendar novo vídeo"
+              onKeyDown={(e) => {if(e.key === "Escape") setNewVideo(null);}}>
+              <button autoFocus type="button" className="dialog-close" aria-label="Fechar agendamento" onClick={() => setNewVideo(null)}>✕</button>
+              <PostingCalendar videos={videos} video={newVideo} isNew onCancel={() => setNewVideo(null)} onSchedule={(date) => handleDateChange(newVideo.id, date)} />
+            </div>
+          </div>}
+          {scheduleNotice && <div className="schedule-notice" role="status"><span>{scheduleNotice}</span><button type="button" aria-label="Fechar aviso" onClick={() => setScheduleNotice("")}>✕</button></div>}
           {/* ÁREA DOS VÍDEOS EM TELONA CHEIA */}
           <main className="flex-1 w-full max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto overflow-x-hidden bg-[#000000]">
             {displayedVideos.length === 0 ? (
@@ -889,11 +1156,11 @@
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                           {/* Left: Badge do Dia com botão de expandir ⋯ */}
                           <div className="flex items-center gap-3 flex-wrap">
-                            <div className="flex items-center gap-3 bg-[#131317] border border-[#2b2b34] px-4 py-2.5 rounded-2xl shadow-md">
+                            <div className="video-date-toolbar flex items-center gap-3 bg-[#131317] border border-[#2b2b34] px-4 py-2.5 rounded-2xl shadow-md">
                               <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-zinc-950 text-xl font-black select-none shadow-sm">
                                 📅
                               </div>
-                              <div className="flex items-center gap-2.5 whitespace-nowrap">
+                              <div className="video-date-summary flex items-center gap-2.5">
                                 {video.posted ? (
                                   <span className="text-base font-black text-emerald-400 uppercase tracking-tight">POSTADO NO YOUTUBE ✓</span>
                                 ) : (
@@ -943,10 +1210,10 @@
                                   type="button"
                                   disabled
                                   className="text-xs sm:text-sm font-black px-4 py-2 rounded-xl opacity-40 cursor-not-allowed bg-[#18181b] text-zinc-400 border border-[#27272a] flex items-center gap-2 select-none"
-                                  title={`Marque todas as caixas de produção para liberar (${completedSteps}/9 concluídas)`}
+                                  title={`Marque todas as caixas de produção para liberar (${completedSteps}/${PRODUCTION_STEPS.length + 1} concluídas)`}
                                 >
                                   <span>🔒</span>
-                                  <span>Vídeo Postado ({completedSteps}/9)</span>
+                                  <span>Vídeo Postado ({completedSteps}/{PRODUCTION_STEPS.length + 1})</span>
                                 </button>
                               )
                             ) : (
@@ -973,69 +1240,23 @@
 
                         {/* Painel Expansível de Configurações (Some quando fechado!) */}
                         {!video.posted && expandedDetails[video.id] && (
-                          <div className="bg-[#0f0f13] border border-[#262630] p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 animate-in fade-in duration-200">
-                            {/* Seletor de Data de Publicação */}
-                            <div className="flex items-center gap-2.5 flex-wrap">
-                              <span className="text-xs font-black uppercase tracking-wider text-zinc-400">Data de Publicação:</span>
-                              <label className="flex items-center gap-2 bg-[#18181f] border border-[#353545] rounded-xl px-3 py-1.5 hover:border-zinc-400 transition cursor-pointer">
-                                <span className="text-sm select-none">🗓️</span>
-                                <input
-                                  type="date"
-                                  value={dayInfo.dateStr}
-                                  min={todayStr}
-                                  onChange={(e) => handleDateChange(video.id, e.target.value)}
-                                  className="bg-transparent text-white text-xs sm:text-sm font-black border-0 outline-none cursor-pointer [color-scheme:dark]"
-                                />
-                              </label>
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                {upcomingPostingDays.slice(0, 3).map((u) => (
-                                  <button
-                                    key={u.dateStr}
-                                    type="button"
-                                    onClick={() => handleDateChange(video.id, u.dateStr)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-black transition active:scale-95 cursor-pointer ${
-                                      dayInfo.dateStr === u.dateStr
-                                        ? "bg-white text-black shadow-sm"
-                                        : "bg-[#18181f] text-zinc-400 hover:text-white hover:bg-[#23232c]"
-                                    }`}
-                                  >
-                                    {u.label}
+                          <div className="settings-panel">
+                            <PostingCalendar videos={videos} video={video} onSchedule={(date) => handleDateChange(video.id, date)} />
+                            <div className="production-checklist">
+                              <div className="checklist-heading"><h3>Etapas de produção</h3><span>{completedSteps}/{PRODUCTION_STEPS.length + 1} concluídas</span></div>
+                              <div className="checklist-progress"><span style={{width: (completedSteps / (PRODUCTION_STEPS.length + 1) * 100) + "%"}} /></div>
+                              <div className="checklist-items">
+                                {PRODUCTION_STEPS.map(([key, label]) => (
+                                  <button key={key} type="button" aria-pressed={!!video[key]}
+                                    onClick={() => toggleProcess(video.id, key)}
+                                    className={"checklist-item " + (video[key] ? "complete" : "")}>
+                                    <span>{label}</span><b>{video[key] ? "✓" : "○"}</b>
                                   </button>
                                 ))}
+                                <div className={"checklist-item " + (thumbsComplete ? "complete" : "")}>
+                                  <span>Thumbs</span><b>{thumbsComplete ? "✓" : (video.thumbs?.filter(Boolean).length || 0) + "/3"}</b>
+                                </div>
                               </div>
-                            </div>
-
-                            {/* Checklist de Etapas de Produção */}
-                            <div className="flex flex-wrap items-center gap-1.5 bg-[#09090c] border border-[#1f1f26] p-1.5 rounded-xl">
-                              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 px-1.5">
-                                Checklist:
-                              </span>
-                              {PRODUCTION_STEPS.map(([key, label]) => {
-                                const isActive = !!video[key];
-                                return (
-                                  <button
-                                    key={key}
-                                    type="button"
-                                    onClick={() => toggleProcess(video.id, key)}
-                                    className={`px-2.5 py-1.5 rounded-lg text-xs font-black transition-all active:scale-95 flex items-center gap-1 cursor-pointer ${
-                                      isActive ? "status-btn-active" : "status-btn-inactive"
-                                    }`}
-                                    title={`Alternar ${label}: ${isActive ? "Concluído" : "Pendente"}`}
-                                  >
-                                    <span>{label}</span>
-                                    <span>{isActive ? "✓" : "·"}</span>
-                                  </button>
-                                );
-                              })}
-                              <span
-                                className={`px-2.5 py-1.5 rounded-lg text-xs font-black flex items-center gap-1 transition-all ${
-                                  thumbsComplete ? "status-btn-active" : "status-btn-inactive"
-                                }`}
-                                title={thumbsComplete ? "3 thumbnails enviadas" : "Envie as 3 thumbnails abaixo para completar esta etapa"}
-                              >
-                                <span>Thumbs</span>
-                                <span>{thumbsComplete ? "✓" : `${video.thumbs?.filter(Boolean).length || 0}/3`}</span>
-                              </span>
                             </div>
                           </div>
                         )}
