@@ -158,6 +158,56 @@
       textarea { font-size: 16px !important; }
     }
 
+
+    /* Compact project settings */
+    .settings-panel { display:flex; align-items:center; flex-wrap:wrap; gap:14px; padding:14px; border-radius:12px; background:#111113; }
+    .publication-control { position:relative; flex:0 0 auto; }
+    .date-control-trigger { display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:36px; padding:8px 12px; border:1px solid #35353b; border-radius:8px; background:#202023; color:#e4e4e7; font-size:12px; font-weight:600; cursor:pointer; }
+    .date-control-trigger:hover { background:#29292e; }
+    .production-checklist { display:flex; align-items:center; gap:12px; flex:1 1 500px; width:auto; }
+    .checklist-count { flex:0 0 auto; color:#90909a; font-size:11px; font-weight:600; font-variant-numeric:tabular-nums; }
+    .checklist-items { display:flex; flex-wrap:wrap; gap:6px; flex:1; min-width:0; }
+    .checklist-item { min-height:34px; padding:8px 10px; gap:12px; border-radius:7px; border-color:#2e2e34; background:#19191d; font-size:11px; font-weight:600; color:#a1a1aa; }
+    .checklist-item b { font-size:11px; font-weight:600; color:#60606b; }
+    .checklist-item.complete { background:#14231d; border-color:#254a3b; color:#9adbbd; }
+    .checklist-item.complete b { color:#6bc69c; }
+    .calendar-popover { position:absolute; z-index:25; top:calc(100% + 10px); left:0; width:330px; max-width:calc(100vw - 64px); padding:18px; background:#161619; border:1px solid #36363e; border-radius:14px; box-shadow:0 16px 45px #0009; }
+    .calendar-heading h3 { margin:0 0 18px; font-size:15px; }
+    .calendar-month { padding-bottom:10px; gap:10px; }
+    .calendar-month strong { font-size:13px; }
+    .calendar-month button { width:32px; height:32px; border-radius:7px; background:#222227; border-color:#303037; font-size:20px; }
+    .calendar-legend { gap:12px; margin-bottom:10px; font-size:10px; }
+    .calendar-days { gap:6px; }
+    .calendar-weekday { font-size:10px; font-weight:600; letter-spacing:.02em; }
+    .calendar-date { min-height:40px; border-radius:7px; padding:5px; }
+    .calendar-date strong { font-size:13px; font-weight:600; }
+    .calendar-date.free { background:#14251e; border-color:#264d3c; color:#91d4b3; }
+    .calendar-date.busy { background:#321c21; border-color:#63323e; color:#e9a1ad; }
+    .calendar-date.selected { outline:1.5px solid #ededf0; outline-offset:1px; }
+    .calendar-actions { margin-top:14px; gap:8px; flex-wrap:nowrap; }
+    .schedule-confirm,.schedule-cancel { min-height:38px; padding:9px 12px; font-size:11px; font-weight:700; border-radius:8px; }
+    .schedule-confirm { flex-basis:auto; }
+    .schedule-preview { margin-top:12px; padding:10px 12px; border-radius:8px; background:#1b1b20; font-size:11px; }
+    .schedule-preview summary { color:#c7c7d0; cursor:pointer; }
+    .schedule-preview li { font-size:10px; }
+    .schedule-dialog { max-width:380px; padding:24px; border-radius:16px; }
+    @media(max-width:900px) {
+      .production-checklist { flex-basis:100%; }
+      .settings-panel { gap:12px; padding:14px; }
+    }
+    @media(max-width:640px) {
+      .settings-panel { display:block; padding:12px; }
+      .publication-control { width:100%; margin-bottom:12px; }
+      .date-control-trigger { width:100%; min-height:40px; }
+      .calendar-popover { position:static; width:100%; max-width:none; margin-top:10px; padding:12px; box-shadow:none; background:#151518; }
+      .production-checklist { align-items:flex-start; gap:8px; }
+      .checklist-count { padding-top:11px; font-size:10px; }
+      .checklist-items { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+      .checklist-item { min-height:38px; padding:9px; font-size:11px; gap:5px; }
+      .calendar-date { min-height:42px; }
+      .schedule-dialog { padding:20px 16px; }
+    }
+
   </style>
 </head>
 <body>
@@ -581,7 +631,7 @@
           date.setDate(firstMonday.getDate() + week * 7 + (day === 0 ? 6 : day - 1));
           return date.getMonth() === month.getMonth() ? date : null;
         });
-        if (row.some(Boolean)) dates.push(...row);
+        if (row.some(date => date && localDateKey(date) >= today)) dates.push(...row);
       }
       const occupied = new Map();
       videos.filter(v => !v.posted && v.id !== video.id).forEach(v => {
@@ -595,15 +645,13 @@
       function changeMonth(delta) { setMonth(new Date(month.getFullYear(), month.getMonth() + delta, 1, 12)); }
       return (
         <div className="posting-calendar">
-          <div className="calendar-heading">
-            <div><h3>{isNew ? "Agendar novo vídeo" : "Data de publicação"}</h3><p>Quarta, quinta, sábado e domingo</p></div>
-          </div>
+          {isNew && <div className="calendar-heading"><h3>Agendar vídeo</h3></div>}
           <div className="calendar-month">
             <button type="button" aria-label="Mês anterior" disabled={currentMonth} onClick={() => changeMonth(-1)}>‹</button>
             <strong aria-live="polite">{month.toLocaleDateString("pt-BR", {month:"long", year:"numeric"})}</strong>
             <button type="button" aria-label="Próximo mês" onClick={() => changeMonth(1)}>›</button>
           </div>
-          <div className="calendar-legend"><span className="legend-free">● Livre</span><span className="legend-busy">● Ocupado</span><span>✓ Selecionado</span></div>
+          <div className="calendar-legend"><span className="legend-free">● Livre</span><span className="legend-busy">● Ocupado</span></div>
           <div className="calendar-days">
             {["Qua", "Qui", "Sáb", "Dom"].map(label => <span key={label} className="calendar-weekday">{label}</span>)}
             {dates.map((date, index) => {
@@ -611,6 +659,7 @@
               const key = localDateKey(date);
               const busy = occupied.get(key);
               const past = key < today;
+              if (past) return <span key={key} aria-hidden="true" />;
               const chosen = selected === key;
               const title = busy?.map(v => v.titles?.find(Boolean) || "Vídeo sem título").join("; ");
               return <button key={key} type="button" disabled={past} aria-pressed={chosen}
@@ -618,29 +667,57 @@
                 title={busy ? title : "Data livre"}
                 className={"calendar-date " + (busy ? "busy" : "free") + (chosen ? " selected" : "")}
                 onClick={() => {setSelected(key); setError("");}}>
-                <strong>{date.getDate()}{chosen && <span className="date-check">✓</span>}</strong>
-                <small>{past ? "Passou" : busy ? "Ocupado" : "Livre"}</small>
+                <strong>{date.getDate()}</strong>
               </button>;
             })}
           </div>
-          <div className="schedule-preview" aria-live="polite">
-            {preview ? <><strong>Seu vídeo fica em {shortDate(selected)}</strong>
-              {preview.moves.length > 0 ? <>
-                <p>Os vídeos abaixo avançam automaticamente, na mesma ordem:</p>
-                <ul>{preview.moves.map(move => <li key={move.id}><span>{move.title}</span><b>{shortDate(move.from)} → {shortDate(move.to)}</b></li>)}</ul>
-              </> : <p>Nenhum outro vídeo será remanejado.</p>}
-            </> : <p>Selecione uma data disponível ou ocupada para agendar.</p>}
-          </div>
+          {preview?.moves.length > 0 && <details className="schedule-preview">
+            <summary>{preview.moves.length === 1 ? "1 vídeo será remanejado" : preview.moves.length + " vídeos serão remanejados"}</summary>
+            <ul>{preview.moves.map(move => <li key={move.id}><span>{move.title}</span><b>{shortDate(move.from)} → {shortDate(move.to)}</b></li>)}</ul>
+          </details>}
           {error && <p role="alert">{error}</p>}
           <div className="calendar-actions">
             {onCancel && <button type="button" className="schedule-cancel" onClick={onCancel}>Cancelar</button>}
-            <button type="button" className="schedule-confirm" disabled={!preview}
+            <button type="button" className="schedule-confirm" disabled={!preview || (!isNew && selected === initial)}
               onClick={() => {try {onSchedule(selected);} catch(e) {setError(e.message);}}}>
-              {isNew ? "Criar e agendar vídeo" : preview?.moves.length ? "Salvar e remanejar" : "Salvar data"}
+              {isNew ? "Agendar vídeo" : "Salvar data"}
             </button>
           </div>
         </div>
       );
+    }
+
+
+    function PublicationDateControl({videos, video, onSchedule}) {
+      const [open, setOpen] = useState(false);
+      const container = useRef(null);
+      const trigger = useRef(null);
+      useEffect(() => {
+        if (!open) return;
+        function closeOutside(event) {
+          if (!container.current?.contains(event.target)) setOpen(false);
+        }
+        function closeOnEscape(event) {
+          if (event.key === "Escape") {setOpen(false); trigger.current?.focus();}
+        }
+        document.addEventListener("pointerdown", closeOutside);
+        document.addEventListener("keydown", closeOnEscape);
+        return () => {
+          document.removeEventListener("pointerdown", closeOutside);
+          document.removeEventListener("keydown", closeOnEscape);
+        };
+      }, [open]);
+      return <div className="publication-control" ref={container}>
+        <button ref={trigger} type="button" className="date-control-trigger" aria-expanded={open}
+          aria-controls={"calendar-" + video.id} onClick={() => setOpen(value => !value)}>
+          <span>Alterar data</span><span aria-hidden="true">{open ? "▴" : "▾"}</span>
+        </button>
+        {open && <div id={"calendar-" + video.id} className="calendar-popover" role="region" aria-label="Alterar data de publicação">
+          <PostingCalendar videos={videos} video={video}
+            onCancel={() => {setOpen(false); trigger.current?.focus();}}
+            onSchedule={(date) => {onSchedule(date); setOpen(false); trigger.current?.focus();}} />
+        </div>}
+      </div>;
     }
 
     function App() {
@@ -1200,7 +1277,7 @@
                                   }`}
                                   title={expandedDetails[video.id] ? "Ocultar configurações" : "Configurar data e status"}
                                 >
-                                  {expandedDetails[video.id] ? "Fechar ✕" : "Configurar ⋯"}
+                                  {expandedDetails[video.id] ? "Fechar" : "Configurar"}
                                 </button>
                               )}
                             </div>
@@ -1259,10 +1336,9 @@
                         {/* Painel Expansível de Configurações (Some quando fechado!) */}
                         {!video.posted && expandedDetails[video.id] && (
                           <div className="settings-panel">
-                            <PostingCalendar videos={videos} video={video} onSchedule={(date) => handleDateChange(video.id, date)} />
+                            <PublicationDateControl videos={videos} video={video} onSchedule={(date) => handleDateChange(video.id, date)} />
                             <div className="production-checklist">
-                              <div className="checklist-heading"><h3>Etapas de produção</h3><span>{completedSteps}/{PRODUCTION_STEPS.length + 1} concluídas</span></div>
-                              <div className="checklist-progress"><span style={{width: (completedSteps / (PRODUCTION_STEPS.length + 1) * 100) + "%"}} /></div>
+                              <span className="checklist-count" title="Etapas concluídas">{completedSteps}/{PRODUCTION_STEPS.length + 1}</span>
                               <div className="checklist-items">
                                 {PRODUCTION_STEPS.map(([key, label]) => (
                                   <button key={key} type="button" aria-pressed={!!video[key]}
