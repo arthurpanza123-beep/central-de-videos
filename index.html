@@ -208,6 +208,52 @@
       .schedule-dialog { padding:20px 16px; }
     }
 
+
+    .calendar-modal-backdrop { position:fixed; inset:0; z-index:90; display:flex; align-items:center; justify-content:center; padding:20px; background:#000a; backdrop-filter:blur(5px); }
+    .visual-calendar-dialog { width:100%; max-width:560px; max-height:calc(100dvh - 40px); overflow-y:auto; border:1px solid #36363c; border-radius:18px; padding:24px; background:#141416; box-shadow:0 24px 80px #0009; }
+    .visual-calendar-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+    .visual-calendar-header h3 { margin:0; color:#eeeef1; font-size:15px; font-weight:700; }
+    .visual-calendar-header button { width:32px; height:32px; border:1px solid #34343b; border-radius:8px; background:#202024; color:#a1a1aa; font-size:12px; cursor:pointer; }
+    .visual-calendar .calendar-month { gap:12px; padding-bottom:12px; }
+    .calendar-month-selects { display:flex; align-items:center; justify-content:center; gap:6px; min-width:0; }
+    .calendar-month-selects select { min-width:0; max-width:150px; padding:9px 10px; border:1px solid #36363d; border-radius:8px; background:#202024; color:#fafafa; font:600 13px 'Plus Jakarta Sans',sans-serif; text-transform:capitalize; cursor:pointer; }
+    .calendar-month-selects select:focus-visible { outline:2px solid white; outline-offset:2px; }
+    .visual-calendar .calendar-legend { justify-content:center; gap:18px; color:#8a8a95; margin-bottom:12px; font-size:10px; }
+    .legend-thumbnail { display:flex; align-items:center; gap:5px; }
+    .legend-thumbnail i { display:inline-block; width:13px; height:9px; border:1px solid #676773; border-radius:2px; background:linear-gradient(135deg,#575763,#24242a); }
+    .visual-calendar .calendar-days { gap:8px; }
+    .visual-calendar .calendar-weekday { padding:3px 0 5px; }
+    .visual-calendar .calendar-date.calendar-tile { aspect-ratio:16/10; min-height:58px; overflow:hidden; padding:0; border:1px solid #323238; border-radius:9px; background:#1c1c20; color:#c4c4ce; display:block; }
+    .calendar-tile img { display:block; width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
+    .visual-calendar .calendar-date.calendar-tile.selected { outline:2px solid #f4f4f5; outline-offset:2px; }
+    .visual-calendar .calendar-date.calendar-tile:hover { border-color:#85858e; }
+    .calendar-day-number { position:absolute; z-index:1; top:5px; left:5px; display:flex; align-items:center; justify-content:center; min-width:23px; height:22px; padding:0 5px; background:#121214c9; color:white; border-radius:5px; font-size:12px !important; }
+    .empty-date .calendar-day-number { color:#b9b9c4; background:transparent; }
+    .calendar-free-plus { display:flex; align-items:center; justify-content:center; width:100%; height:100%; color:#50505d; font-size:19px; font-weight:400; }
+    .calendar-title-cover { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; padding:28px 7px 6px; font-size:9px; line-height:1.35; text-align:left; color:#b4b4bf; }
+    .calendar-current-label { position:absolute; bottom:4px; right:4px; padding:2px 5px; border-radius:4px; background:#101012cf; color:#e4e4eb; font-size:8px; line-height:1.2; }
+    .calendar-selection { margin-top:16px; min-height:18px; text-align:center; color:#b4b4bf; font-size:11px; text-transform:capitalize; }
+    .visual-calendar .calendar-actions { margin-top:12px; }
+    .visual-calendar .schedule-confirm { background:#f4f4f5; border-color:#f4f4f5; color:#18181b; }
+    .visual-calendar .schedule-confirm:hover { background:#d4d4d8; border-color:#d4d4d8; }
+    .visual-calendar .schedule-cancel { background:transparent; border-color:#34343c; color:#b8b8c4; }
+    .schedule-dialog:has(.visual-calendar) { max-width:560px; }
+    @media(max-width:640px) {
+      .calendar-modal-backdrop { padding:12px; }
+      .visual-calendar-dialog { padding:16px; max-height:calc(100dvh - 24px); border-radius:14px; }
+      .visual-calendar-header { margin-bottom:14px; }
+      .visual-calendar-header h3 { font-size:14px; }
+      .visual-calendar .calendar-month { gap:7px; }
+      .calendar-month-selects { gap:5px; flex:1; }
+      .calendar-month-selects select { padding:8px 6px; font-size:12px; max-width:125px; }
+      .visual-calendar .calendar-days { gap:6px; }
+      .visual-calendar .calendar-date.calendar-tile { min-height:48px; border-radius:7px; }
+      .visual-calendar .calendar-month button { width:32px; min-width:32px; height:36px; }
+      .visual-calendar .schedule-confirm,.visual-calendar .schedule-cancel { min-height:42px; }
+      .calendar-day-number { min-width:21px; height:20px; top:3px; left:3px; font-size:11px !important; }
+      .calendar-title-cover { font-size:8px; padding-top:25px; }
+    }
+
   </style>
 </head>
 <body>
@@ -614,6 +660,7 @@
       return merged;
     }
 
+
     function PostingCalendar({ videos, video, onSchedule, onCancel, isNew = false }) {
       const today = localDateKey();
       const initial = getVideoScheduledDate(video);
@@ -623,6 +670,7 @@
         return new Date(date.getFullYear(), date.getMonth(), 1, 12);
       });
       const [error, setError] = useState("");
+      const now = new Date();
       const dates = [];
       const firstMonday = getWeekMonday(month);
       for (let week = 0; week < 6; week++) {
@@ -636,87 +684,124 @@
       const occupied = new Map();
       videos.filter(v => !v.posted && v.id !== video.id).forEach(v => {
         const key = getVideoScheduledDate(v);
-        const list = occupied.get(key) || [];
-        occupied.set(key, [...list, v]);
+        occupied.set(key, [...(occupied.get(key) || []), v]);
       });
       let preview = null;
-      try { if (selected) preview = scheduleVideo(videos, video, selected); } catch (e) {}
-      const currentMonth = month.getFullYear() === new Date().getFullYear() && month.getMonth() === new Date().getMonth();
-      function changeMonth(delta) { setMonth(new Date(month.getFullYear(), month.getMonth() + delta, 1, 12)); }
+      try { if (selected) preview = scheduleVideo(videos, video, selected); } catch {}
+      const currentMonth = month.getFullYear() === now.getFullYear() && month.getMonth() === now.getMonth();
+      const monthNames = Array.from({length:12},(_,i) => new Date(2026,i,1).toLocaleDateString("pt-BR",{month:"long"}));
+      const years = Array.from({length:Math.max(6, month.getFullYear() - now.getFullYear() + 2)},(_,i)=>now.getFullYear()+i);
+      function chooseMonth(year, index) {
+        const safeIndex = year === now.getFullYear() ? Math.max(index, now.getMonth()) : index;
+        setMonth(new Date(year,safeIndex,1,12));
+        setSelected("");
+        setError("");
+      }
+      function changeMonth(delta) {
+        const date = new Date(month.getFullYear(),month.getMonth()+delta,1,12);
+        chooseMonth(date.getFullYear(),date.getMonth());
+      }
+      const selectedDate = parseDateKey(selected);
       return (
-        <div className="posting-calendar">
+        <div className="posting-calendar visual-calendar">
           {isNew && <div className="calendar-heading"><h3>Agendar vídeo</h3></div>}
           <div className="calendar-month">
             <button type="button" aria-label="Mês anterior" disabled={currentMonth} onClick={() => changeMonth(-1)}>‹</button>
-            <strong aria-live="polite">{month.toLocaleDateString("pt-BR", {month:"long", year:"numeric"})}</strong>
+            <div className="calendar-month-selects">
+              <select aria-label="Mês de publicação" value={month.getMonth()} onChange={e=>chooseMonth(month.getFullYear(),Number(e.target.value))}>
+                {monthNames.map((name,i)=><option key={name} value={i} disabled={month.getFullYear()===now.getFullYear()&&i<now.getMonth()}>{name}</option>)}
+              </select>
+              <select aria-label="Ano de publicação" value={month.getFullYear()} onChange={e=>chooseMonth(Number(e.target.value),month.getMonth())}>
+                {years.map(year=><option key={year} value={year}>{year}</option>)}
+              </select>
+            </div>
             <button type="button" aria-label="Próximo mês" onClick={() => changeMonth(1)}>›</button>
           </div>
-          <div className="calendar-legend"><span className="legend-free">● Livre</span><span className="legend-busy">● Ocupado</span></div>
+          <div className="calendar-legend"><span>＋ Data livre</span><span className="legend-thumbnail"><i aria-hidden="true" /> Vídeo agendado</span></div>
           <div className="calendar-days">
             {["Qua", "Qui", "Sáb", "Dom"].map(label => <span key={label} className="calendar-weekday">{label}</span>)}
-            {dates.map((date, index) => {
-              if (!date) return <span key={"empty-" + index} aria-hidden="true" />;
-              const key = localDateKey(date);
-              const busy = occupied.get(key);
-              const past = key < today;
-              if (past) return <span key={key} aria-hidden="true" />;
-              const chosen = selected === key;
-              const title = busy?.map(v => v.titles?.find(Boolean) || "Vídeo sem título").join("; ");
-              return <button key={key} type="button" disabled={past} aria-pressed={chosen}
-                aria-label={date.toLocaleDateString("pt-BR", {weekday:"long", day:"numeric", month:"long"}) + (past ? ", indisponível" : busy ? ", ocupado: " + title + ". Selecionar e remanejar." : ", livre")}
-                title={busy ? title : "Data livre"}
-                className={"calendar-date " + (busy ? "busy" : "free") + (chosen ? " selected" : "")}
-                onClick={() => {setSelected(key); setError("");}}>
-                <strong>{date.getDate()}</strong>
+            {dates.map((date,index)=>{
+              if(!date) return <span key={"empty-"+index} aria-hidden="true" />;
+              const key=localDateKey(date);
+              if(key<today)return <span key={key} aria-hidden="true" />;
+              const busy=occupied.get(key);
+              const current=!isNew && key===initial && !busy;
+              const owner=busy?.[0] || (current ? video : null);
+              const thumb=owner?.thumbs?.find(Boolean);
+              const title=owner?.titles?.find(Boolean) || "Vídeo sem título";
+              const chosen=selected===key;
+              return <button key={key} type="button" aria-pressed={chosen}
+                aria-label={date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+
+                  (busy?", ocupado: "+title+". Selecionar e remanejar.":current?", data atual do vídeo":", livre")}
+                title={owner?title:"Data livre"}
+                className={"calendar-date calendar-tile "+(owner?"has-video":"empty-date")+(chosen?" selected":"")}
+                onClick={()=>{setSelected(key);setError("");}}>
+                {thumb ? <img src={thumb} alt="" loading="lazy" /> : owner ? <span className="calendar-title-cover">{title}</span> : <span className="calendar-free-plus" aria-hidden="true">＋</span>}
+                <strong className="calendar-day-number">{date.getDate()}</strong>
+                {current && <span className="calendar-current-label">Atual</span>}
+                {busy?.length>1 && <span className="calendar-current-label">+{busy.length-1}</span>}
               </button>;
             })}
           </div>
-          {preview?.moves.length > 0 && <details className="schedule-preview">
-            <summary>{preview.moves.length === 1 ? "1 vídeo será remanejado" : preview.moves.length + " vídeos serão remanejados"}</summary>
-            <ul>{preview.moves.map(move => <li key={move.id}><span>{move.title}</span><b>{shortDate(move.from)} → {shortDate(move.to)}</b></li>)}</ul>
+          {preview?.moves.length>0 && <details className="schedule-preview">
+            <summary>{preview.moves.length===1?"1 vídeo será remanejado":preview.moves.length+" vídeos serão remanejados"}</summary>
+            <ul>{preview.moves.map(move=><li key={move.id}><span>{move.title}</span><b>{shortDate(move.from)} → {shortDate(move.to)}</b></li>)}</ul>
           </details>}
           {error && <p role="alert">{error}</p>}
+          <div className="calendar-selection" aria-live="polite">
+            {selectedDate ? selectedDate.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "Selecione uma data"}
+          </div>
           <div className="calendar-actions">
             {onCancel && <button type="button" className="schedule-cancel" onClick={onCancel}>Cancelar</button>}
-            <button type="button" className="schedule-confirm" disabled={!preview || (!isNew && selected === initial)}
-              onClick={() => {try {onSchedule(selected);} catch(e) {setError(e.message);}}}>
-              {isNew ? "Agendar vídeo" : "Salvar data"}
+            <button type="button" className="schedule-confirm" disabled={!preview||(!isNew&&selected===initial)}
+              onClick={()=>{try{onSchedule(selected);}catch(e){setError(e.message);}}}>
+              {isNew?"Agendar vídeo":"Salvar data"}
             </button>
           </div>
         </div>
       );
     }
 
-
-    function PublicationDateControl({videos, video, onSchedule}) {
-      const [open, setOpen] = useState(false);
-      const container = useRef(null);
-      const trigger = useRef(null);
-      useEffect(() => {
-        if (!open) return;
-        function closeOutside(event) {
-          if (!container.current?.contains(event.target)) setOpen(false);
+    function PublicationDateControl({videos,video,onSchedule}) {
+      const [open,setOpen]=useState(false);
+      const modal=useRef(null),trigger=useRef(null);
+      useEffect(()=>{
+        if(!open)return;
+        const oldOverflow=document.body.style.overflow;
+        document.body.style.overflow="hidden";
+        modal.current?.querySelector("[data-calendar-close]")?.focus();
+        function onKey(event) {
+          if(event.key==="Escape"){setOpen(false);return;}
+          if(event.key!=="Tab")return;
+          const controls=Array.from(modal.current?.querySelectorAll('button:not([disabled]),select,summary')||[]);
+          const first=controls[0],last=controls[controls.length-1];
+          if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+          else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
         }
-        function closeOnEscape(event) {
-          if (event.key === "Escape") {setOpen(false); trigger.current?.focus();}
-        }
-        document.addEventListener("pointerdown", closeOutside);
-        document.addEventListener("keydown", closeOnEscape);
-        return () => {
-          document.removeEventListener("pointerdown", closeOutside);
-          document.removeEventListener("keydown", closeOnEscape);
+        document.addEventListener("keydown",onKey);
+        return ()=>{
+          document.body.style.overflow=oldOverflow;
+          document.removeEventListener("keydown",onKey);
+          trigger.current?.focus();
         };
-      }, [open]);
-      return <div className="publication-control" ref={container}>
+      },[open]);
+      return <div className="publication-control">
         <button ref={trigger} type="button" className="date-control-trigger" aria-expanded={open}
-          aria-controls={"calendar-" + video.id} onClick={() => setOpen(value => !value)}>
-          <span>Alterar data</span><span aria-hidden="true">{open ? "▴" : "▾"}</span>
+          aria-controls={"calendar-"+video.id} onClick={()=>setOpen(true)}>
+          <span>Alterar data</span><span aria-hidden="true">▾</span>
         </button>
-        {open && <div id={"calendar-" + video.id} className="calendar-popover" role="region" aria-label="Alterar data de publicação">
-          <PostingCalendar videos={videos} video={video}
-            onCancel={() => {setOpen(false); trigger.current?.focus();}}
-            onSchedule={(date) => {onSchedule(date); setOpen(false); trigger.current?.focus();}} />
-        </div>}
+        {open && ReactDOM.createPortal(
+          <div className="calendar-modal-backdrop" onClick={event=>{if(event.target===event.currentTarget)setOpen(false);}}>
+            <div ref={modal} id={"calendar-"+video.id} className="visual-calendar-dialog" role="dialog" aria-modal="true" aria-labelledby={"calendar-heading-"+video.id}>
+              <div className="visual-calendar-header">
+                <h3 id={"calendar-heading-"+video.id}>Data de publicação</h3>
+                <button type="button" data-calendar-close aria-label="Fechar calendário" onClick={()=>setOpen(false)}>✕</button>
+              </div>
+              <PostingCalendar videos={videos} video={video} onCancel={()=>setOpen(false)}
+                onSchedule={date=>{onSchedule(date);setOpen(false);}} />
+            </div>
+          </div>,document.body
+        )}
       </div>;
     }
 
