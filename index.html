@@ -301,13 +301,28 @@
     }
 
   
-    .publication-move{display:flex;gap:4px;margin-left:auto;padding:3px;border:1px solid #303034;border-radius:14px;background:#19191c}
-    .publication-move button{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#ceced6;cursor:pointer;transition:background .15s}
-    .publication-move button:hover:not(:disabled){background:#303035;color:white}
-    .publication-move button:disabled{opacity:.25;cursor:default}
-    .publication-move button:focus-visible{outline:2px solid white;outline-offset:2px}
-    .publication-move svg{width:22px;height:22px}
-    @media(max-width:640px){.publication-move{margin-left:0}}
+  
+    .calendar-drag-hint{font-size:12px;color:#91919a;margin:0 0 14px;text-align:center}
+    .calendar-weeks{display:grid;gap:12px}
+    .calendar-week{padding:12px;border:1px solid #303035;border-radius:16px;background:#19191c}
+    .calendar-week-caption{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#d4d4da;font-size:12px;font-weight:600;margin-bottom:12px}
+    .calendar-week-caption span{font-size:10px;font-weight:400;color:#81818b}
+    .visual-calendar .calendar-week .calendar-days{column-gap:8px}
+    .calendar-week .calendar-days>:nth-child(4n+3){margin-left:8px}
+    .calendar-week .calendar-days>:nth-child(4n+2){margin-right:8px}
+    .calendar-drag-grip{position:absolute;right:4px;top:4px;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:9px;background:#111b;color:#eee;font-size:20px;letter-spacing:-4px;padding-right:4px;cursor:grab;touch-action:none;user-select:none;z-index:2}
+    .calendar-drag-grip:focus-visible{outline:2px solid white}
+    .visual-calendar .calendar-date.drop-target{outline:2px solid #9bcbb4;outline-offset:2px;background:#294036}
+    .visual-calendar .calendar-date.moving-video{opacity:.45}
+    .calendar-weeks.is-moving .calendar-date{cursor:grabbing}
+    @media(max-width:640px){
+      .calendar-week{padding:10px;border-radius:14px}
+      .calendar-week-caption span{font-size:9px}
+      .visual-calendar .calendar-week .calendar-date.calendar-tile{min-height:60px}
+      .calendar-drag-grip{width:30px;height:32px;right:2px;top:2px}
+      .calendar-week .calendar-days>:nth-child(4n+3){margin-left:3px}
+      .calendar-week .calendar-days>:nth-child(4n+2){margin-right:3px}
+    }
   </style>
 </head>
 <body>
@@ -696,29 +711,6 @@
       return { videos: result, moves };
     }
 
-    function adjacentPostingDate(value, direction) {
-      const date = parseDateKey(value);
-      if (!date) return "";
-      do { date.setDate(date.getDate() + direction); } while (!POSTING_DAYS.has(date.getDay()));
-      return localDateKey(date);
-    }
-    function moveVideoSlot(items, id, direction) {
-      const selected = items.find(v => v.id === id);
-      if (!selected || selected.posted || ![-1,1].includes(direction)) return null;
-      const original = getVideoScheduledDate(selected);
-      let target = adjacentPostingDate(original, direction);
-      if (direction === 1 && target < localDateKey()) {
-        target = localDateKey();
-        if (!POSTING_DAYS.has(parseDateKey(target).getDay())) target = nextPostingDate(target);
-      }
-      if (!target || target < localDateKey()) return null;
-      const neighbor = items.find(v => !v.posted && v.id !== id && getVideoScheduledDate(v) === target);
-      const prepared = neighbor && original >= localDateKey()
-        ? items.map(v => v.id === neighbor.id ? withScheduledDate(v, original) : v)
-        : items;
-      return { ...scheduleVideo(prepared, selected, target), date: target };
-    }
-
     function shortDate(value) {
       return parseDateKey(value)?.toLocaleDateString("pt-BR", {day:"2-digit", month:"2-digit"}) || value;
     }
@@ -739,7 +731,7 @@
     }
 
 
-    function PostingCalendar({ videos, video, onSchedule, onCancel, isNew = false }) {
+    function PostingCalendar({ videos, video, onSchedule, onCancel, onMoveVideo, isNew = false }) {
       const today = localDateKey();
       const initial = getVideoScheduledDate(video);
       const [selected, setSelected] = useState(initial >= today ? initial : "");
@@ -781,6 +773,31 @@
       }
       const selectedDate = parseDateKey(selected);
       const selectedOwner = occupied.get(selected)?.[0];
+      const dragRef = useRef(null);
+      const [dragging,setDragging] = useState(null);
+      const [dropDate,setDropDate] = useState("");
+      function dragTarget(event) {
+        const cell = document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-posting-date]");
+        return cell?.getAttribute("data-posting-date") || "";
+      }
+      function startMove(event, owner) {
+        if (!owner || !onMoveVideo) return;
+        event.preventDefault(); event.stopPropagation();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        dragRef.current = { id:owner.id, from:getVideoScheduledDate(owner) };
+        setDragging(owner.id);
+      }
+      function trackMove(event) {
+        if (dragRef.current) { event.preventDefault(); setDropDate(dragTarget(event)); }
+      }
+      function finishMove(event) {
+        const moving=dragRef.current;
+        if (!moving) return;
+        event.preventDefault();event.stopPropagation();
+        const target=dragTarget(event);
+        dragRef.current=null;setDragging(null);setDropDate("");
+        if(target && target!==moving.from) onMoveVideo(moving.id,target);
+      }
       return (
         <div className="posting-calendar visual-calendar">
           {isNew && <div className="calendar-heading"><h3>Agendar vídeo</h3></div>}
@@ -796,9 +813,16 @@
             </div>
             <button type="button" aria-label="Próximo mês" onClick={() => changeMonth(1)}>›</button>
           </div>
-          <div className="calendar-days">
-            {["Qua", "Qui", "Sáb", "Dom"].map(label => <span key={label} className="calendar-weekday">{label}</span>)}
-            {dates.map((date,index)=>{
+          <p className="calendar-drag-hint">Segure ⋮⋮ para arrastar um vídeo</p>
+          <div className={"calendar-weeks"+(dragging!==null?" is-moving":"")}>
+            {Array.from({length:dates.length/4},(_,week)=> {
+              const row=dates.slice(week*4,week*4+4);
+              const first=row.find(Boolean), last=[...row].reverse().find(Boolean);
+              return <div className="calendar-week" key={week}>
+                <div className="calendar-week-caption">{first?.getDate()}–{last?.getDate()} <span>Meio da semana · Fim de semana</span></div>
+                <div className="calendar-days">
+                {["Qua", "Qui", "Sáb", "Dom"].map(label => <span key={label} className="calendar-weekday">{label}</span>)}
+                {row.map((date,index)=>{
               if(!date) return <span key={"empty-"+index} aria-hidden="true" />;
               const key=localDateKey(date);
               if(key<today)return <span key={key} aria-hidden="true" />;
@@ -808,17 +832,27 @@
               const thumb=owner?.thumbs?.find(Boolean);
               const title=owner?.titles?.find(Boolean) || "Vídeo sem título";
               const chosen=selected===key;
-              return <button key={key} type="button" aria-pressed={chosen}
+              return <button key={key} type="button" data-posting-date={key} aria-pressed={chosen}
+                onKeyDown={e=>{if(!owner||!onMoveVideo||!e.altKey||!["ArrowLeft","ArrowRight"].includes(e.key))return;e.preventDefault();const all=getUpcomingPostingDates(400).map(d=>d.dateStr), pos=all.indexOf(key), target=all[pos+(e.key==="ArrowLeft"?-1:1)];if(target)onMoveVideo(owner.id,target);}}
                 aria-label={date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+
                   (busy?", ocupado: "+title+". Selecionar e remanejar.":current?", data atual do vídeo":", livre")}
                 title={owner?title:"Data livre"}
-                className={"calendar-date calendar-tile "+(owner?"has-video":"empty-date")+(chosen?" selected":"")}
-                onClick={()=>{setSelected(key);setError("");}}>
+                className={"calendar-date calendar-tile "+(owner?"has-video":"empty-date")+(chosen?" selected":"")+(dropDate===key?" drop-target":"")+(dragging===owner?.id?" moving-video":"")}
+                onClick={()=>{if(dragRef.current)return;setSelected(key);setError("");}}>
                 {thumb ? <img src={thumb} alt="" loading="lazy" /> : owner ? <span className="calendar-video-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="4" stroke="currentColor" strokeWidth="1.5"/><path d="m10 9 5 3-5 3V9Z" fill="currentColor"/></svg></span> : <span className="calendar-free-plus" aria-hidden="true">＋</span>}
                 <strong className="calendar-day-number">{date.getDate()}</strong>
+                {owner && onMoveVideo && <span className="calendar-drag-grip"
+                  aria-label={"Mover "+title} title="Segure e arraste para outra data"
+                  onClick={e=>{e.stopPropagation();setSelected(key);}}
+                  onPointerDown={e=>startMove(e,owner)} onPointerMove={trackMove} onPointerUp={finishMove}
+                  onPointerCancel={()=>{dragRef.current=null;setDragging(null);setDropDate("");}}
+>⋮⋮</span>}
                 {current && <span className="calendar-current-label">Atual</span>}
                 {busy?.length>1 && <span className="calendar-current-label">+{busy.length-1}</span>}
               </button>;
+                })}
+                </div>
+              </div>;
             })}
           </div>
           {preview?.moves.length>0 && <details className="schedule-preview">
@@ -841,7 +875,7 @@
       );
     }
 
-    function PublicationDateControl({videos,video,onSchedule}) {
+    function PublicationDateControl({videos,video,onSchedule,onMoveVideo}) {
       const [open,setOpen]=useState(false);
       const modal=useRef(null),trigger=useRef(null);
       useEffect(()=>{
@@ -876,7 +910,7 @@
                 <h3 id={"calendar-heading-"+video.id}>Data de publicação</h3>
                 <button type="button" data-calendar-close aria-label="Fechar calendário" onClick={()=>setOpen(false)}>✕</button>
               </div>
-              <PostingCalendar videos={videos} video={video} onCancel={()=>setOpen(false)}
+              <PostingCalendar videos={videos} video={video} onMoveVideo={onMoveVideo} onCancel={()=>setOpen(false)}
                 onSchedule={date=>{onSchedule(date);setOpen(false);}} />
             </div>
           </div>,document.body
@@ -1132,13 +1166,15 @@
         setActiveTab("producao");
       }
 
-      function movePublication(id, direction) {
-        const result = moveVideoSlot(videosRef.current, id, direction);
-        if (!result) return;
-        videosRef.current = result.videos;
+      function moveCalendarVideo(id,date) {
+        const current=videosRef.current;
+        const moving=current.find(v=>v.id===id);
+        if(!moving || moving.posted)return;
+        const result=scheduleVideo(current,moving,date);
+        videosRef.current=result.videos;
         setVideos(result.videos);
+        setScheduleNotice("Vídeo movido para "+shortDate(date)+".");
         playSound("click");
-        setScheduleNotice("Vídeo movido para " + shortDate(result.date) + ".");
       }
 
       function toggleDetails(id) {
@@ -1379,7 +1415,7 @@
             <div className="schedule-dialog" role="dialog" aria-modal="true" aria-label="Agendar novo vídeo"
               onKeyDown={(e) => {if(e.key === "Escape") setNewVideo(null);}}>
               <button autoFocus type="button" className="dialog-close" aria-label="Fechar agendamento" onClick={() => setNewVideo(null)}>✕</button>
-              <PostingCalendar videos={videos} video={newVideo} isNew onCancel={() => setNewVideo(null)} onSchedule={(date) => handleDateChange(newVideo.id, date)} />
+              <PostingCalendar videos={videos} video={newVideo} onMoveVideo={moveCalendarVideo} isNew onCancel={() => setNewVideo(null)} onSchedule={(date) => handleDateChange(newVideo.id, date)} />
             </div>
           </div>}
           {scheduleNotice && <div className="schedule-notice" role="status"><span>{scheduleNotice}</span><button type="button" aria-label="Fechar aviso" onClick={() => setScheduleNotice("")}>✕</button></div>}
@@ -1456,19 +1492,6 @@
                             </div>
                           </div>
 
-                          {!video.posted && <div className="publication-move" role="group" aria-label="Mover data do vídeo">
-                            <button type="button" title="Adiantar para a data anterior"
-                              aria-label="Adiantar vídeo para a data anterior"
-                              disabled={adjacentPostingDate(getVideoScheduledDate(video), -1) < localDateKey()}
-                              onClick={()=>movePublication(video.id,-1)}>
-                              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 14 5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </button>
-                            <button type="button" title="Passar para a próxima data"
-                              aria-label="Passar vídeo para a próxima data"
-                              onClick={()=>movePublication(video.id,1)}>
-                              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </button>
-                          </div>}
                           {/* Right: Botão Postar e Lixeira */}
                           <div className="flex items-center gap-2">
                             {!video.posted ? (
@@ -1522,7 +1545,7 @@
                         {/* Painel Expansível de Configurações (Some quando fechado!) */}
                         {!video.posted && expandedDetails[video.id] && (
                           <div className="settings-panel">
-                            <PublicationDateControl videos={videos} video={video} onSchedule={(date) => handleDateChange(video.id, date)} />
+                            <PublicationDateControl videos={videos} video={video} onSchedule={(date) => handleDateChange(video.id, date)} onMoveVideo={moveCalendarVideo} />
                             <div className="production-checklist">
                               <span className="checklist-count" title="Etapas concluídas">{completedSteps}/{PRODUCTION_STEPS.length + 1}</span>
                               <div className="checklist-items">
