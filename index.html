@@ -376,6 +376,12 @@
     .calendar-slot-dates{grid-template-columns:repeat(2,minmax(0,1fr))}
     .calendar-slot-dates .date-alternative{opacity:.35}
     .calendar-week-caption span{color:#97b8a4}
+  
+    .paired-weeks .calendar-week{padding:12px;border-color:#29292e;background:#17171a}
+    .paired-weeks{gap:18px}
+    .calendar-post-slot{padding:10px;border-radius:12px}
+    .calendar-slot-dates{margin-bottom:10px}
+    .calendar-slot-empty{color:#686e6a;min-height:46px}
   </style>
 </head>
 <body>
@@ -885,24 +891,21 @@
             </div>
             <button type="button" aria-label="Próximo mês" data-month-shift="1" onClick={() => changeMonth(1)}>›</button>
           </div>
-          <p className="calendar-drag-hint">Arraste o vídeo. Para outro mês, segure sobre ›.</p>
           <div className={"calendar-weeks paired-weeks"+(dragging!==null?" is-moving":"")}>
             {Array.from({length:dates.length/4},(_,week)=>{
               const row=dates.slice(week*4,week*4+4);
-              const first=row.find(Boolean),last=[...row].reverse().find(Boolean);
+              const first=row.find(Boolean);
               const monday=getWeekMonday(first);
               const weekOwners=videos.filter(v=>!v.posted&&localDateKey(getWeekMonday(parseDateKey(getVideoScheduledDate(v))))===localDateKey(monday))
                 .sort((a,b)=>getVideoScheduledDate(a).localeCompare(getVideoScheduledDate(b)));
               const weekDates=[3,4,6,0].map(day=>{const d=new Date(monday);d.setDate(d.getDate()+(day===0?6:day-1));return d;});
               return <section className="calendar-week paired-week" key={week}>
-                <div className="calendar-week-caption">Semana de {first?.getDate()} a {last?.getDate()}<span>{weekOwners.length}/2 postagens</span></div>
                 <div className="calendar-pair">
                   {[0,1].map(part=>{
                     const pair=weekDates;
                     const owners=weekOwners.slice(part,part+1).map(owner=>({owner,key:getVideoScheduledDate(owner)}));
                     const active=owners.length>0;
                     return <div className={"calendar-post-slot"+(active?" slot-defined":"")} key={part}>
-                      <span className="calendar-slot-label">{part===0?"1ª postagem":"2ª postagem"}</span>
                       <div className="calendar-slot-dates">
                         {pair.map((date,index)=>{
                           if(!date||localDateKey(date)<today)return <span key={index}/>;
@@ -911,7 +914,7 @@
                             aria-label={date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}
                             className={"slot-date"+(defined?" date-defined":active?" date-alternative":"")+(dropDate===key?" date-drop":"")+(selected===key?" date-selected":"")}
                             onClick={()=>{setSelected(key);setError("");}}>
-                            <span>{date.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")}</span><strong>{date.getDate()}</strong>
+                            <span>{date.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")}</span><strong>{date.getDate()}{date.getMonth()!==month.getMonth()?"/"+String(date.getMonth()+1).padStart(2,"0"):""}</strong>
                           </button>;
                         })}
                       </div>
