@@ -254,6 +254,52 @@
       .calendar-title-cover { font-size:8px; padding-top:25px; }
     }
 
+  
+    /* Spacious calendar: large touch targets and quiet occupied slots. */
+    .visual-calendar-dialog,.schedule-dialog:has(.visual-calendar){max-width:580px;padding:28px;border-radius:24px;background:#151517}
+    .visual-calendar-header{margin-bottom:22px}
+    .visual-calendar-header h3,.visual-calendar .calendar-heading h3{font-size:19px;font-weight:600;letter-spacing:-.3px}
+    .visual-calendar .calendar-heading{margin-bottom:22px}
+    .visual-calendar-header button,.schedule-dialog:has(.visual-calendar) .dialog-close{width:44px;height:44px;min-width:44px;border-radius:12px;font-size:18px}
+    .visual-calendar .calendar-month{gap:12px;padding-bottom:20px}
+    .visual-calendar .calendar-month>button{width:46px;min-width:46px;height:46px;border-radius:12px;font-size:26px;background:#242427;border:1px solid #343438}
+    .visual-calendar .calendar-month-selects{gap:8px;flex:1}
+    .visual-calendar .calendar-month-selects select{height:46px;max-width:none;min-width:0;padding:0 12px;font-size:15px;border-radius:12px;background:#242427}
+    .visual-calendar .calendar-month-selects select:first-child{flex:1}
+    .visual-calendar .calendar-month-selects select:last-child{width:90px}
+    .visual-calendar .calendar-days{gap:10px}
+    .visual-calendar .calendar-weekday{font-size:12px;font-weight:500;padding-bottom:4px;color:#929298}
+    .visual-calendar .calendar-date.calendar-tile{aspect-ratio:1.35;min-height:68px;border-radius:13px;background:#202023;border:1px solid #303034}
+    .visual-calendar .calendar-date.empty-date{background:#1a1a1d;border-color:#29292e}
+    .visual-calendar .calendar-date.selected{outline:2px solid #e8e8eb;outline-offset:2px}
+    .visual-calendar .calendar-day-number{top:7px;left:7px;font-size:14px;min-width:25px;height:25px;border-radius:7px}
+    .visual-calendar .empty-date .calendar-day-number{color:#d5d5da}
+    .visual-calendar .calendar-free-plus{font-size:22px;color:#62626b}
+    .calendar-video-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#777782;background:linear-gradient(145deg,#313139,#222227)}
+    .calendar-video-placeholder svg{width:30px;height:30px;transform:translate(5px,7px)}
+    .visual-calendar .calendar-current-label{font-size:10px;padding:3px 6px}
+    .visual-calendar .calendar-selection{margin-top:20px;font-size:14px;line-height:1.5;text-transform:none;color:#dedee3;min-height:22px}
+    .calendar-selected-video{display:block;font-size:12px;color:#92929b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin-top:3px}
+    .visual-calendar .schedule-preview{margin-top:16px;padding:12px 14px;border-radius:12px;background:#202023;font-size:12px;border:0}
+    .visual-calendar .calendar-actions{display:flex;gap:12px;margin-top:20px}
+    .visual-calendar .calendar-actions button{min-height:50px;padding:12px 20px;border-radius:13px;font-size:14px;font-weight:600}
+    .visual-calendar .schedule-confirm{flex:1}
+    .visual-calendar .schedule-cancel{border:1px solid #36363d;background:transparent;color:#b6b6bf}
+    .visual-calendar button:focus-visible,.visual-calendar select:focus-visible{outline:2px solid #eee;outline-offset:3px}
+    @media(max-width:640px){
+      .visual-calendar-dialog,.schedule-dialog:has(.visual-calendar){padding:20px;max-height:calc(100dvh - 24px);border-radius:20px}
+      .visual-calendar .calendar-month{gap:8px;padding-bottom:18px}
+      .visual-calendar .calendar-month>button{width:44px;min-width:44px;height:46px}
+      .visual-calendar .calendar-month-selects{gap:6px}
+      .visual-calendar .calendar-month-selects select{font-size:14px;padding:0 7px}
+      .visual-calendar .calendar-month-selects select:last-child{width:77px}
+      .visual-calendar .calendar-days{gap:8px}
+      .visual-calendar .calendar-date.calendar-tile{aspect-ratio:1;min-height:54px;border-radius:11px}
+      .visual-calendar .calendar-day-number{top:5px;left:5px;font-size:13px;min-width:23px;height:23px}
+      .visual-calendar .calendar-actions{gap:10px;margin-top:18px}
+      .visual-calendar .calendar-actions button{min-height:50px;padding:12px 16px}
+    }
+
   </style>
 </head>
 <body>
@@ -702,6 +748,7 @@
         chooseMonth(date.getFullYear(),date.getMonth());
       }
       const selectedDate = parseDateKey(selected);
+      const selectedOwner = occupied.get(selected)?.[0];
       return (
         <div className="posting-calendar visual-calendar">
           {isNew && <div className="calendar-heading"><h3>Agendar vídeo</h3></div>}
@@ -717,7 +764,6 @@
             </div>
             <button type="button" aria-label="Próximo mês" onClick={() => changeMonth(1)}>›</button>
           </div>
-          <div className="calendar-legend"><span>＋ Data livre</span><span className="legend-thumbnail"><i aria-hidden="true" /> Vídeo agendado</span></div>
           <div className="calendar-days">
             {["Qua", "Qui", "Sáb", "Dom"].map(label => <span key={label} className="calendar-weekday">{label}</span>)}
             {dates.map((date,index)=>{
@@ -736,7 +782,7 @@
                 title={owner?title:"Data livre"}
                 className={"calendar-date calendar-tile "+(owner?"has-video":"empty-date")+(chosen?" selected":"")}
                 onClick={()=>{setSelected(key);setError("");}}>
-                {thumb ? <img src={thumb} alt="" loading="lazy" /> : owner ? <span className="calendar-title-cover">{title}</span> : <span className="calendar-free-plus" aria-hidden="true">＋</span>}
+                {thumb ? <img src={thumb} alt="" loading="lazy" /> : owner ? <span className="calendar-video-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="4" stroke="currentColor" strokeWidth="1.5"/><path d="m10 9 5 3-5 3V9Z" fill="currentColor"/></svg></span> : <span className="calendar-free-plus" aria-hidden="true">＋</span>}
                 <strong className="calendar-day-number">{date.getDate()}</strong>
                 {current && <span className="calendar-current-label">Atual</span>}
                 {busy?.length>1 && <span className="calendar-current-label">+{busy.length-1}</span>}
@@ -749,7 +795,8 @@
           </details>}
           {error && <p role="alert">{error}</p>}
           <div className="calendar-selection" aria-live="polite">
-            {selectedDate ? selectedDate.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "Selecione uma data"}
+            {selectedDate ? selectedDate.toLocaleDateString("pt-BR",{day:"numeric",month:"long"}) : "Escolha o dia da publicação"}
+            {selectedOwner && <span className="calendar-selected-video">{selectedOwner.titles?.find(Boolean) || "Vídeo agendado"}</span>}
           </div>
           <div className="calendar-actions">
             {onCancel && <button type="button" className="schedule-cancel" onClick={onCancel}>Cancelar</button>}
@@ -837,7 +884,7 @@
         function trapFocus(event) {
           if (event.key !== "Tab") return;
           const dialog = document.querySelector(".schedule-dialog");
-          const controls = dialog ? Array.from(dialog.querySelectorAll('button:not([disabled]), [tabindex="0"]')) : [];
+          const controls = dialog ? Array.from(dialog.querySelectorAll('button:not([disabled]), select, summary, [tabindex="0"]')) : [];
           const first = controls[0], last = controls[controls.length - 1];
           if (event.shiftKey && document.activeElement === first) {event.preventDefault(); last?.focus();}
           else if (!event.shiftKey && document.activeElement === last) {event.preventDefault(); first?.focus();}
