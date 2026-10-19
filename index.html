@@ -372,6 +372,10 @@
       .slot-date strong{font-size:14px}
       .calendar-card-title{font-size:12px;-webkit-line-clamp:4}
     }
+  
+    .calendar-slot-dates{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .calendar-slot-dates .date-alternative{opacity:.35}
+    .calendar-week-caption span{color:#97b8a4}
   </style>
 </head>
 <body>
@@ -734,30 +738,32 @@
     // Insert the selected video first; keep the remaining queue in its original order.
     // Only a collision starts a cascade. Posted videos and dates before it stay untouched.
     function scheduleVideo(items, selected, dateStr) {
-      const date = parseDateKey(dateStr);
-      if (!date || !POSTING_DAYS.has(date.getDay()) || dateStr < localDateKey()) {
+      const date=parseDateKey(dateStr);
+      if(!date||!POSTING_DAYS.has(date.getDay())||dateStr<localDateKey())
         throw new Error("Escolha uma quarta, quinta, sábado ou domingo a partir de hoje.");
-      }
-      const others = items.filter(v => v.id !== selected.id);
-      const queue = others.filter(v => !v.posted && getVideoScheduledDate(v) >= dateStr)
-        .map((v, index) => ({ v, index, date: getVideoScheduledDate(v) }))
-        .sort((a, b) => a.date.localeCompare(b.date) || a.index - b.index);
-      const updates = new Map([[selected.id, withScheduledDate(selected, dateStr)]]);
-      const moves = [];
-      let cursor = dateStr;
-      for (const {v, date: original} of queue) {
-        if (original <= cursor) {
-          const target = nextPostingDate(cursor);
-          updates.set(v.id, withScheduledDate(v, target));
-          moves.push({ id: v.id, title: v.titles?.find(Boolean) || "Vídeo sem título", from: original, to: target });
-          cursor = target;
-        } else {
-          break;
+      const weekKey=key=>localDateKey(getWeekMonday(parseDateKey(key)));
+      const firstWeek=weekKey(dateStr);
+      const queue=items.filter(v=>v.id!==selected.id&&!v.posted&&weekKey(getVideoScheduledDate(v))>=firstWeek)
+        .map((v,index)=>({v,index,date:getVideoScheduledDate(v)}))
+        .sort((a,b)=>a.date.localeCompare(b.date)||a.index-b.index);
+      const updates=new Map([[selected.id,withScheduledDate(selected,dateStr)]]);
+      const used=new Set([dateStr]),counts=new Map([[firstWeek,1]]),moves=[];
+      let cursor="";
+      for(const {v,date:original} of queue){
+        let target=original<cursor?cursor:original;
+        while(used.has(target)||(counts.get(weekKey(target))||0)>=2){
+          if((counts.get(weekKey(target))||0)>=2){
+            const monday=getWeekMonday(parseDateKey(target));monday.setDate(monday.getDate()+9);
+            target=localDateKey(monday);
+          } else target=nextPostingDate(target);
         }
+        used.add(target);counts.set(weekKey(target),(counts.get(weekKey(target))||0)+1);
+        if(target!==original){updates.set(v.id,withScheduledDate(v,target));moves.push({id:v.id,title:v.titles?.find(Boolean)||"Vídeo sem título",from:original,to:target});}
+        cursor=target;
       }
-      const result = items.map(v => updates.get(v.id) || v);
-      if (!items.some(v => v.id === selected.id)) result.unshift(updates.get(selected.id));
-      return { videos: result, moves };
+      const result=items.map(v=>updates.get(v.id)||v);
+      if(!items.some(v=>v.id===selected.id))result.unshift(updates.get(selected.id));
+      return {videos:result,moves};
     }
 
     function shortDate(value) {
@@ -884,24 +890,23 @@
             {Array.from({length:dates.length/4},(_,week)=>{
               const row=dates.slice(week*4,week*4+4);
               const first=row.find(Boolean),last=[...row].reverse().find(Boolean);
+              const monday=getWeekMonday(first);
+              const weekOwners=videos.filter(v=>!v.posted&&localDateKey(getWeekMonday(parseDateKey(getVideoScheduledDate(v))))===localDateKey(monday))
+                .sort((a,b)=>getVideoScheduledDate(a).localeCompare(getVideoScheduledDate(b)));
+              const weekDates=[3,4,6,0].map(day=>{const d=new Date(monday);d.setDate(d.getDate()+(day===0?6:day-1));return d;});
               return <section className="calendar-week paired-week" key={week}>
-                <div className="calendar-week-caption">Semana de {first?.getDate()} a {last?.getDate()}</div>
+                <div className="calendar-week-caption">Semana de {first?.getDate()} a {last?.getDate()}<span>{weekOwners.length}/2 postagens</span></div>
                 <div className="calendar-pair">
                   {[0,1].map(part=>{
-                    const pair=row.slice(part*2,part*2+2);
-                    const owners=pair.flatMap(date=>{
-                      if(!date)return [];
-                      const key=localDateKey(date);
-                      const list=occupied.get(key)||[];
-                      return [...list,...(!isNew&&key===initial&&!list.length?[video]:[])].map(owner=>({owner,key}));
-                    });
-                    const active=owners.length>0||pair.some(date=>date&&localDateKey(date)===selected);
+                    const pair=weekDates;
+                    const owners=weekOwners.slice(part,part+1).map(owner=>({owner,key:getVideoScheduledDate(owner)}));
+                    const active=owners.length>0;
                     return <div className={"calendar-post-slot"+(active?" slot-defined":"")} key={part}>
                       <span className="calendar-slot-label">{part===0?"1ª postagem":"2ª postagem"}</span>
                       <div className="calendar-slot-dates">
                         {pair.map((date,index)=>{
                           if(!date||localDateKey(date)<today)return <span key={index}/>;
-                          const key=localDateKey(date),defined=owners.some(item=>item.key===key)||selected===key;
+                          const key=localDateKey(date),defined=owners.some(item=>item.key===key);
                           return <button type="button" key={key} data-posting-date={key} aria-pressed={selected===key}
                             aria-label={date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}
                             className={"slot-date"+(defined?" date-defined":active?" date-alternative":"")+(dropDate===key?" date-drop":"")+(selected===key?" date-selected":"")}
@@ -922,7 +927,7 @@
                             <span className="calendar-card-title">{title}</span>
                           </button>;
                         })}
-                        {!owners.length&&<div className="calendar-slot-empty">{pair.some(date=>date&&localDateKey(date)===selected)?"Novo vídeo aqui":"Sem vídeo"}</div>}
+                        {!owners.length&&<div className="calendar-slot-empty">{weekOwners.length>2?"Semana com excesso":"Sem vídeo"}</div>}
                       </div>
                     </div>;
                   })}
