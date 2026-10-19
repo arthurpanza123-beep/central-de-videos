@@ -323,6 +323,16 @@
       .calendar-week .calendar-days>:nth-child(4n+3){margin-left:3px}
       .calendar-week .calendar-days>:nth-child(4n+2){margin-right:3px}
     }
+  
+    .visual-calendar .calendar-date.confirmed-date{border:2px solid #519878;background:#183b2c;box-shadow:0 0 0 1px #51987822}
+    .visual-calendar .confirmed-date .calendar-day-number{background:#245d41;color:#e2ffed;z-index:1}
+    .visual-calendar .calendar-date.selected{outline-color:#76be94}
+    .visual-calendar .calendar-date.alternate-date{opacity:.28;background:transparent;border-color:#44444a;box-shadow:none}
+    .visual-calendar .calendar-date.alternate-date:hover,.visual-calendar .calendar-date.alternate-date.drop-target{opacity:1}
+    .visual-calendar .calendar-date.has-video{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+    .visual-calendar .calendar-date.has-video img{pointer-events:none;-webkit-user-drag:none}
+    .visual-calendar .calendar-date.has-video:active{cursor:grabbing}
+    .visual-calendar .calendar-date.drop-target{opacity:1;border-color:#a4e2bb;outline:2px solid #a4e2bb}
   </style>
 </head>
 <body>
@@ -784,11 +794,14 @@
         if (!owner || !onMoveVideo) return;
         event.preventDefault(); event.stopPropagation();
         event.currentTarget.setPointerCapture(event.pointerId);
-        dragRef.current = { id:owner.id, from:getVideoScheduledDate(owner) };
-        setDragging(owner.id);
+        dragRef.current = { id:owner.id, from:getVideoScheduledDate(owner), x:event.clientX, y:event.clientY, moved:false };
       }
       function trackMove(event) {
-        if (dragRef.current) { event.preventDefault(); setDropDate(dragTarget(event)); }
+        const moving=dragRef.current;
+        if (!moving) return;
+        event.preventDefault();
+        if(!moving.moved && Math.hypot(event.clientX-moving.x,event.clientY-moving.y)<8)return;
+        moving.moved=true;setDragging(moving.id);setDropDate(dragTarget(event));
       }
       function finishMove(event) {
         const moving=dragRef.current;
@@ -796,7 +809,8 @@
         event.preventDefault();event.stopPropagation();
         const target=dragTarget(event);
         dragRef.current=null;setDragging(null);setDropDate("");
-        if(target && target!==moving.from) onMoveVideo(moving.id,target);
+        if(moving.moved && target && target!==moving.from) onMoveVideo(moving.id,target);
+        else if(!moving.moved) {setSelected(moving.from);setError("");}
       }
       return (
         <div className="posting-calendar visual-calendar">
@@ -813,7 +827,7 @@
             </div>
             <button type="button" aria-label="Próximo mês" onClick={() => changeMonth(1)}>›</button>
           </div>
-          <p className="calendar-drag-hint">Segure ⋮⋮ para arrastar um vídeo</p>
+          <p className="calendar-drag-hint">Arraste o vídeo para mudar a data</p>
           <div className={"calendar-weeks"+(dragging!==null?" is-moving":"")}>
             {Array.from({length:dates.length/4},(_,week)=> {
               const row=dates.slice(week*4,week*4+4);
@@ -832,21 +846,23 @@
               const thumb=owner?.thumbs?.find(Boolean);
               const title=owner?.titles?.find(Boolean) || "Vídeo sem título";
               const chosen=selected===key;
+              const alternate=new Date(date);
+              alternate.setDate(date.getDate()+([3,6].includes(date.getDay())?1:-1));
+              const alternateKey=localDateKey(alternate);
+              const pairedDate=occupied.has(alternateKey) || (!isNew && alternateKey===initial) || selected===alternateKey;
+              const confirmed=!!owner || chosen;
+              const muted=!confirmed && pairedDate;
               return <button key={key} type="button" data-posting-date={key} aria-pressed={chosen}
                 onKeyDown={e=>{if(!owner||!onMoveVideo||!e.altKey||!["ArrowLeft","ArrowRight"].includes(e.key))return;e.preventDefault();const all=getUpcomingPostingDates(400).map(d=>d.dateStr), pos=all.indexOf(key), target=all[pos+(e.key==="ArrowLeft"?-1:1)];if(target)onMoveVideo(owner.id,target);}}
                 aria-label={date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+
                   (busy?", ocupado: "+title+". Selecionar e remanejar.":current?", data atual do vídeo":", livre")}
                 title={owner?title:"Data livre"}
-                className={"calendar-date calendar-tile "+(owner?"has-video":"empty-date")+(chosen?" selected":"")+(dropDate===key?" drop-target":"")+(dragging===owner?.id?" moving-video":"")}
-                onClick={()=>{if(dragRef.current)return;setSelected(key);setError("");}}>
+                className={"calendar-date calendar-tile "+(owner?"has-video":"empty-date")+(chosen?" selected":"")+(confirmed?" confirmed-date":"")+(muted?" alternate-date":"")+(dropDate===key?" drop-target":"")+(dragging===owner?.id?" moving-video":"")}
+                onPointerDown={e=>{if(e.button===0)startMove(e,owner);}} onPointerMove={trackMove} onPointerUp={finishMove}
+                onPointerCancel={()=>{dragRef.current=null;setDragging(null);setDropDate("");}}
+                onClick={e=>{if(owner&&onMoveVideo&&e.detail!==0)return;setSelected(key);setError("");}}>
                 {thumb ? <img src={thumb} alt="" loading="lazy" /> : owner ? <span className="calendar-video-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="4" stroke="currentColor" strokeWidth="1.5"/><path d="m10 9 5 3-5 3V9Z" fill="currentColor"/></svg></span> : <span className="calendar-free-plus" aria-hidden="true">＋</span>}
                 <strong className="calendar-day-number">{date.getDate()}</strong>
-                {owner && onMoveVideo && <span className="calendar-drag-grip"
-                  aria-label={"Mover "+title} title="Segure e arraste para outra data"
-                  onClick={e=>{e.stopPropagation();setSelected(key);}}
-                  onPointerDown={e=>startMove(e,owner)} onPointerMove={trackMove} onPointerUp={finishMove}
-                  onPointerCancel={()=>{dragRef.current=null;setDragging(null);setDropDate("");}}
->⋮⋮</span>}
                 {current && <span className="calendar-current-label">Atual</span>}
                 {busy?.length>1 && <span className="calendar-current-label">+{busy.length-1}</span>}
               </button>;
@@ -855,14 +871,9 @@
               </div>;
             })}
           </div>
-          {preview?.moves.length>0 && <details className="schedule-preview">
-            <summary>{preview.moves.length===1?"1 vídeo será remanejado":preview.moves.length+" vídeos serão remanejados"}</summary>
-            <ul>{preview.moves.map(move=><li key={move.id}><span>{move.title}</span><b>{shortDate(move.from)} → {shortDate(move.to)}</b></li>)}</ul>
-          </details>}
           {error && <p role="alert">{error}</p>}
           <div className="calendar-selection" aria-live="polite">
             {selectedDate ? selectedDate.toLocaleDateString("pt-BR",{day:"numeric",month:"long"}) : "Escolha o dia da publicação"}
-            {selectedOwner && <span className="calendar-selected-video">{selectedOwner.titles?.find(Boolean) || "Vídeo agendado"}</span>}
           </div>
           <div className="calendar-actions">
             {onCancel && <button type="button" className="schedule-cancel" onClick={onCancel}>Cancelar</button>}
