@@ -1641,7 +1641,7 @@
                             <div className="production-checklist">
                               <span className="checklist-count" title="Etapas concluídas">{completedSteps}/{PRODUCTION_STEPS.length + 1}</span>
                               <div className="checklist-items">
-                                {PRODUCTION_STEPS.map(([key, label]) => (
+                                {PRODUCTION_STEPS.filter(([key]) => !(key === "gravarAudioSim" && video[key])).map(([key, label]) => (
                                   <button key={key} type="button" aria-pressed={!!video[key]}
                                     onClick={() => toggleProcess(video.id, key)}
                                     className={"checklist-item " + (video[key] ? "complete" : "")}>
