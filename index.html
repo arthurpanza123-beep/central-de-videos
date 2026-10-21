@@ -453,9 +453,14 @@
     ];
     const POSTING_DAYS = new Set([3, 4, 6, 0]); // quarta, quinta, sábado e domingo
     const PRODUCTION_STEPS = [
-      ["gravarAudioSim", "Gravar áudio"],
-      ["nandoSim", "Nando"], ["dudaSim", "Duda"], ["sonoraSim", "Sonora"],
-      ["legendasSim", "Legendas"], ["tvSim", "Vídeos TV"]
+      ["introSim", "Intro"],
+      ["nandoSim", "Nando"],
+      ["dudaSim", "Duda"],
+      ["sonoraSim", "Sonorização"],
+      ["tvSim", "Vídeos TV"],
+      ["transicoesSim", "Transições"],
+      ["legendasSim", "Legendas"],
+      ["finalizacaoSim", "Finalização"]
     ];
 
     function getWeekMonday(d) {
@@ -629,7 +634,7 @@
           weekday: 6,
           weekOffset: 0,
           posted: false,
-          introSim: false,
+          introSim: false, transicoesSim: false,
           nandoSim: true,
           dudaSim: false,
           sonoraSim: true,
