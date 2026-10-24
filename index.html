@@ -939,14 +939,14 @@
                             <span className="calendar-card-title">{title}</span>
                           </button>;
                         })}
-                        {part===0 && weekHistory.map(owner=>{
+                        {weekHistory.slice(part,part+1).map(owner=>{
                           const title=owner.titles?.find(Boolean)||"Vídeo sem título",thumb=owner.thumbs?.find(Boolean);
                           return <div key={"history-"+owner.id} className="calendar-video-card" style={{cursor:"default",opacity:1}} aria-label={"Semana concluída: "+title}>
                             {thumb?<img src={thumb} alt="" draggable="false"/>:<span className="calendar-card-placeholder" aria-hidden="true">✓</span>}
                             <span className="calendar-card-title" style={{color:"#9fe0b6"}}>SEMANA CONCLUÍDA · {title}</span>
                           </div>;
                         })}
-                        {!owners.length&&!weekHistory.length&&<div className="calendar-slot-empty">{weekOwners.length>2?"Semana com excesso":"Sem vídeo"}</div>}
+                        {!owners.length&&!weekHistory.slice(part,part+1).length&&<div className="calendar-slot-empty">{weekOwners.length>2?"Semana com excesso":"Sem vídeo"}</div>}
                       </div>
                     </div>;
                   })}
