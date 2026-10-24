@@ -1382,8 +1382,13 @@
 
       // Os vídeos em produção são organizados por data de publicação:
       // a data mais próxima aparece automaticamente no topo (ex: dia 18 antes do dia 22).
+      const currentWeekKey = localDateKey(getWeekMonday(new Date()));
+      const currentWeekPostedVideos = [...videos].filter((v) =>
+        v.posted && v.postedAt &&
+        localDateKey(getWeekMonday(new Date(v.postedAt))) === currentWeekKey
+      );
       const activeVideos = [...videos]
-        .filter((v) => !v.posted)
+        .filter((v) => !v.posted || currentWeekPostedVideos.some((posted) => posted.id === v.id))
         .sort((a, b) => {
           const infoA = calculatePostDayInfo(a);
           const infoB = calculatePostDayInfo(b);
@@ -1540,11 +1545,12 @@
                   const thumbsComplete = Array.isArray(video.thumbs) && video.thumbs.filter(Boolean).length === 3;
                   const completedSteps = PRODUCTION_STEPS.filter(([key]) => video[key]).length + (thumbsComplete ? 1 : 0);
                   const is100Percent = completedSteps === PRODUCTION_STEPS.length + 1;
+                  const isCurrentWeekPosted = video.posted && currentWeekPostedVideos.some((posted) => posted.id === video.id);
 
                   return (
                     <section
                       key={video.id}
-                      className="production-card bg-[#080808] rounded-2xl p-4 sm:p-5 lg:p-6 border border-[#1a1a1a] shadow-2xl space-y-4"
+                      className={"production-card rounded-2xl p-4 sm:p-5 lg:p-6 shadow-2xl space-y-4 " + (isCurrentWeekPosted ? "bg-[#102a20] border border-[#2f8f62]" : "bg-[#080808] border border-[#1a1a1a]")}
                     >
                       {/* CARD TOOLBAR */}
                       <div className="flex flex-col space-y-3 pb-4 border-b border-[#202026]">
@@ -1552,13 +1558,16 @@
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                           {/* Left: Badge do Dia com botão de expandir ⋯ */}
                           <div className="flex items-center gap-3 flex-wrap">
-                            <div className="video-date-toolbar flex items-center gap-3 bg-[#131317] border border-[#2b2b34] px-4 py-2.5 rounded-2xl shadow-md">
+                            <div className={"video-date-toolbar flex items-center gap-3 px-4 py-2.5 rounded-2xl shadow-md " + (isCurrentWeekPosted ? "bg-[#153b2b] border border-[#3e9b6b]" : "bg-[#131317] border border-[#2b2b34]")}>
                               <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-zinc-950 text-xl font-black select-none shadow-sm">
                                 📅
                               </div>
                               <div className="video-date-summary flex items-center gap-2.5">
                                 {video.posted ? (
-                                  <span className="text-base font-black text-emerald-400 uppercase tracking-tight">POSTADO NO YOUTUBE ✓</span>
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-base font-black text-emerald-300 uppercase tracking-tight">SEMANA CONCLUÍDA ✓</span>
+                                    {isCurrentWeekPosted && <span className="text-[11px] font-bold text-emerald-100/70 uppercase tracking-wide">Vídeo publicado nesta semana</span>}
+                                  </div>
                                 ) : (
                                   <>
                                     <span className="text-base sm:text-lg font-black text-white uppercase tracking-tight">{dayInfo.weekdayName}</span>
