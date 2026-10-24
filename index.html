@@ -927,9 +927,11 @@
                         {pair.map((date,index)=>{
                           if(!date)return <span key={index}/>;
                           const key=localDateKey(date),historical=localDateKey(date)<today;
-                          const defined=owners.some(item=>item.key===key)||historyKey===key;
+                          const ownerDay=owners[0]?.key ? new Date(owners[0].key+"T12:00:00").getDay() : -1;
+                          const defined=(owners.length>0 && ownerDay===date.getDay())||historyKey===key;
                           return <button type="button" key={key} data-posting-date={key} disabled={historical} aria-pressed={selected===key}
                             aria-label={date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}
+                            style={defined ? {background:"#245d40",borderColor:"#579e72",color:"#e3ffec",boxShadow:"0 0 0 2px #78c89a"} : undefined}
                             className={"slot-date"+(defined?" date-defined":active?" date-alternative":"")+(dropDate===key?" date-drop":"")+(selected===key?" date-selected":"")}
                             onClick={()=>{setSelected(key);setError("");}}>
                             <span>{date.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")}</span><strong>{date.getDate()}{date.getMonth()!==month.getMonth()?"/"+String(date.getMonth()+1).padStart(2,"0"):""}</strong>
