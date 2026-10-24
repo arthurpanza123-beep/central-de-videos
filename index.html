@@ -927,7 +927,7 @@
                         {pair.map((date,index)=>{
                           if(!date)return <span key={index}/>;
                           const key=localDateKey(date),historical=localDateKey(date)<today;
-                          if(historical && !weekHistory.length)return <span key={index}/>;
+                          if(historical && key!==historyKey)return <span key={index}/>;
                           const defined=owners.some(item=>item.key===key)||historyKey===key;
                           return <button type="button" key={key} data-posting-date={key} disabled={historical} aria-pressed={selected===key}
                             aria-label={date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}
