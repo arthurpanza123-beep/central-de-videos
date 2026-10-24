@@ -905,6 +905,8 @@
               const monday=getWeekMonday(first);
               const weekOwners=videos.filter(v=>!v.posted&&localDateKey(getWeekMonday(parseDateKey(getVideoScheduledDate(v))))===localDateKey(monday))
                 .sort((a,b)=>getVideoScheduledDate(a).localeCompare(getVideoScheduledDate(b)));
+              const weekHistory=videos.filter(v=>v.posted&&localDateKey(getWeekMonday(parseDateKey(getVideoScheduledDate(v))))===localDateKey(monday))
+                .sort((a,b)=>getVideoScheduledDate(a).localeCompare(getVideoScheduledDate(b)));
               const weekDates=[3,4,6,0].map(day=>{const d=new Date(monday);d.setDate(d.getDate()+(day===0?6:day-1));return d;});
               return <section className="calendar-week paired-week" key={week}>
                 <div className="calendar-pair">
@@ -937,7 +939,14 @@
                             <span className="calendar-card-title">{title}</span>
                           </button>;
                         })}
-                        {!owners.length&&<div className="calendar-slot-empty">{weekOwners.length>2?"Semana com excesso":"Sem vídeo"}</div>}
+                        {part===0 && weekHistory.map(owner=>{
+                          const title=owner.titles?.find(Boolean)||"Vídeo sem título",thumb=owner.thumbs?.find(Boolean);
+                          return <div key={"history-"+owner.id} className="calendar-video-card" style={{cursor:"default",opacity:1}} aria-label={"Semana concluída: "+title}>
+                            {thumb?<img src={thumb} alt="" draggable="false"/>:<span className="calendar-card-placeholder" aria-hidden="true">✓</span>}
+                            <span className="calendar-card-title" style={{color:"#9fe0b6"}}>SEMANA CONCLUÍDA · {title}</span>
+                          </div>;
+                        })}
+                        {!owners.length&&!weekHistory.length&&<div className="calendar-slot-empty">{weekOwners.length>2?"Semana com excesso":"Sem vídeo"}</div>}
                       </div>
                     </div>;
                   })}
@@ -1382,13 +1391,8 @@
 
       // Os vídeos em produção são organizados por data de publicação:
       // a data mais próxima aparece automaticamente no topo (ex: dia 18 antes do dia 22).
-      const currentWeekKey = localDateKey(getWeekMonday(new Date()));
-      const currentWeekPostedVideos = [...videos].filter((v) =>
-        v.posted &&
-        localDateKey(getWeekMonday(parseDateKey(getVideoScheduledDate(v)))) === currentWeekKey
-      );
       const activeVideos = [...videos]
-        .filter((v) => !v.posted || currentWeekPostedVideos.some((posted) => posted.id === v.id))
+        .filter((v) => !v.posted)
         .sort((a, b) => {
           const infoA = calculatePostDayInfo(a);
           const infoB = calculatePostDayInfo(b);
@@ -1545,7 +1549,7 @@
                   const thumbsComplete = Array.isArray(video.thumbs) && video.thumbs.filter(Boolean).length === 3;
                   const completedSteps = PRODUCTION_STEPS.filter(([key]) => video[key]).length + (thumbsComplete ? 1 : 0);
                   const is100Percent = completedSteps === PRODUCTION_STEPS.length + 1;
-                  const isCurrentWeekPosted = video.posted && currentWeekPostedVideos.some((posted) => posted.id === video.id);
+                  const isCurrentWeekPosted = false;
 
                   return (
                     <section
