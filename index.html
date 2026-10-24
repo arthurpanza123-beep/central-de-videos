@@ -1384,8 +1384,8 @@
       // a data mais próxima aparece automaticamente no topo (ex: dia 18 antes do dia 22).
       const currentWeekKey = localDateKey(getWeekMonday(new Date()));
       const currentWeekPostedVideos = [...videos].filter((v) =>
-        v.posted && v.postedAt &&
-        localDateKey(getWeekMonday(new Date(v.postedAt))) === currentWeekKey
+        v.posted &&
+        localDateKey(getWeekMonday(parseDateKey(getVideoScheduledDate(v)))) === currentWeekKey
       );
       const activeVideos = [...videos]
         .filter((v) => !v.posted || currentWeekPostedVideos.some((posted) => posted.id === v.id))
