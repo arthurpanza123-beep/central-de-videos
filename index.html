@@ -915,10 +915,11 @@
                   {[0,1].map(part=>{
                     const pair=weekDates.slice(part*2,part*2+2);
                     const owners=weekOwners.slice(part,part+1).map(owner=>({owner,key:getVideoScheduledDate(owner)}));
-                    const historyOwner=weekHistory.filter(owner=>{
-                      const day=parseDateKey(getVideoScheduledDate(owner))?.getDay();
+                    const historyOwner=weekHistory.find(owner=>{
+                      const key=getVideoScheduledDate(owner);
+                      const day=key ? new Date(key+"T12:00:00").getDay() : -1;
                       return part===0 ? day===3||day===4 : day===6||day===0;
-                    })[0];
+                    });
                     const historyKey=historyOwner ? getVideoScheduledDate(historyOwner) : "";
                     const active=owners.length>0;
                     return <div className={"calendar-post-slot"+(active?" slot-defined":"")} key={part}>
@@ -927,7 +928,7 @@
                           if(!date)return <span key={index}/>;
                           const key=localDateKey(date),historical=localDateKey(date)<today;
                           if(historical && !weekHistory.length)return <span key={index}/>;
-                          const defined=owners.some(item=>localDateKey(parseDateKey(item.key))===key)||localDateKey(parseDateKey(historyKey))===key;
+                          const defined=owners.some(item=>item.key===key)||historyKey===key;
                           return <button type="button" key={key} data-posting-date={key} disabled={historical} aria-pressed={selected===key}
                             aria-label={date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}
                             className={"slot-date"+(defined?" date-defined":active?" date-alternative":"")+(dropDate===key?" date-drop":"")+(selected===key?" date-selected":"")}
