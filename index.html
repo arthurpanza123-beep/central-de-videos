@@ -927,7 +927,7 @@
                           if(!date)return <span key={index}/>;
                           const key=localDateKey(date),historical=localDateKey(date)<today;
                           if(historical && key!==historyKey)return <span key={index}/>;
-                          const defined=owners.some(item=>item.key===key)||key===historyKey;
+                          const defined=owners.some(item=>localDateKey(parseDateKey(item.key))===key)||localDateKey(parseDateKey(historyKey))===key;
                           return <button type="button" key={key} data-posting-date={key} disabled={historical} aria-pressed={selected===key}
                             aria-label={date.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}
                             className={"slot-date"+(defined?" date-defined":active?" date-alternative":"")+(dropDate===key?" date-drop":"")+(selected===key?" date-selected":"")}
