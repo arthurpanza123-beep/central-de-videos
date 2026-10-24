@@ -910,12 +910,15 @@
               const weekDates=[3,4,6,0].map(day=>{const d=new Date(monday);d.setDate(d.getDate()+(day===0?6:day-1));return d;});
               const weekNumber=Math.round((monday.getTime()-getWeekMonday(new Date()).getTime())/(7*24*60*60*1000))+1;
               return <section className="calendar-week paired-week" key={week}>
-                <div className="calendar-week-caption"><strong>Semana {weekNumber}</strong><span>{monday.toLocaleDateString("pt-BR",{day:"2-digit",month:"short"})}</span></div>
+                <div className="calendar-week-caption"><strong>Semana {weekNumber}</strong><span>{weekHistory.length>=2 ? <b style={{color:"#9fe0b6",background:"#163d2a",border:"1px solid #2f8f62",borderRadius:"999px",padding:"4px 8px",fontSize:"10px"}}>Semana concluída</b> : monday.toLocaleDateString("pt-BR",{day:"2-digit",month:"short"})}</span></div>
                 <div className="calendar-pair">
                   {[0,1].map(part=>{
                     const pair=weekDates.slice(part*2,part*2+2);
                     const owners=weekOwners.slice(part,part+1).map(owner=>({owner,key:getVideoScheduledDate(owner)}));
-                    const historyOwner=weekHistory.slice(part,part+1)[0];
+                    const historyOwner=weekHistory.filter(owner=>{
+                      const day=parseDateKey(getVideoScheduledDate(owner))?.getDay();
+                      return part===0 ? day===3||day===4 : day===6||day===0;
+                    })[0];
                     const historyKey=historyOwner ? getVideoScheduledDate(historyOwner) : "";
                     const active=owners.length>0;
                     return <div className={"calendar-post-slot"+(active?" slot-defined":"")} key={part}>
