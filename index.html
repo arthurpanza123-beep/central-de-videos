@@ -914,7 +914,10 @@
                 <div className="calendar-pair">
                   {[0,1].map(part=>{
                     const pair=weekDates.slice(part*2,part*2+2);
-                    const owners=weekOwners.slice(part,part+1).map(owner=>({owner,key:getVideoScheduledDate(owner)}));
+                    const owners=weekOwners.filter(owner=>{
+                      const day=new Date(getVideoScheduledDate(owner)+"T12:00:00").getDay();
+                      return part===0 ? day===3||day===4 : day===6||day===0;
+                    }).slice(0,1).map(owner=>({owner,key:getVideoScheduledDate(owner)}));
                     const historyOwner=weekHistory.find(owner=>{
                       const key=getVideoScheduledDate(owner);
                       const day=key ? new Date(key+"T12:00:00").getDay() : -1;
