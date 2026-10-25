@@ -1439,6 +1439,7 @@
                     playSound("click");
                     setActiveTab("producao");
                   }}
+                  style={activeTab === "producao" ? {background:"#f4f4f5",color:"#111113"} : undefined}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-black transition active:scale-95 ${
                       activeTab === "producao"
                         ? "bg-white text-black shadow-md"
@@ -1464,6 +1465,7 @@
                     playSound("click");
                     setActiveTab("postados");
                   }}
+                  style={activeTab === "postados" ? {background:"#f4f4f5",color:"#111113"} : undefined}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-black transition active:scale-95 ${
                       activeTab === "postados"
                         ? "bg-white text-black shadow-md"
