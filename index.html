@@ -347,6 +347,11 @@
     .slot-date strong{font-size:16px}
     .calendar-slot-dates .date-defined{background:#245d40;border-color:#579e72;color:#e3ffec}
     .calendar-slot-dates button.date-defined{background:#245d40 !important;border-color:#78c89a !important;color:#e3ffec !important;box-shadow:0 0 0 2px #78c89a !important}
+    .posted-card{background:#0b0d0c!important;border-color:#26382f!important}
+    .posted-card .video-date-toolbar{background:#111a15!important;border-color:#2c4d3c!important}
+    .posted-card .production-card{box-shadow:none}
+    .posted-card .title-editor{background:#0d120f!important;border-color:#22362b!important}
+    .posted-card .thumb-option{background:#0a0e0c!important;border-color:#1e3027!important}
     .calendar-slot-dates .date-alternative{background:transparent;opacity:.28}
     .calendar-slot-dates .date-alternative:hover{opacity:.8}
     .calendar-slot-dates .date-selected{outline:1px solid #9bd8ad;outline-offset:2px}
@@ -1435,8 +1440,8 @@
                     setActiveTab("producao");
                   }}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-black transition active:scale-95 ${
-                    activeTab === "producao"
-                      ? "bg-[#ff0000] text-white shadow-md shadow-red-600/30"
+                      activeTab === "producao"
+                        ? "bg-white text-black shadow-md"
                       : "text-zinc-400 hover:text-white hover:bg-[#121212]"
                   }`}
                 >
@@ -1460,8 +1465,8 @@
                     setActiveTab("postados");
                   }}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-black transition active:scale-95 ${
-                    activeTab === "postados"
-                      ? "bg-[#ff0000] text-white shadow-md shadow-red-600/30"
+                      activeTab === "postados"
+                        ? "bg-white text-black shadow-md"
                       : "text-zinc-400 hover:text-white hover:bg-[#121212]"
                   }`}
                 >
@@ -1569,7 +1574,7 @@
                   return (
                     <section
                       key={video.id}
-                      className={"production-card rounded-2xl p-4 sm:p-5 lg:p-6 shadow-2xl space-y-4 " + (isCurrentWeekPosted ? "bg-[#102a20] border border-[#2f8f62]" : "bg-[#080808] border border-[#1a1a1a]")}
+                      className={(video.posted ? "posted-card " : "") + "production-card rounded-2xl p-4 sm:p-5 lg:p-6 shadow-2xl space-y-4 " + (isCurrentWeekPosted ? "bg-[#102a20] border border-[#2f8f62]" : "bg-[#080808] border border-[#1a1a1a]")}
                     >
                       {/* CARD TOOLBAR */}
                       <div className="flex flex-col space-y-3 pb-4 border-b border-[#202026]">
@@ -1695,7 +1700,7 @@
                           return (
                             <div
                               key={idx}
-                              className="flex flex-col bg-[#0b0b0e] border border-[#23232a] hover:border-[#383844] p-4 sm:p-5 rounded-2xl transition shadow-xl space-y-4"
+                              className="thumb-option flex flex-col bg-[#0b0b0e] border border-[#23232a] hover:border-[#383844] p-4 sm:p-5 rounded-2xl transition shadow-xl space-y-4"
                             >
                               {/* Option Header */}
                               <div className="flex items-center justify-between pb-2 border-b border-[#1c1c22]">
@@ -1803,7 +1808,7 @@
                                   }}
                                   maxLength={100}
                                   placeholder={`Título em destaque para a Opção ${idx + 1}...`}
-                                  className="w-full bg-[#131318] hover:bg-[#16161d] focus:bg-[#16161d] border border-[#2b2b36] focus:border-red-500 focus:ring-1 focus:ring-red-500/25 text-base sm:text-lg font-black text-white p-3.5 rounded-xl focus:outline-none resize-none transition leading-snug placeholder:text-zinc-600 placeholder:font-normal shadow-inner"
+                                  className="title-editor w-full bg-[#131318] hover:bg-[#16161d] focus:bg-[#16161d] border border-[#2b2b36] focus:border-white focus:ring-1 focus:ring-white/20 text-base sm:text-lg font-black text-white p-3.5 rounded-xl focus:outline-none resize-none transition leading-snug placeholder:text-zinc-600 placeholder:font-normal shadow-inner"
                                 />
                               </div>
                             </div>
