@@ -1726,7 +1726,7 @@
                               {/* 16:9 Thumbnail Box com moldura nítida */}
                               <div className="space-y-2">
                                 <div
-                                  className={`relative rounded-xl overflow-hidden cursor-pointer group aspect-video transition duration-200 flex items-center justify-center border-2 ${
+                                  className={`relative rounded-xl overflow-hidden cursor-pointer group aspect-video !aspect-video transition duration-200 flex items-center justify-center border-2 ${
                                     thumb
                                       ? "bg-black border-[#2d2d38] hover:border-red-500"
                                       : "bg-[#111116] border-dashed border-[#363644] hover:border-red-500"
@@ -1739,7 +1739,7 @@
                                     <img
                                       src={thumb}
                                       alt={`Opção ${idx + 1}`}
-                                      className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                                      className="w-full h-full object-contain bg-black transition duration-300"
                                     />
                                   ) : (
                                     <div className="relative w-full h-full flex flex-col items-center justify-center p-3 text-zinc-400 group-hover:text-white transition">
