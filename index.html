@@ -93,6 +93,7 @@
     .video-date-summary { flex-wrap: wrap; min-width: 0; }
     .settings-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); gap: 24px; padding: 24px; border: 1px solid #2b2b30; border-radius: 18px; background: #111113; align-items: start; }
     .script-panel { grid-column: auto; flex: 0 1 300px; width: 300px; min-width: 260px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid #2b2b30; border-radius: 12px; background: #0d0d0f; }
+    .script-panel.script-panel-reading { flex: 1 1 100%; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 260px; }
     .script-panel-title { font-size: 12px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: .04em; }
     .script-panel-name { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #a1a1aa; font-size: 11px; }
     .script-panel-actions { display: flex; flex-wrap: nowrap; align-content: flex-start; gap: 8px; }
@@ -214,6 +215,7 @@
     }
     @media(max-width:640px) {
       .script-panel { display: flex; flex: 1 1 100%; width: 100%; min-width: 0; }
+      .script-panel.script-panel-reading { display: flex; }
       .script-panel-title, .script-panel-name, .script-panel-actions, .script-reader { width: 100%; }
       .settings-panel { display:block; padding:12px; }
       .publication-control { width:100%; margin-bottom:12px; }
@@ -1756,7 +1758,7 @@
                                 </div>
                               </div>
                             </div>
-                            <div className="script-panel">
+                            <div className={"script-panel " + (readingScriptId === video.id ? "script-panel-reading" : "")}>
                               <span className="script-panel-title">Roteiro em PDF</span>
                               {video.scriptPdf?.name ? (
                                 <span className="script-panel-name" title={video.scriptPdf.name}>{video.scriptPdf.name}</span>
