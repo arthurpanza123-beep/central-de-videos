@@ -92,6 +92,14 @@
     .video-date-toolbar { flex-wrap: wrap; min-width: 0; }
     .video-date-summary { flex-wrap: wrap; min-width: 0; }
     .settings-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); gap: 24px; padding: 24px; border: 1px solid #2b2b30; border-radius: 18px; background: #111113; align-items: start; }
+    .script-panel { min-width: 220px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid #2b2b30; border-radius: 12px; background: #0d0d0f; }
+    .script-panel-title { font-size: 12px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: .04em; }
+    .script-panel-name { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #a1a1aa; font-size: 11px; }
+    .script-panel-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .script-panel button, .script-panel label { min-height: 34px; padding: 8px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; }
+    .script-import { background: #f4f4f5; color: #111113; }
+    .script-download { background: #173b2c; color: #a7f3d0; border: 1px solid #286347; }
+    .script-remove { background: #1d1719; color: #fda4af; border: 1px solid #512630; }
     .posting-calendar, .production-checklist { min-width: 0; width: 100%; }
     .calendar-heading h3, .checklist-heading h3 { margin: 0; font-size: 15px; font-weight: 800; color: #fafafa; }
     .calendar-heading p { margin: 6px 0 18px; font-size: 12px; color: #92929d; }
@@ -1281,6 +1289,7 @@
           gravarAudioSim: false, legendasSim: false, tvSim: false,
           thumbs: ["", "", ""],
           titles: ["", "", ""],
+          scriptPdf: null,
         };
         setNewVideo(newV);
       }
@@ -1334,6 +1343,33 @@
         } catch (e) {
           console.error("Erro ao processar imagem", e);
         }
+      }
+
+      async function importScript(id, file) {
+        if (!file) return;
+        if (file.type !== "application/pdf") { alert("Escolha um arquivo PDF."); return; }
+        if (file.size > 8 * 1024 * 1024) { alert("Esse PDF é maior que 8 MB. Use um arquivo menor para sincronizar corretamente."); return; }
+        const reader = new FileReader();
+        reader.onload = () => {
+          playSound("click");
+          setVideos((prev) => prev.map((v) => v.id === id ? { ...v, scriptPdf: { name: file.name, data: reader.result } } : v));
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function downloadScript(video) {
+        if (!video?.scriptPdf?.data) return;
+        const link = document.createElement("a");
+        link.href = video.scriptPdf.data;
+        link.download = video.scriptPdf.name || "roteiro.pdf";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+
+      function removeScript(id) {
+        playSound("delete");
+        setVideos((prev) => prev.map((v) => v.id === id ? { ...v, scriptPdf: null } : v));
       }
 
       function removeThumb(id, index) {
@@ -1695,6 +1731,22 @@
                                 <div className={"checklist-item " + (thumbsComplete ? "complete" : "")}>
                                   <span>Thumbs</span><b>{thumbsComplete ? "✓" : (video.thumbs?.filter(Boolean).length || 0) + "/3"}</b>
                                 </div>
+                              </div>
+                            </div>
+                            <div className="script-panel">
+                              <span className="script-panel-title">Roteiro em PDF</span>
+                              {video.scriptPdf?.name ? (
+                                <span className="script-panel-name" title={video.scriptPdf.name}>{video.scriptPdf.name}</span>
+                              ) : (
+                                <span className="script-panel-name">Nenhum roteiro importado</span>
+                              )}
+                              <div className="script-panel-actions">
+                                <label className="script-import">
+                                  {video.scriptPdf?.name ? "Trocar PDF" : "Importar PDF"}
+                                  <input type="file" accept="application/pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importScript(video.id, f); e.currentTarget.value = ""; }} />
+                                </label>
+                                {video.scriptPdf?.data && <button type="button" className="script-download" onClick={() => downloadScript(video)}>Baixar roteiro</button>}
+                                {video.scriptPdf?.data && <button type="button" className="script-remove" onClick={() => removeScript(video.id)}>Remover</button>}
                               </div>
                             </div>
                           </div>
