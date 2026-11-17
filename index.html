@@ -100,6 +100,8 @@
     .script-import { background: #f4f4f5; color: #111113; }
     .script-download { background: #173b2c; color: #a7f3d0; border: 1px solid #286347; }
     .script-remove { background: #1d1719; color: #fda4af; border: 1px solid #512630; }
+    .script-reader { width: 100%; min-height: 520px; margin-top: 4px; overflow: hidden; border: 1px solid #303038; border-radius: 10px; background: #050505; }
+    .script-reader iframe { display: block; width: 100%; height: 520px; border: 0; }
     .posting-calendar, .production-checklist { min-width: 0; width: 100%; }
     .calendar-heading h3, .checklist-heading h3 { margin: 0; font-size: 15px; font-weight: 800; color: #fafafa; }
     .calendar-heading p { margin: 6px 0 18px; font-size: 12px; color: #92929d; }
@@ -1062,6 +1064,7 @@
       const [scheduleNotice, setScheduleNotice] = useState("");
       const [postingId, setPostingId] = useState(null);
       const [expandedDetails, setExpandedDetails] = useState({});
+      const [readingScriptId, setReadingScriptId] = useState(null);
       const [loaded, setLoaded] = useState(false);
       const [cloudStatus, setCloudStatus] = useState("syncing"); // 'syncing', 'synced', 'saving', 'offline'
       const saveTimerRef = useRef(null);
@@ -1745,9 +1748,15 @@
                                   {video.scriptPdf?.name ? "Trocar PDF" : "Importar PDF"}
                                   <input type="file" accept="application/pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importScript(video.id, f); e.currentTarget.value = ""; }} />
                                 </label>
+                                {video.scriptPdf?.data && <button type="button" className="script-download" onClick={() => setReadingScriptId(readingScriptId === video.id ? null : video.id)}>{readingScriptId === video.id ? "Fechar leitura" : "Ler roteiro"}</button>}
                                 {video.scriptPdf?.data && <button type="button" className="script-download" onClick={() => downloadScript(video)}>Baixar roteiro</button>}
                                 {video.scriptPdf?.data && <button type="button" className="script-remove" onClick={() => removeScript(video.id)}>Remover</button>}
                               </div>
+                              {readingScriptId === video.id && video.scriptPdf?.data && (
+                                <div className="script-reader">
+                                  <iframe title={`Leitor do roteiro ${video.scriptPdf.name}`} src={video.scriptPdf.data} />
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
