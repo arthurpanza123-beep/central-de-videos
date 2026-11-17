@@ -860,8 +860,7 @@
       const monthNames = Array.from({length:12},(_,i) => new Date(2026,i,1).toLocaleDateString("pt-BR",{month:"long"}));
       const years = Array.from({length:Math.max(6, month.getFullYear() - now.getFullYear() + 2)},(_,i)=>now.getFullYear()+i);
       function chooseMonth(year, index) {
-        const safeIndex = year === now.getFullYear() ? Math.max(index, now.getMonth()) : index;
-        setMonth(new Date(year,safeIndex,1,12));
+        setMonth(new Date(year,index,1,12));
         setSelected("");
         setError("");
       }
@@ -920,7 +919,7 @@
             <button type="button" aria-label="Mês anterior" data-month-shift="-1" disabled={currentMonth} onClick={() => changeMonth(-1)}>‹</button>
             <div className="calendar-month-selects">
               <select aria-label="Mês de publicação" value={month.getMonth()} onChange={e=>chooseMonth(month.getFullYear(),Number(e.target.value))}>
-                {monthNames.map((name,i)=><option key={name} value={i} disabled={month.getFullYear()===now.getFullYear()&&i<now.getMonth()}>{name}</option>)}
+                {monthNames.map((name,i)=><option key={name} value={i}>{name}</option>)}
               </select>
               <select aria-label="Ano de publicação" value={month.getFullYear()} onChange={e=>chooseMonth(Number(e.target.value),month.getMonth())}>
                 {years.map(year=><option key={year} value={year}>{year}</option>)}
