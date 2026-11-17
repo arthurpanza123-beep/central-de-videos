@@ -95,7 +95,7 @@
     .script-panel { grid-column: 1 / -1; flex: 1 1 100%; width: 100%; min-width: 220px; display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 12px 18px; padding: 14px; border: 1px solid #2b2b30; border-radius: 12px; background: #0d0d0f; }
     .script-panel-title { grid-column: 2; grid-row: 1; font-size: 12px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: .04em; }
     .script-panel-name { grid-column: 2; grid-row: 2; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #a1a1aa; font-size: 11px; }
-    .script-panel-actions { grid-column: 2; grid-row: 3; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 8px; }
+    .script-panel-actions { grid-column: 2; grid-row: 3; display: flex; flex-wrap: nowrap; align-content: flex-start; gap: 8px; }
     .script-panel button, .script-panel label { min-height: 34px; padding: 8px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; }
     .script-import { background: #f4f4f5; color: #111113; }
     .script-download { background: #173b2c; color: #a7f3d0; border: 1px solid #286347; }
@@ -1764,14 +1764,8 @@
                                 <span className="script-panel-name">Nenhum roteiro importado</span>
                               )}
                               <div className="script-panel-actions">
-                                <label className="script-import">
-                                  {video.scriptPdf?.name ? "Trocar PDF" : "Importar PDF"}
-                                  <input type="file" accept="application/pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importScript(video.id, f); e.currentTarget.value = ""; }} />
-                                </label>
                                 {video.scriptPdf?.data && <button type="button" className="script-download" onClick={() => setReadingScriptId(readingScriptId === video.id ? null : video.id)}>{readingScriptId === video.id ? "Fechar leitura" : "Ler roteiro"}</button>}
-                                {readingScriptId === video.id && <button type="button" className="script-close-reading" onClick={() => setReadingScriptId(null)}>Fechar roteiro ✕</button>}
                                 {video.scriptPdf?.data && <button type="button" className="script-download" onClick={() => downloadScript(video)}>Baixar roteiro</button>}
-                                {video.scriptPdf?.data && <button type="button" className="script-remove" onClick={() => removeScript(video.id)}>Remover</button>}
                               </div>
                               {readingScriptId === video.id && video.scriptPdf?.data && (
                                 <div className="script-reader">
