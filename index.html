@@ -92,10 +92,10 @@
     .video-date-toolbar { flex-wrap: wrap; min-width: 0; }
     .video-date-summary { flex-wrap: wrap; min-width: 0; }
     .settings-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); gap: 24px; padding: 24px; border: 1px solid #2b2b30; border-radius: 18px; background: #111113; align-items: start; }
-    .script-panel { grid-column: 1 / -1; flex: 1 1 100%; width: 100%; min-width: 220px; display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 12px 18px; padding: 14px; border: 1px solid #2b2b30; border-radius: 12px; background: #0d0d0f; }
-    .script-panel-title { grid-column: 2; grid-row: 1; font-size: 12px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: .04em; }
-    .script-panel-name { grid-column: 2; grid-row: 2; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #a1a1aa; font-size: 11px; }
-    .script-panel-actions { grid-column: 2; grid-row: 3; display: flex; flex-wrap: nowrap; align-content: flex-start; gap: 8px; }
+    .script-panel { grid-column: auto; flex: 0 1 300px; width: 300px; min-width: 260px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid #2b2b30; border-radius: 12px; background: #0d0d0f; }
+    .script-panel-title { font-size: 12px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: .04em; }
+    .script-panel-name { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #a1a1aa; font-size: 11px; }
+    .script-panel-actions { display: flex; flex-wrap: nowrap; align-content: flex-start; gap: 8px; }
     .script-panel button, .script-panel label { min-height: 34px; padding: 8px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; }
     .script-import { background: #f4f4f5; color: #111113; }
     .script-download { background: #173b2c; color: #a7f3d0; border: 1px solid #286347; }
@@ -213,7 +213,7 @@
       .settings-panel { gap:12px; padding:14px; }
     }
     @media(max-width:640px) {
-      .script-panel { display: flex; }
+      .script-panel { display: flex; flex: 1 1 100%; width: 100%; min-width: 0; }
       .script-panel-title, .script-panel-name, .script-panel-actions, .script-reader { width: 100%; }
       .settings-panel { display:block; padding:12px; }
       .publication-control { width:100%; margin-bottom:12px; }
