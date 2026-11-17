@@ -1765,6 +1765,10 @@
                                 <span className="script-panel-name">Nenhum roteiro importado</span>
                               )}
                               <div className="script-panel-actions">
+                                {!video.scriptPdf?.data && <label className="script-import">
+                                  Upar PDF
+                                  <input type="file" accept="application/pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importScript(video.id, f); e.currentTarget.value = ""; }} />
+                                </label>}
                                 {video.scriptPdf?.data && <button type="button" className="script-download" onClick={() => setReadingScriptId(readingScriptId === video.id ? null : video.id)}>{readingScriptId === video.id ? "Fechar leitura" : "Ler roteiro"}</button>}
                                 {video.scriptPdf?.data && <button type="button" className="script-download" onClick={() => downloadScript(video)}>Baixar roteiro</button>}
                               </div>
