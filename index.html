@@ -1261,6 +1261,23 @@
 
       useEffect(() => {
         if (!loaded) return;
+        const cleanupKey = STORAGE_KEY + "_tarobinha_script_cleanup_v1";
+        try { if (localStorage.getItem(cleanupKey)) return; } catch {}
+        const hasTarobinhaScript = videos.some((video) =>
+          (video.titles || []).some((title) => /tarobinha/i.test(title || "")) && video.scriptPdf?.data
+        );
+        if (hasTarobinhaScript) {
+          setVideos((prev) => prev.map((video) =>
+            (video.titles || []).some((title) => /tarobinha/i.test(title || ""))
+              ? { ...video, scriptPdf: null }
+              : video
+          ));
+        }
+        try { localStorage.setItem(cleanupKey, "1"); } catch {}
+      }, [loaded]);
+
+      useEffect(() => {
+        if (!loaded) return;
         const refresh = () => {
           if (document.visibilityState === "hidden") return;
           if (pendingSaveRef.current) saveToCloud(videosRef.current, saveRevisionRef.current);
