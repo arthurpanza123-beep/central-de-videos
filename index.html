@@ -1000,7 +1000,7 @@
                     </div>;
                   })}
                 </div>
-                {extraOpen && <div className="calendar-extra-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:"12px",marginTop:"12px"}}>{extraDates.map(date=>{const key=localDateKey(date);const owner=weekOwners.find(v=>getVideoScheduledDate(v)===key);const thumb=owner?.thumbs?.find(Boolean);const title=owner?.titles?.find(Boolean)||"Vídeo extra — escolha o dia";return <div className="calendar-post-slot" key={key} style={{borderColor:owner?"#579e72":"#3d5f4c",background:owner?"#19251f":"#14251e"}}><button type="button" disabled={key<today} onClick={()=>{setSelected(key);setError("")}} className="slot-date" style={{width:"100%",minHeight:"48px",border:"1px solid #579e72",borderRadius:"10px",background:selected===key?"#245d40":"#1c3328",color:"#d9ffe8",cursor:key<today?"not-allowed":"pointer"}}><span>{date.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")}</span><strong>{date.getDate()}</strong></button><div className="calendar-slot-videos" style={{marginTop:"10px"}}>{owner?(thumb?<img src={thumb} alt="" style={{width:"100%",aspectRatio:"16/9",objectFit:"cover",borderRadius:"8px"}}/>:<span className="calendar-card-placeholder">▶</span>):<div className="calendar-slot-empty">Sem vídeo</div>}<span className="calendar-card-title" style={{display:"block",marginTop:"8px",fontSize:"11px",color:owner?"#fff":"#a7f3d0"}}>{title}</span></div></div>})}</div>}
+                {extraOpen && <div className="calendar-extra-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:"12px",marginTop:"12px"}}>{extraDates.map(date=>{const key=localDateKey(date);const owner=weekOwners.find(v=>getVideoScheduledDate(v)===key);const thumb=owner?.thumbs?.find(Boolean);const title=owner?.titles?.find(Boolean)||"Vídeo extra — escolha o dia";return <div className="calendar-post-slot" key={key} data-posting-date={key} onPointerDown={e=>{if(owner&&e.button===0)startMove(e,owner)}} style={{borderColor:owner?"#579e72":"#3d5f4c",background:owner?"#19251f":"#14251e",cursor:owner?"grab":"default"}}><button type="button" data-posting-date={key} disabled={key<today} onClick={()=>{setSelected(key);setError("")}} className="slot-date" style={{width:"100%",minHeight:"48px",border:"1px solid #579e72",borderRadius:"10px",background:selected===key?"#245d40":"#1c3328",color:"#d9ffe8",cursor:key<today?"not-allowed":"pointer"}}><span>{date.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")}</span><strong>{date.getDate()}</strong></button><div className="calendar-slot-videos" style={{marginTop:"10px"}}>{owner?(thumb?<img src={thumb} alt="" style={{width:"100%",aspectRatio:"16/9",objectFit:"cover",borderRadius:"8px",pointerEvents:"none"}}/>:<span className="calendar-card-placeholder">▶</span>):<div className="calendar-slot-empty">Sem vídeo</div>}<span className="calendar-card-title" style={{display:"block",marginTop:"8px",fontSize:"11px",color:owner?"#fff":"#a7f3d0"}}>{title}</span></div></div>})}</div>}
               </section>;
             })}
           </div>
@@ -1341,7 +1341,11 @@
         const current=videosRef.current;
         const moving=current.find(v=>v.id===id);
         if(!moving || moving.posted)return;
-        const result=scheduleVideo(current,moving,date);
+        const targetDate=parseDateKey(date);
+        const targetWeek=localDateKey(getWeekMonday(targetDate));
+        const targetCount=current.filter(v=>!v.posted&&v.id!==id&&localDateKey(getWeekMonday(parseDateKey(getVideoScheduledDate(v))))===targetWeek).length;
+        const allowExtraWeek=targetDate.getDay()===5||targetCount>=2;
+        const result=scheduleVideo(current,moving,date,allowExtraWeek);
         videosRef.current=result.videos;
         setVideos(result.videos);
         setScheduleNotice("Vídeo movido para "+shortDate(date)+".");
