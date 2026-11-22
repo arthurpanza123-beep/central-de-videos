@@ -782,7 +782,7 @@
     // Only a collision starts a cascade. Posted videos and dates before it stay untouched.
     function scheduleVideo(items, selected, dateStr, allowExtraWeek = false) {
       const date=parseDateKey(dateStr);
-      if(!date||!POSTING_DAYS.has(date.getDay())||dateStr<localDateKey())
+      if(!date||(!POSTING_DAYS.has(date.getDay()) && !(allowExtraWeek && date.getDay()===5))||dateStr<localDateKey())
         throw new Error("Escolha uma quarta, quinta, sábado ou domingo a partir de hoje.");
       const weekKey=key=>localDateKey(getWeekMonday(parseDateKey(key)));
       const firstWeek=weekKey(dateStr);
@@ -940,12 +940,13 @@
               const weekHistory=videos.filter(v=>v.posted&&localDateKey(getWeekMonday(parseDateKey(getVideoScheduledDate(v))))===localDateKey(monday))
                 .sort((a,b)=>getVideoScheduledDate(a).localeCompare(getVideoScheduledDate(b)));
               const weekDates=[3,4,6,0].map(day=>{const d=new Date(monday);d.setDate(d.getDate()+(day===0?6:day-1));return d;});
+              const extraDates=[3,5,6].map(day=>{const d=new Date(monday);d.setDate(d.getDate()+(day===0?6:day-1));return d;});
               const weekNumber=Math.round((monday.getTime()-getWeekMonday(new Date()).getTime())/(7*24*60*60*1000))+1;
               const weekKeyValue = localDateKey(monday);
               const extraOpen = extraWeekKeys.has(weekKeyValue);
               return <section className="calendar-week paired-week" key={week}>
                 <div className="calendar-week-caption"><strong>Semana {weekNumber}</strong><span>{weekHistory.length>=2 ? <b style={{color:"#9fe0b6",background:"#163d2a",border:"1px solid #2f8f62",borderRadius:"999px",padding:"4px 8px",fontSize:"10px"}}>Semana concluída</b> : <button type="button" onClick={()=>setExtraWeekKeys(prev=>{const next=new Set(prev); if(next.has(weekKeyValue)) next.delete(weekKeyValue); else next.add(weekKeyValue); return next;})} style={{color:extraOpen?"#a7f3d0":"#f6c76d",background:extraOpen?"#163d2a":"#332512",border:"1px solid",borderColor:extraOpen?"#2f8f62":"#8a6428",borderRadius:"8px",padding:"5px 8px",fontSize:"10px",fontWeight:800,cursor:"pointer"}}>{extraOpen?"Vídeo extra liberado ✓":"+ Adicionar vídeo extra"}</button>}</span></div>
-                <div className="calendar-pair">
+                <div className="calendar-pair" style={extraOpen?{display:"none"}:undefined}>
                   {[0,1].map(part=>{
                     const pair=weekDates.slice(part*2,part*2+2);
                     const owners=weekOwners.filter(owner=>{
@@ -999,10 +1000,7 @@
                     </div>;
                   })}
                 </div>
-                {extraOpen && <div className="calendar-extra-slot" style={{marginTop:"12px",padding:"10px",border:"1px dashed #579e72",borderRadius:"12px",background:"#14251e"}}>
-                  <strong style={{display:"block",color:"#a7f3d0",fontSize:"11px",marginBottom:"8px"}}>Vídeo extra — escolha o dia</strong>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:"6px"}}>{weekDates.map(date=>{const key=localDateKey(date); return <button type="button" key={key} disabled={key<today} onClick={()=>{setSelected(key);setError("")}} className="slot-date" style={{minHeight:"42px",border:"1px solid #579e72",borderRadius:"8px",background:selected===key?"#245d40":"#1c3328",color:"#d9ffe8",cursor:key<today?"not-allowed":"pointer"}}><span>{date.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")}</span><strong>{date.getDate()}</strong></button>})}</div>
-                </div>}
+                {extraOpen && <div className="calendar-extra-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:"12px",marginTop:"12px"}}>{extraDates.map(date=>{const key=localDateKey(date);const owner=weekOwners.find(v=>getVideoScheduledDate(v)===key);const thumb=owner?.thumbs?.find(Boolean);const title=owner?.titles?.find(Boolean)||"Vídeo extra — escolha o dia";return <div className="calendar-post-slot" key={key} style={{borderColor:owner?"#579e72":"#3d5f4c",background:owner?"#19251f":"#14251e"}}><button type="button" disabled={key<today} onClick={()=>{setSelected(key);setError("")}} className="slot-date" style={{width:"100%",minHeight:"48px",border:"1px solid #579e72",borderRadius:"10px",background:selected===key?"#245d40":"#1c3328",color:"#d9ffe8",cursor:key<today?"not-allowed":"pointer"}}><span>{date.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")}</span><strong>{date.getDate()}</strong></button><div className="calendar-slot-videos" style={{marginTop:"10px"}}>{owner?(thumb?<img src={thumb} alt="" style={{width:"100%",aspectRatio:"16/9",objectFit:"cover",borderRadius:"8px"}}/>:<span className="calendar-card-placeholder">▶</span>):<div className="calendar-slot-empty">Sem vídeo</div>}<span className="calendar-card-title" style={{display:"block",marginTop:"8px",fontSize:"11px",color:owner?"#fff":"#a7f3d0"}}>{title}</span></div></div>})}</div>}
               </section>;
             })}
           </div>
