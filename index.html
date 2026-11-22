@@ -1288,6 +1288,25 @@
 
       useEffect(() => {
         if (!loaded) return;
+        const moveKey = STORAGE_KEY + "_tarobinha_friday_v1";
+        try { if (localStorage.getItem(moveKey)) return; } catch {}
+        let changed = false;
+        const next = videos.map((video) => {
+          if (video.posted || !(video.titles || []).some((title) => /tarobinha/i.test(title || ""))) return video;
+          const monday = getWeekMonday(parseDateKey(getVideoScheduledDate(video)));
+          const friday = new Date(monday);
+          friday.setDate(monday.getDate() + 4);
+          const fridayKey = localDateKey(friday);
+          if (getVideoScheduledDate(video) === fridayKey) return video;
+          changed = true;
+          return withScheduledDate(video, fridayKey);
+        });
+        if (changed) setVideos(next);
+        try { localStorage.setItem(moveKey, "1"); } catch {}
+      }, [loaded]);
+
+      useEffect(() => {
+        if (!loaded) return;
         const refresh = () => {
           if (document.visibilityState === "hidden") return;
           if (pendingSaveRef.current) saveToCloud(videosRef.current, saveRevisionRef.current);
