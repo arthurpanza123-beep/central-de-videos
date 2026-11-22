@@ -946,7 +946,7 @@
               const chosenExtraDays=[...new Set([...(extraDaySelections[weekKeyValue] || existingExtraDays), ...existingExtraDays])];
               const extraDates=chosenExtraDays.map(day=>{const d=new Date(monday);d.setDate(d.getDate()+(day===0?6:day-1));return d;});
               const weekNumber=Math.round((monday.getTime()-getWeekMonday(new Date()).getTime())/(7*24*60*60*1000))+1;
-              const extraOpen = extraWeekKeys.has(weekKeyValue);
+              const extraOpen = extraWeekKeys.has(weekKeyValue) || existingExtraDays.includes(5);
               return <section className="calendar-week paired-week" key={week}>
                 <div className="calendar-week-caption"><strong>Semana {weekNumber}</strong><span>{weekHistory.length>=2 ? <b style={{color:"#9fe0b6",background:"#163d2a",border:"1px solid #2f8f62",borderRadius:"999px",padding:"4px 8px",fontSize:"10px"}}>Semana concluída</b> : <button type="button" onClick={()=>setExtraWeekKeys(prev=>{const next=new Set(prev); if(next.has(weekKeyValue)) next.delete(weekKeyValue); else next.add(weekKeyValue); return next;})} style={{color:extraOpen?"#a7f3d0":"#f6c76d",background:extraOpen?"#163d2a":"#332512",border:"1px solid",borderColor:extraOpen?"#2f8f62":"#8a6428",borderRadius:"8px",padding:"5px 8px",fontSize:"10px",fontWeight:800,cursor:"pointer"}}>{extraOpen?"Vídeo extra liberado ✓":"+ Adicionar vídeo extra"}</button>}</span></div>
                 <div className="calendar-pair" style={extraOpen?{display:"none"}:undefined}>
