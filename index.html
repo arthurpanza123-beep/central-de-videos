@@ -482,9 +482,7 @@
     const PRODUCTION_STEPS = [
       ["gravarAudioSim", "Gravar áudio"],
       ["aparecendoSim", "Aparecendo"],
-      ["tvCortarSim", "TV cortar"],
-      ["tvTopazSim", "TV Topaz"],
-      ["tvLegendaSim", "TV legenda"],
+      ["clipesTvSim", "Clipes TV"],
       ["baseClipesSim", "Base clipes"],
       ["cortarNandoSim", "Cortar Nando"],
       ["cortarDudaSim", "Cortar Duda"],
@@ -493,6 +491,11 @@
       ["sonoraSim", "Sonorização"],
       ["correcaoCorSim", "Correção de cor"]
     ];
+    function isProductionStepComplete(video, key) {
+      if (video?.[key]) return true;
+      if (key === "clipesTvSim") return Boolean(video?.tvCortarSim || video?.tvTopazSim || video?.tvLegendaSim);
+      return false;
+    }
 
     function getWeekMonday(d) {
       const date = new Date(d);
@@ -669,7 +672,7 @@
           nandoSim: true,
           dudaSim: false,
           sonoraSim: true,
-          gravarAudioSim: false, legendasSim: false, tvSim: false,
+          gravarAudioSim: false, clipesTvSim: false, legendasSim: false, tvSim: false,
           thumbs: ["", "", ""],
           titles: [
             "O DIA QUE O REAL MADRID QUEBROU O MERCADO DA BOLA",
@@ -1713,7 +1716,7 @@
                   const todayStr = new Date().toISOString().slice(0, 10);
 
                   const thumbsComplete = Array.isArray(video.thumbs) && video.thumbs.filter(Boolean).length === 3;
-                  const completedSteps = PRODUCTION_STEPS.filter(([key]) => video[key]).length + (thumbsComplete ? 1 : 0);
+                  const completedSteps = PRODUCTION_STEPS.filter(([key]) => isProductionStepComplete(video, key)).length + (thumbsComplete ? 1 : 0);
                   const is100Percent = completedSteps === PRODUCTION_STEPS.length + 1;
                   const isCurrentWeekPosted = false;
 
@@ -1821,10 +1824,10 @@
                               <span className="checklist-count" title="Etapas concluídas">{completedSteps}/{PRODUCTION_STEPS.length + 1}</span>
                               <div className="checklist-items">
                                 {PRODUCTION_STEPS.filter(([key]) => key !== "gravarAudioSim" || !Boolean(video.gravarAudioSim)).map(([key, label]) => (
-                                  <button key={key} type="button" aria-pressed={!!video[key]}
+                                  <button key={key} type="button" aria-pressed={isProductionStepComplete(video, key)}
                                     onClick={() => toggleProcess(video.id, key)}
-                                    className={"checklist-item " + (video[key] ? "complete" : "")}>
-                                    <span>{label}</span><b>{video[key] ? "✓" : "○"}</b>
+                                    className={"checklist-item " + (isProductionStepComplete(video, key) ? "complete" : "")}>
+                                    <span>{label}</span><b>{isProductionStepComplete(video, key) ? "✓" : "○"}</b>
                                   </button>
                                 ))}
                                 <div className={"checklist-item " + (thumbsComplete ? "complete" : "")}>
