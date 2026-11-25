@@ -1335,6 +1335,29 @@
 
       useEffect(() => {
         if (!loaded) return;
+        const fixKey = STORAGE_KEY + "_week_layout_v2";
+        try { if (localStorage.getItem(fixKey)) return; } catch {}
+        const monday = getWeekMonday(new Date());
+        const makeDate = (offset) => { const date = new Date(monday); date.setDate(monday.getDate() + offset); return localDateKey(date); };
+        let changed = false;
+        const next = videos.map(video => {
+          if (video.posted) return video;
+          const titles = (video.titles || []).join(" ");
+          let target = null;
+          if (/tulinho/i.test(titles)) target = makeDate(2);
+          else if (/tarobinha/i.test(titles)) target = makeDate(4);
+          else if (/palmeiras/i.test(titles)) target = makeDate(5);
+          else if (/victorando/i.test(titles)) target = makeDate(9);
+          if (!target || getVideoScheduledDate(video) === target) return video;
+          changed = true;
+          return withScheduledDate(video, target);
+        });
+        if (changed) setVideos(next);
+        try { localStorage.setItem(fixKey, "1"); } catch {}
+      }, [loaded, videos]);
+
+      useEffect(() => {
+        if (!loaded) return;
         const refresh = () => {
           if (document.visibilityState === "hidden") return;
           if (pendingSaveRef.current) saveToCloud(videosRef.current, saveRevisionRef.current);
